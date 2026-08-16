@@ -1,9 +1,9 @@
 from django.contrib import admin
 
+from core.admin_site import roshan_admin_site
 from .models import Document
 
 
-@admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ("title", "status", "created_at", "updated_at")
     list_filter = ("status", "created_at")
@@ -15,3 +15,6 @@ class DocumentAdmin(admin.ModelAdmin):
         ("متن کامل", {"fields": ("full_text",)}),
         ("زمان", {"fields": ("created_at", "updated_at")}),
     )
+
+
+roshan_admin_site.register(Document, DocumentAdmin)

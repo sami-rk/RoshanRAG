@@ -1,9 +1,9 @@
 from django.contrib import admin
 
+from core.admin_site import roshan_admin_site
 from .models import Question
 
 
-@admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ("question", "status", "created_at", "answered_at")
     list_filter = ("status", "created_at")
@@ -15,3 +15,6 @@ class QuestionAdmin(admin.ModelAdmin):
         ("وضعیت", {"fields": ("status", "error_message")}),
         ("زمان", {"fields": ("created_at", "answered_at")}),
     )
+
+
+roshan_admin_site.register(Question, QuestionAdmin)
