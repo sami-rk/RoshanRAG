@@ -20,7 +20,8 @@ RUN sed -i '/^torch==/d' requirements.txt \
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput
+RUN pip install --no-cache-dir "whitenoise==6.9.0" \
+    && python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
