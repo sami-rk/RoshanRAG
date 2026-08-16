@@ -12,8 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+ARG TORCH_VERSION=2.6.0
+ARG TORCH_INDEX=https://download.pytorch.org/whl/cpu
 RUN sed -i '/^torch==/d' requirements.txt \
-    && pip install --no-cache-dir torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir torch==${TORCH_VERSION} --index-url ${TORCH_INDEX} \
     && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
