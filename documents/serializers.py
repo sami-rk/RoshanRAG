@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from django.conf import settings
 from rest_framework import serializers
 
 from .models import Document
@@ -26,6 +27,10 @@ class DocumentSerializer(serializers.ModelSerializer):
         extension = value.name.rsplit(".", 1)[-1].lower() if "." in value.name else ""
         if extension not in SUPPORTED_EXTENSIONS:
             raise serializers.ValidationError("فرمت فایل باید docx یا txt باشد")
+        if value.size > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
+            raise serializers.ValidationError(
+                f"حجم فایل نباید بیشتر از {settings.MAX_UPLOAD_SIZE_MB} مگابایت باشد"
+            )
         return value
 
     def create(self, validated_data):
