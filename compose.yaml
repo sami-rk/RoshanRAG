@@ -10,6 +10,7 @@ services:
       - CHROMA_PORT=8000
       - SQLITE_PATH=/app/data/db.sqlite3
       - MEDIA_ROOT=/app/media
+      - HF_HUB_DISABLE_XET=1
     volumes:
       - media:/app/media
       - data:/app/data
