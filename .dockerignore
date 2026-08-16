@@ -1,0 +1,14 @@
+.git
+.gitignore
+LICENSE
+.env
+.venv
+venv
+env
+__pycache__
+*.pyc
+db.sqlite3
+media
+staticfiles
+*.pdf
+*.md
