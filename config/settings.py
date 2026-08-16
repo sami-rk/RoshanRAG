@@ -130,7 +130,7 @@ LLM_FALLBACK_MODELS = env(
     "deepseek/deepseek-chat:free,qwen/qwen-2.5-72b-instruct:free",
 ).split(",")
 
-EMBEDDING_MODEL = env("EMBEDDING_MODEL", "jinaai/jina-embeddings-v3")
+EMBEDDING_MODEL = env("EMBEDDING_MODEL", "BAAI/bge-m3")
 CHROMA_HOST = env("CHROMA_HOST", "localhost")
 CHROMA_PORT = int(env("CHROMA_PORT", "8000"))
 CHROMA_COLLECTION = env("CHROMA_COLLECTION", "roshan_documents")
