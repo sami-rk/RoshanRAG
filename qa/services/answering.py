@@ -53,7 +53,7 @@ def answer_question(question_id: int) -> None:
         return
     try:
         question.status = Question.Status.GENERATING
-        question.save(update_fields=["status", "updated_at"])
+        question.save(update_fields=["status"])
 
         vectorstore = get_chroma_vectorstore()
         retrieved = vectorstore.similarity_search(
@@ -79,7 +79,7 @@ def answer_question(question_id: int) -> None:
         question.error_message = str(exc)
         logger.exception("Failed to answer question %s", question_id)
 
-    question.save()
+    question.save(update_fields=["answer", "sources", "status", "answered_at", "error_message"])
 
 
 def schedule_answering(question_id: int) -> None:
