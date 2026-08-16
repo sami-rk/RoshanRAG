@@ -9,8 +9,8 @@ def _model(model_name: str) -> ChatOpenRouter:
         model=model_name,
         api_key=settings.OPENROUTER_API_KEY,
         temperature=0.2,
-        timeout=90,
-        max_retries=1,
+        timeout=60_000,
+        max_retries=0,
     )
 
 
