@@ -9,6 +9,10 @@
 <link rel="stylesheet" href="{% static 'admin/css/roshan-admin.css' %}">
 {% endblock %}
 
+{% block extrahead %}
+<link rel="icon" type="image/svg+xml" href="{% static 'admin/img/roshan-favicon.svg' %}">
+{% endblock %}
+
 {% block branding %}
 <div id="site-name">
   <a href="{% url 'admin:index' %}">

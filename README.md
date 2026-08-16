@@ -143,6 +143,8 @@ Example question response:
 | ![questions](docs/screenshots/5-questions-list.png) | ![answer](docs/screenshots/6-question-answer.png) |
 | Swagger UI | |
 | ![api docs](docs/screenshots/7-api-docs.png) | |
+| Dark mode | Mobile |
+| ![dark](docs/screenshots/8-admin-dark.png) | ![mobile](docs/screenshots/9-admin-mobile.png) |
 
 ## Project Structure
 
@@ -169,3 +171,5 @@ entrypoint.sh      Migrate, create superuser, run gunicorn
 - **Separate ChromaDB container** keeps the vector store isolated from the app.
 - **SQLite** for simplicity and persistence via a Docker volume; chunking at 800/200 via `RecursiveCharacterTextSplitter`.
 - **Hugging Face xet backend disabled** — it can hang on some networks; downloads fall back to plain HTTP.
+- **Custom Persian admin theme** — Django Admin is restyled with a Persian-first design system (bundled Vazirmatn font, RTL, light/dark mode, dashboard stat cards, status pills) via a custom `AdminSite` and template overrides, no third-party admin package.
+- **WhiteNoise serves static files** — installed in a dedicated Docker layer (keeps the torch layer cached) so gunicorn serves the admin's collected assets.
