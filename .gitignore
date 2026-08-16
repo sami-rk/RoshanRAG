@@ -224,3 +224,4 @@ deep-research*
 media/
 staticfiles/
 .playwright-cli/
+.opencode/
