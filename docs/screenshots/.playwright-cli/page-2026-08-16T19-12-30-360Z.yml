@@ -1,0 +1,118 @@
+- generic [active] [ref=f1e1]:
+  - link "انتقال به محتوای اصلی" [ref=f1e2] [cursor=pointer]:
+    - /url: "#content-start"
+  - generic [ref=f1e3]:
+    - banner [ref=f1e4]:
+      - link "مدیریت Django" [ref=f1e7] [cursor=pointer]:
+        - /url: /admin/
+      - generic [ref=f1e8]:
+        - text: خوش آمدید،
+        - strong [ref=f1e9]: admin
+        - text: .
+        - link "نمایش وبگاه" [ref=f1e10] [cursor=pointer]:
+          - /url: /
+        - text: /
+        - link "تغییر گذرواژه" [ref=f1e11] [cursor=pointer]:
+          - /url: /admin/password_change/
+        - text: /
+        - button "خروج" [ref=f1e13]
+        - 'button "تغییر رنگ پوسته (حالت کنونی: خودکار) تغییر رنگ پوسته (حالت کنونی: روشن) تغییر رنگ پوسته (حالت کنونی: تیره)" [ref=f1e14]'
+    - main [ref=f1e22]:
+      - generic [ref=f1e23]:
+        - heading "مدیریت وب‌گاه" [level=1] [ref=f1e26]
+        - generic [ref=f1e27]:
+          - table [ref=f1e29]:
+            - caption [ref=f1e30]:
+              - link "Qa" [ref=f1e31] [cursor=pointer]:
+                - /url: /admin/qa/
+            - rowgroup [ref=f1e32]:
+              - row [ref=f1e33]:
+                - columnheader "Model name" [ref=f1e34]
+                - columnheader "اضافه‌کردن پیوند" [ref=f1e35]
+                - columnheader "تغییر یا مشاهده لیست پیوند" [ref=f1e36]
+            - rowgroup [ref=f1e37]:
+              - row [ref=f1e38]:
+                - rowheader [ref=f1e39]:
+                  - link "پرسش‌ها" [ref=f1e40] [cursor=pointer]:
+                    - /url: /admin/qa/question/
+                - cell [ref=f1e41]:
+                  - link "اضافه کردن" [ref=f1e42] [cursor=pointer]:
+                    - /url: /admin/qa/question/add/
+                - cell [ref=f1e43]:
+                  - link "تغییر" [ref=f1e44] [cursor=pointer]:
+                    - /url: /admin/qa/question/
+          - table [ref=f1e46]:
+            - caption [ref=f1e47]:
+              - link "اسناد" [ref=f1e48] [cursor=pointer]:
+                - /url: /admin/documents/
+            - rowgroup [ref=f1e49]:
+              - row [ref=f1e50]:
+                - columnheader "Model name" [ref=f1e51]
+                - columnheader "اضافه‌کردن پیوند" [ref=f1e52]
+                - columnheader "تغییر یا مشاهده لیست پیوند" [ref=f1e53]
+            - rowgroup [ref=f1e54]:
+              - row [ref=f1e55]:
+                - rowheader [ref=f1e56]:
+                  - link "اسناد" [ref=f1e57] [cursor=pointer]:
+                    - /url: /admin/documents/document/
+                - cell [ref=f1e58]:
+                  - link "اضافه کردن" [ref=f1e59] [cursor=pointer]:
+                    - /url: /admin/documents/document/add/
+                - cell [ref=f1e60]:
+                  - link "تغییر" [ref=f1e61] [cursor=pointer]:
+                    - /url: /admin/documents/document/
+          - table [ref=f1e63]:
+            - caption [ref=f1e64]:
+              - link "بررسی اصالت و اجازه‌ها" [ref=f1e65] [cursor=pointer]:
+                - /url: /admin/auth/
+            - rowgroup [ref=f1e66]:
+              - row [ref=f1e67]:
+                - columnheader "Model name" [ref=f1e68]
+                - columnheader "اضافه‌کردن پیوند" [ref=f1e69]
+                - columnheader "تغییر یا مشاهده لیست پیوند" [ref=f1e70]
+            - rowgroup [ref=f1e71]:
+              - row [ref=f1e72]:
+                - rowheader [ref=f1e73]:
+                  - link "کاربرها" [ref=f1e74] [cursor=pointer]:
+                    - /url: /admin/auth/user/
+                - cell [ref=f1e75]:
+                  - link "اضافه کردن" [ref=f1e76] [cursor=pointer]:
+                    - /url: /admin/auth/user/add/
+                - cell [ref=f1e77]:
+                  - link "تغییر" [ref=f1e78] [cursor=pointer]:
+                    - /url: /admin/auth/user/
+              - row [ref=f1e79]:
+                - rowheader [ref=f1e80]:
+                  - link "گروه‌ها" [ref=f1e81] [cursor=pointer]:
+                    - /url: /admin/auth/group/
+                - cell [ref=f1e82]:
+                  - link "اضافه کردن" [ref=f1e83] [cursor=pointer]:
+                    - /url: /admin/auth/group/add/
+                - cell [ref=f1e84]:
+                  - link "تغییر" [ref=f1e85] [cursor=pointer]:
+                    - /url: /admin/auth/group/
+          - table [ref=f1e87]:
+            - caption [ref=f1e88]:
+              - link "توکن اعتبار‌سنجی" [ref=f1e89] [cursor=pointer]:
+                - /url: /admin/authtoken/
+            - rowgroup [ref=f1e90]:
+              - row [ref=f1e91]:
+                - columnheader "Model name" [ref=f1e92]
+                - columnheader "اضافه‌کردن پیوند" [ref=f1e93]
+                - columnheader "تغییر یا مشاهده لیست پیوند" [ref=f1e94]
+            - rowgroup [ref=f1e95]:
+              - row [ref=f1e96]:
+                - rowheader [ref=f1e97]:
+                  - link "توکن‌ها" [ref=f1e98] [cursor=pointer]:
+                    - /url: /admin/authtoken/tokenproxy/
+                - cell [ref=f1e99]:
+                  - link "اضافه کردن" [ref=f1e100] [cursor=pointer]:
+                    - /url: /admin/authtoken/tokenproxy/add/
+                - cell [ref=f1e101]:
+                  - link "تغییر" [ref=f1e102] [cursor=pointer]:
+                    - /url: /admin/authtoken/tokenproxy/
+        - generic [ref=f1e104]:
+          - heading "فعالیتهای اخیر" [level=2] [ref=f1e105]
+          - heading "فعالیتهای من" [level=3] [ref=f1e106]
+          - paragraph [ref=f1e107]: چیزی در دسترس نیست
+    - contentinfo

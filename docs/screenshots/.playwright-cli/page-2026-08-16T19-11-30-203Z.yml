@@ -1,0 +1,19 @@
+- generic [ref=e1]:
+  - link "انتقال به محتوای اصلی" [ref=e2] [cursor=pointer]:
+    - /url: "#content-start"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "مدیریت Django" [ref=e7] [cursor=pointer]:
+          - /url: /admin/
+        - 'button "تغییر رنگ پوسته (حالت کنونی: خودکار) تغییر رنگ پوسته (حالت کنونی: روشن) تغییر رنگ پوسته (حالت کنونی: تیره)" [ref=e8]'
+    - main [ref=e16]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - text: "نام کاربری:"
+          - textbox "نام کاربری:" [ref=e21]: admin
+        - generic [ref=e22]:
+          - text: "گذرواژه:"
+          - textbox "گذرواژه:" [active] [ref=e23]
+        - button "ورود" [ref=e25]
+    - contentinfo

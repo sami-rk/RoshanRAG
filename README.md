@@ -16,6 +16,7 @@ RoshanRAG یک سامانه مبتنی بر RAG است که به شما امکا
 - [راه‌اندازی با Docker](#راه‌اندازی-با-docker)
 - [اجرای بدون GPU](#اجرای-بدون-gpu)
 - [داده نمونه](#داده-نمونه)
+- [تصاویر](#تصاویر)
 - [مستندات API](#مستندات-api)
 - [ساختار پروژه](#ساختار-پروژه)
 - [تصمیمات فنی](#تصمیمات-فنی)
@@ -142,6 +143,19 @@ docker compose exec web python manage.py shell
 ```bash
 docker compose exec web python manage.py load_sample_data
 ```
+
+## تصاویر
+
+| | |
+| --- | --- |
+| ورود به پنل مدیریت | داشبورد مدیریت |
+| ![ورود](docs/screenshots/1-admin-login.png) | ![داشبورد](docs/screenshots/2-admin-dashboard.png) |
+| فهرست اسناد | جزئیات سند |
+| ![اسناد](docs/screenshots/3-documents-list.png) | ![جزئیات سند](docs/screenshots/4-document-detail.png) |
+| فهرست پرسش‌ها | پاسخ پرسش با منابع |
+| ![پرسش‌ها](docs/screenshots/5-questions-list.png) | ![پاسخ پرسش](docs/screenshots/6-question-answer.png) |
+| مستندات تعاملی API (Swagger) |
+| ![مستندات API](docs/screenshots/7-api-docs.png) |
 
 ## مستندات API
 
