@@ -15,18 +15,39 @@
 <div id="content-main">
   {% if stats %}
   <section class="stat-cards" aria-label="{% translate 'Overview' %}">
-    <a class="stat-card stat-card-documents" href="{% url 'admin:documents_document_changelist' %}">
+    <a class="stat-card card-3d reveal stat-card-documents" data-tilt style="--i: 0" href="{% url 'admin:documents_document_changelist' %}">
+      <span class="card-glow" aria-hidden="true"></span>
+      <span class="card-glass" aria-hidden="true"></span>
+      <span class="stat-card-top">
+        <span class="stat-icon stat-icon-documents">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </span>
+      </span>
       <span class="stat-label">{% translate 'Documents' %}</span>
-      <span class="stat-value">{{ stats.documents }}</span>
+      <span class="stat-value" data-count="{{ stats.documents }}">{{ stats.documents }}</span>
       <span class="stat-detail">
         <span class="pill pill-ready">{{ stats.documents_ready }} {% translate 'ready' %}</span>
         <span class="pill pill-pending">{{ stats.documents_pending }} {% translate 'pending' %}</span>
         <span class="pill pill-failed">{{ stats.documents_failed }} {% translate 'failed' %}</span>
       </span>
     </a>
-    <a class="stat-card stat-card-questions" href="{% url 'admin:qa_question_changelist' %}">
+    <a class="stat-card card-3d reveal stat-card-questions" data-tilt style="--i: 1" href="{% url 'admin:qa_question_changelist' %}">
+      <span class="card-glow" aria-hidden="true"></span>
+      <span class="card-glass" aria-hidden="true"></span>
+      <span class="stat-card-top">
+        <span class="stat-icon stat-icon-questions">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <line x1="9" y1="10" x2="15" y2="10"/>
+          </svg>
+        </span>
+      </span>
       <span class="stat-label">{% translate 'Questions' %}</span>
-      <span class="stat-value">{{ stats.questions }}</span>
+      <span class="stat-value" data-count="{{ stats.questions }}">{{ stats.questions }}</span>
       <span class="stat-detail">
         <span class="pill pill-done">{{ stats.questions_done }} {% translate 'answered' %}</span>
         <span class="pill pill-pending">{{ stats.questions_generating|add:stats.questions_pending }} {% translate 'in progress' %}</span>
