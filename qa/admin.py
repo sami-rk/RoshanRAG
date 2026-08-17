@@ -4,6 +4,7 @@ from django.utils.html import format_html
 
 from core.admin_site import roshan_admin_site
 from .models import Question
+from .services.answering import schedule_answering
 
 STATUS_PILLS = {
     Question.Status.DONE: "pill-done",
@@ -14,7 +15,7 @@ STATUS_PILLS = {
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    actions = ("delete_selected",)
+    actions = ("delete_selected", "retry_answering")
     list_display = ("question", "status_badge", "created_at", "answered_at")
     list_filter = ("status", "created_at")
     search_fields = ("question", "answer")
@@ -36,6 +37,16 @@ class QuestionAdmin(admin.ModelAdmin):
 
     delete_selected.short_description = "حذف پرسش‌های انتخاب‌شده"
     delete_selected.allowed_permissions = ("delete",)
+
+    def retry_answering(self, request, queryset):
+        count = 0
+        for question in queryset:
+            schedule_answering(question.pk)
+            count += 1
+        self.message_user(request, f"پاسخ‌دهی مجدد {count} پرسش در پس‌زمینه آغاز شد")
+
+    retry_answering.short_description = "پاسخ‌دهی مجدد پرسش‌های انتخاب‌شده"
+    retry_answering.allowed_permissions = ("change",)
 
 
 roshan_admin_site.register(Question, QuestionAdmin)
