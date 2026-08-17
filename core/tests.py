@@ -1,10 +1,14 @@
+import tempfile
 from datetime import timedelta
 from io import StringIO
+from pathlib import Path
 from unittest.mock import patch
 
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from documents.models import Document
 from qa.models import Question
@@ -38,9 +42,10 @@ class HealthCheckTests(TestCase):
 
 class RecoverStuckTasksTests(TestCase):
     def test_recent_pending_items_are_not_touched(self):
-        Document.objects.create(
-            title="جدید", file="documents/x.txt", status=Document.Status.PENDING
-        )
+        with patch("documents.signals.schedule_index"):
+            Document.objects.create(
+                title="جدید", file="documents/x.txt", status=Document.Status.PENDING
+            )
         Question.objects.create(question="جدید", status=Question.Status.GENERATING)
         call_command("recover_stuck_tasks", stdout=StringIO())
         self.assertEqual(Document.objects.filter(status=Document.Status.PENDING).count(), 1)
@@ -50,9 +55,10 @@ class RecoverStuckTasksTests(TestCase):
 
     def test_stuck_items_are_marked_failed(self):
         old = timezone.now() - timedelta(hours=2)
-        document = Document.objects.create(
-            title="گیر کرده", file="documents/x.txt", status=Document.Status.PENDING
-        )
+        with patch("documents.signals.schedule_index"):
+            document = Document.objects.create(
+                title="گیر کرده", file="documents/x.txt", status=Document.Status.PENDING
+            )
         Document.objects.filter(pk=document.pk).update(updated_at=old)
         question = Question.objects.create(
             question="گیر کرده", status=Question.Status.GENERATING
@@ -70,9 +76,10 @@ class RecoverStuckTasksTests(TestCase):
 
     def test_failed_and_done_items_are_not_touched(self):
         old = timezone.now() - timedelta(hours=2)
-        document = Document.objects.create(
-            title="ناموفق", file="documents/x.txt", status=Document.Status.FAILED
-        )
+        with patch("documents.signals.schedule_index"):
+            document = Document.objects.create(
+                title="ناموفق", file="documents/x.txt", status=Document.Status.FAILED
+            )
         Document.objects.filter(pk=document.pk).update(updated_at=old)
         question = Question.objects.create(
             question="پاسخ داده", status=Question.Status.DONE
@@ -85,3 +92,46 @@ class RecoverStuckTasksTests(TestCase):
         question.refresh_from_db()
         self.assertEqual(document.status, Document.Status.FAILED)
         self.assertEqual(question.status, Question.Status.DONE)
+
+
+class MediaAccessTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="tester", password="pass"
+        )
+
+    @staticmethod
+    def _media_root():
+        directory = tempfile.mkdtemp()
+        Path(directory, "secret.txt").write_text("متن محرمانه", encoding="utf-8")
+        return directory
+
+    def test_anonymous_request_is_denied(self):
+        with override_settings(MEDIA_ROOT=self._media_root()):
+            response = self.client.get("/media/secret.txt")
+        self.assertEqual(response.status_code, 403)
+
+    def test_session_authenticated_user_can_download(self):
+        with override_settings(MEDIA_ROOT=self._media_root()):
+            self.client.force_login(self.user)
+            response = self.client.get("/media/secret.txt")
+        self.assertEqual(response.status_code, 200)
+        body = b"".join(response.streaming_content).decode("utf-8")
+        self.assertEqual(body, "متن محرمانه")
+
+    def test_token_authenticated_user_can_download(self):
+        token = Token.objects.create(user=self.user)
+        with override_settings(MEDIA_ROOT=self._media_root()):
+            response = self.client.get(
+                "/media/secret.txt", HTTP_AUTHORIZATION=f"Token {token.key}"
+            )
+        self.assertEqual(response.status_code, 200)
+        body = b"".join(response.streaming_content).decode("utf-8")
+        self.assertEqual(body, "متن محرمانه")
+
+    def test_invalid_token_is_denied(self):
+        with override_settings(MEDIA_ROOT=self._media_root()):
+            response = self.client.get(
+                "/media/secret.txt", HTTP_AUTHORIZATION="Token not-a-real-key"
+            )
+        self.assertEqual(response.status_code, 403)

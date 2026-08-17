@@ -1,11 +1,17 @@
 from django.conf import settings
 from django.urls import include, path
-from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
 from core.admin_site import roshan_admin_site
-from core.views import AboutView, ContactView, LandingView, PricingView, health_check
+from core.views import (
+    AboutView,
+    ContactView,
+    LandingView,
+    PricingView,
+    health_check,
+    protected_media,
+)
 
 handler404 = "core.views.page_not_found"
 
@@ -28,11 +34,12 @@ urlpatterns = [
 ]
 
 # Serve uploaded media in all environments (DEBUG-independent) so document
-# files remain accessible behind gunicorn with DEBUG=false.
+# files remain accessible behind gunicorn with DEBUG=false — gated behind a
+# session or API-token check.
 urlpatterns += [
     path(
         f"{settings.MEDIA_URL.lstrip('/')}<path:path>",
-        serve,
-        {"document_root": settings.MEDIA_ROOT},
+        protected_media,
+        name="protected_media",
     ),
 ]
