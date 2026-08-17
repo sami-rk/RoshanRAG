@@ -5,7 +5,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
 from core.admin_site import roshan_admin_site
-from core.views import AboutView, ContactView, LandingView, PricingView
+from core.views import AboutView, ContactView, LandingView, PricingView, health_check
 
 handler404 = "core.views.page_not_found"
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path("contact/", ContactView.as_view(), name="contact"),
     path("admin/", roshan_admin_site.urls),
     path("api/token/", obtain_auth_token, name="api-token"),
+    path("api/health/", health_check, name="health"),
     path("api/documents/", include("documents.urls")),
     path("api/questions/", include("qa.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
