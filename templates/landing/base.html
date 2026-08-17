@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}روشن RAG — سامانه پرسش از اسناد{% endblock %}</title>
+  <meta name="description" content="روشن RAG؛ سامانه هوشمند پرسش و پاسخ از اسناد سازمانی با موتور RAG، پشتیبانی از زبان فارسی و پاسخ همراه با ذکر منبع.">
+  <link rel="icon" type="image/svg+xml" href="{% static 'admin/img/roshan-favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'landing/css/landing.css' %}">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("roshan-landing-theme"); } catch (e) {}
+      if (t === "light" || t === "dark") {
+        document.documentElement.setAttribute("data-theme", t);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-nav">
+    <div class="container">
+      <a class="brand" href="{% url 'home' %}" aria-label="روشن RAG">
+        <svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
+          <rect width="40" height="40" rx="11" fill="#2563EB"/>
+          <path d="M20 8c1.2 4.8 3.9 7.5 8.8 8.7-4.9 1.2-7.6 3.9-8.8 8.7-1.2-4.8-3.9-7.5-8.8-8.7C16.1 15.5 18.8 12.8 20 8z" fill="#fff"/>
+        </svg>
+        <span class="brand-name">روشن <strong>RAG</strong></span>
+      </a>
+      <nav class="nav-links" aria-label="ناوبری اصلی">
+        <a href="{% url 'home' %}#features">ویژگی‌ها</a>
+        <a href="{% url 'home' %}#how">نحوه کار</a>
+        <a href="{% url 'pricing' %}">تعرفه‌ها</a>
+        <a href="{% url 'about' %}">درباره</a>
+        <a href="{% url 'contact' %}">تماس</a>
+      </nav>
+      <div class="nav-actions">
+        <button type="button" class="theme-toggle" aria-label="تغییر حالت روشن و تاریک">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <a class="btn btn-primary" href="{% url 'admin:index' %}">ورود به پنل مدیریت</a>
+        <button type="button" class="nav-toggle" aria-label="باز و بسته کردن منو" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="{% url 'home' %}">
+            <svg viewBox="0 0 40 40" width="26" height="26" aria-hidden="true">
+              <rect width="40" height="40" rx="11" fill="#2563EB"/>
+              <path d="M20 8c1.2 4.8 3.9 7.5 8.8 8.7-4.9 1.2-7.6 3.9-8.8 8.7-1.2-4.8-3.9-7.5-8.8-8.7C16.1 15.5 18.8 12.8 20 8z" fill="#fff"/>
+            </svg>
+            <span class="brand-name">روشن <strong>RAG</strong></span>
+          </a>
+          <p class="brand-desc">سامانه هوشمند پرسش از اسناد سازمانی؛ پاسخ دقیق همراه با ذکر منبع، مبتنی بر موتور RAG و مدل‌های زبانی پیشرفته.</p>
+        </div>
+        <div>
+          <h4>محصول</h4>
+          <ul>
+            <li><a href="{% url 'home' %}#features">ویژگی‌ها</a></li>
+            <li><a href="{% url 'home' %}#how">نحوه کار</a></li>
+            <li><a href="{% url 'pricing' %}">تعرفه‌ها</a></li>
+            <li><a href="{% url 'about' %}">درباره</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>دسترسی</h4>
+          <ul>
+            <li><a href="{% url 'admin:index' %}">پنل مدیریت</a></li>
+            <li><a href="{% url 'schema-docs' %}">مستندات API</a></li>
+            <li><a href="{% url 'home' %}#faq">سوالات متداول</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>تماس</h4>
+          <ul>
+            <li><a href="{% url 'contact' %}">صفحه تماس</a></li>
+            <li><a href="mailto:info@roshan-rag.example">info@roshan-rag.example</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© ۱۴۰۳ روشن RAG</span>
+        <span>ساخته‌شده با Django و مدل BAAI/bge-m3</span>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="{% static 'landing/js/landing.js' %}"></script>
+</body>
+</html>
