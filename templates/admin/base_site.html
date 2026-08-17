@@ -4,8 +4,6 @@
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
 {% block extrastyle %}
-<link rel="preload" href="{% static 'fonts/vazirmatn/Vazirmatn-Regular.woff2' %}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{% static 'fonts/vazirmatn/Vazirmatn-Bold.woff2' %}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{% static 'admin/css/roshan-admin.css' %}">
 {% endblock %}
 
