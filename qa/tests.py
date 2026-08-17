@@ -108,11 +108,14 @@ class AnsweringServiceTests(APITestCase):
         super().setUp()
         # A ready document lets the answering flow reach the retrieval/LLM steps;
         # the empty-corpus behavior is covered separately in NoCorpusAnswerTests.
-        self.document = Document.objects.create(
-            title="سند آماده",
-            file="documents/ready.txt",
-            status=Document.Status.READY,
-        )
+        # The post_save signal is patched so no real indexing thread (which would
+        # touch Chroma and the test database) is spawned during tests.
+        with patch("documents.signals.schedule_index"):
+            self.document = Document.objects.create(
+                title="سند آماده",
+                file="documents/ready.txt",
+                status=Document.Status.READY,
+            )
 
     @staticmethod
     def _fake_doc(document_id, title, content):
@@ -365,11 +368,12 @@ class NoCorpusAnswerTests(TestCase):
         self.assertIsNotNone(question.answered_at)
 
     def test_pending_document_does_not_count_as_a_corpus(self):
-        Document.objects.create(
-            title="در انتظار",
-            file="documents/pending.txt",
-            status=Document.Status.PENDING,
-        )
+        with patch("documents.signals.schedule_index"):
+            Document.objects.create(
+                title="در انتظار",
+                file="documents/pending.txt",
+                status=Document.Status.PENDING,
+            )
         question = Question.objects.create(question="سوال")
         with (
             patch("qa.services.answering.get_chroma_vectorstore") as vectorstore,
@@ -383,9 +387,10 @@ class NoCorpusAnswerTests(TestCase):
         self.assertEqual(question.status, Question.Status.DONE)
 
     def test_failed_only_corpus_answers_without_llm(self):
-        Document.objects.create(
-            title="ناموفق", file="documents/failed.txt", status=Document.Status.FAILED
-        )
+        with patch("documents.signals.schedule_index"):
+            Document.objects.create(
+                title="ناموفق", file="documents/failed.txt", status=Document.Status.FAILED
+            )
         question = Question.objects.create(question="سوال")
         with patch("qa.services.answering.get_llm") as llm:
             answer_question(question.pk)
