@@ -26,6 +26,8 @@
           var py = (event.clientY - rect.top) / rect.height;
           card.style.setProperty("--rx", ((py - 0.5) * -7).toFixed(2) + "deg");
           card.style.setProperty("--ry", ((px - 0.5) * 9).toFixed(2) + "deg");
+          card.style.setProperty("--mx", (px * 100).toFixed(2) + "%");
+          card.style.setProperty("--my", (py * 100).toFixed(2) + "%");
         },
         { passive: true }
       );
@@ -68,6 +70,43 @@
     });
   }
 
+  function initReveal() {
+    var els = document.querySelectorAll("[data-reveal]");
+    if (!els.length) return;
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      Array.prototype.forEach.call(els, function (el) {
+        el.classList.add("in-view");
+      });
+      return;
+    }
+    Array.prototype.forEach.call(els, function (el) {
+      var group = el.parentNode;
+      var siblings = group.querySelectorAll("[data-reveal]");
+      var index = 0;
+      for (var i = 0; i < siblings.length; i++) {
+        if (siblings[i] === el) {
+          index = i;
+          break;
+        }
+      }
+      el.style.setProperty("--i", index);
+    });
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0, rootMargin: "0px 0px 10% 0px" }
+    );
+    Array.prototype.forEach.call(els, function (el) {
+      io.observe(el);
+    });
+  }
+
   function ready(fn) {
     if (document.readyState !== "loading") {
       fn();
@@ -77,6 +116,7 @@
   }
 
   ready(function () {
+    initReveal();
     if (reduceMotion) {
       return;
     }
