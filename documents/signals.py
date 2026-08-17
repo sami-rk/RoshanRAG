@@ -45,3 +45,13 @@ def on_document_deleted(sender, instance, **kwargs):
         # orphaned chunks will be replaced the next time the document is
         # re-uploaded (indexing deletes leftovers before adding new ones).
         logger.exception("Failed to remove vector chunks for document %s", instance.pk)
+
+    try:
+        if instance.file and instance.file.name:
+            storage = instance.file.storage
+            if storage.exists(instance.file.name):
+                storage.delete(instance.file.name)
+    except Exception:
+        # Django does not remove FileField files automatically on delete.
+        # If the storage is unreachable we still must not fail the deletion.
+        logger.exception("Failed to remove stored file for document %s", instance.pk)

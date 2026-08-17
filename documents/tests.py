@@ -252,3 +252,12 @@ class DocumentSignalsTests(TestCase):
         ):
             doc.delete()
         self.assertFalse(Document.objects.filter(pk=doc.pk).exists())
+
+    def test_deleting_document_removes_stored_file(self):
+        with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            doc = _make_document("work.txt", "متن".encode("utf-8"))
+            stored_path = doc.file.path
+            self.assertTrue(Path(stored_path).exists())
+            with patch("core.chroma_client.delete_document_chunks"):
+                doc.delete()
+            self.assertFalse(Path(stored_path).exists())
