@@ -118,7 +118,7 @@ curl -X POST http://localhost:8000/api/token/ -d 'username=admin&password=admin'
 |---|---|---|
 | `POST` | `/api/documents/` | Upload a document (multipart: `file` required, `title` optional) |
 | `GET` | `/api/documents/` | List documents (`?q=<text>` searches title + full text, `?status=pending|ready|failed` filters) |
-| `GET` / `PATCH` / `DELETE` | `/api/documents/{id}/` | Detail / edit / delete (removes vector chunks too) |
+| `GET` / `PATCH` / `DELETE` | `/api/documents/{id}/` | Detail / edit / delete (removes vector chunks and the stored file) |
 | `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`) |
 | `GET` | `/api/questions/` | Q&A history (`?status=pending|generating|done|failed` filters) |
 | `GET` | `/api/questions/{id}/` | Poll for status / answer / sources |
