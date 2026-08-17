@@ -3,6 +3,9 @@ set -e
 
 python manage.py migrate --noinput
 
+# Mark documents/questions stuck mid-task (e.g. after a kill/restart) as failed
+python manage.py recover_stuck_tasks
+
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
   python manage.py shell -c "
 from django.contrib.auth import get_user_model
