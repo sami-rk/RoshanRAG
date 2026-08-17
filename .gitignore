@@ -225,3 +225,5 @@ media/
 staticfiles/
 .playwright-cli/
 .opencode/
+DESIGN.md
+graphify-out/
