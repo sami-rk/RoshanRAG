@@ -14,4 +14,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         query = self.request.query_params.get("q")
         if query:
             queryset = queryset.filter(Q(title__icontains=query) | Q(full_text__icontains=query))
+        status = self.request.query_params.get("status")
+        if status:
+            queryset = queryset.filter(status=status)
         return queryset

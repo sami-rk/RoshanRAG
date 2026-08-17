@@ -109,6 +109,19 @@ class DocumentAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
 
+    def test_status_filter(self):
+        with patch("documents.signals.schedule_index"):
+            Document.objects.create(
+                title="آماده", file="documents/a.txt", status=Document.Status.READY
+            )
+            Document.objects.create(
+                title="در انتظار", file="documents/b.txt", status=Document.Status.PENDING
+            )
+        response = self.client.get("/api/documents/?status=pending")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["title"], "در انتظار")
+
 
 class IndexingServiceTests(TestCase):
     def test_index_txt_document_success(self):

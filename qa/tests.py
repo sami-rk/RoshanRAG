@@ -57,6 +57,14 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 2)
 
+    def test_status_filter(self):
+        Question.objects.create(question="پاسخ داده شده", status=Question.Status.DONE)
+        Question.objects.create(question="در انتظار")
+        response = self.client.get("/api/questions/?status=pending")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["question"], "در انتظار")
+
     def test_delete_question_via_api(self):
         question = Question.objects.create(question="برای حذف")
         response = self.client.delete(f"/api/questions/{question.pk}/")
