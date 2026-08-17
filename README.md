@@ -6,9 +6,11 @@
 
 - Document CRUD (`docx` + `txt`), full-text storage
 - Automatic text extraction → chunking → vector indexing
-- RAG question answering with citation of used documents
+- RAG question answering with citation of used documents (MMR retrieval for diverse chunks)
 - Full Q&A history (question, answer, status, sources)
-- Free OpenRouter LLMs with an automatic fallback chain
+- Free OpenRouter LLMs with an automatic fallback chain + readable error messages
+- Admin retry actions (re-index / re-answer) and automatic stuck-task recovery
+- API rate limiting and a health-check endpoint for Docker healthchecks
 - Multilingual embedding model `BAAI/bge-m3` (Persian + English), GPU-aware
 - Django Admin UI (Persian) + token-authenticated REST API with OpenAPI schema
 - Public Persian landing page (dark/light) with home, about, pricing, contact and a styled 404, including scroll reveals, tilt/spotlight cards, magnetic CTAs and a tech-stack marquee
@@ -36,7 +38,9 @@
    └─────────────────┘         └──────────────────┘
 ```
 
-RAG flow: `user question → embed → similarity search (top-4) → dedupe (max 3 docs) → prompt (answer in the question's language, cite sources) → LLM → save answer + sources`.
+RAG flow: `user question → embed → MMR retrieval (top-4 of 20, diverse) → dedupe (max 3 docs) → prompt (answer in the question's language, cite sources) → LLM → save answer + sources`.
+
+Stuck-task safety: background tasks run in threads, so a killed worker can leave an item in `pending`/`generating`. `recover_stuck_tasks` (run automatically on container start) marks such items `failed` after 30 minutes, and the admin offers **re-index** / **re-answer** actions to retry them.
 
 ## Getting Started
 
@@ -81,11 +85,13 @@ Everything is driven by environment variables (see `.env.example`):
 | `CHROMA_HOST` / `CHROMA_PORT` | `localhost` / `8000` | ChromaDB connection (`chroma` / `8000` in Docker) |
 | `CHROMA_COLLECTION` | `roshan_documents` | Chroma collection name |
 | `CHUNK_SIZE` / `CHUNK_OVERLAP` | `800` / `200` | RecursiveCharacterTextSplitter settings |
-| `RETRIEVAL_TOP_K` / `RETRIEVAL_MAX_DOCS` | `4` / `3` | Retrieve top-4 chunks, dedupe to max 3 documents |
+| `RETRIEVAL_TOP_K` / `RETRIEVAL_FETCH_K` / `RETRIEVAL_MAX_DOCS` | `4` / `20` / `3` | MMR: fetch top-20 chunks, return 4 diverse ones, dedupe to max 3 documents |
+| `THROTTLE_USER_RATE` / `THROTTLE_ANON_RATE` | `300/minute` / `30/minute` | DRF API rate limits |
 | `MAX_UPLOAD_SIZE_MB` | `25` | Max document upload size |
 | `DJANGO_SUPERUSER_*` | `admin` / `admin` | Auto-created superuser in Docker |
 | `SQLITE_PATH` / `MEDIA_ROOT` | — | Set by docker-compose (persistent volumes) |
 | `HF_HUB_DISABLE_XET` | `1` | Disables the flaky Hugging Face xet download backend |
+| `HF_TOKEN` | — | Optional; speeds up Hugging Face downloads |
 
 ### Useful commands
 
@@ -114,6 +120,8 @@ curl -X POST http://localhost:8000/api/token/ -d 'username=admin&password=admin'
 | `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`) |
 | `GET` | `/api/questions/` | Q&A history |
 | `GET` | `/api/questions/{id}/` | Poll for status / answer / sources |
+| `DELETE` | `/api/questions/{id}/` | Delete a question from the history |
+| `GET` | `/api/health/` | Health check (DB + Chroma), used by the container healthcheck |
 
 Document status: `pending → ready | failed`. Question status: `pending → generating → done | failed`. After creating a question, poll `GET /api/questions/{id}/` for the result.
 
@@ -171,7 +179,7 @@ sample_data/       Four Persian sample documents (3 DOCX + 1 TXT)
 Dockerfile         python:3.12-slim; CPU torch by default, CUDA torch via GPU build arg
 compose.yaml       web + chroma services
 compose.gpu.yaml   GPU override (adds CUDA torch + nvidia device reservation)
-entrypoint.sh      Migrate, create superuser, run gunicorn
+entrypoint.sh      Migrate, recover stuck tasks, create superuser, run gunicorn
 .env.example       Configuration template
 ```
 
@@ -179,10 +187,11 @@ entrypoint.sh      Migrate, create superuser, run gunicorn
 
 - **Embedding model — `BAAI/bge-m3` (MIT).** Strong on Persian (~61% FaMTEB), multilingual (one model for Farsi + English in a single vector space), and permissively licensed. jina-embeddings-v3 was dropped because its license is non-commercial CC BY-NC.
 - **GPU-aware, CPU-portable.** The app auto-detects CUDA. `compose.yaml` is CPU-only; `compose.gpu.yaml` builds the image with CUDA torch and requests the GPU. Note: bge-m3 ships `.bin` weights only, so torch ≥ 2.6 is required (modern transformers refuses `torch.load` below it).
-- **Background work via Python threads + status fields** (`pending/ready/failed`), per the project's simplicity-first requirement — no Celery/Redis.
-- **Free OpenRouter models with `with_fallbacks`.** Free models get rate-limited, so on error LangChain tries the next model in the chain.
+- **Background work via Python threads + status fields** (`pending/ready/failed`), per the project's simplicity-first requirement — no Celery/Redis. Stuck tasks are recovered automatically on container start (`recover_stuck_tasks`).
+- **Free OpenRouter models with `with_fallbacks`.** Free models get rate-limited, so on error LangChain tries the next model in the chain. Stored errors are unwrapped to the provider's actual message.
+- **MMR retrieval.** Retrieval uses maximal marginal relevance (`fetch_k=20`, `k=4`) to balance relevance with diversity, then dedupes to at most 3 documents.
 - **Answers are cited.** Every answer returns the source documents used, keeping RAG transparent; answers follow the language of the question.
-- **Separate ChromaDB container** keeps the vector store isolated from the app.
+- **Separate ChromaDB container** keeps the vector store isolated from the app (pinned to `chromadb/chroma:1.5.9` with a healthcheck).
 - **SQLite** for simplicity and persistence via a Docker volume; chunking at 800/200 via `RecursiveCharacterTextSplitter`.
 - **Hugging Face xet backend disabled** — it can hang on some networks; downloads fall back to plain HTTP.
 - **Custom Persian admin theme** — Django Admin is restyled with a Persian-first design system (bundled Vazirmatn font, RTL, light/dark mode, dashboard stat cards, status pills) via a custom `AdminSite` and template overrides, no third-party admin package. Dashboard and app cards are 3D-interactive (mouse-tracked perspective tilt, glassmorphism, layered depth, count-up stats, cursor-tracking spotlight) with `prefers-reduced-motion` respected, and bulk actions render as explicit buttons instead of a dropdown. Movement is layered across every page: header slide-down, staggered card entrance, IntersectionObserver scroll reveals, a pulsing amber "pending" pill, and press/scale on buttons. Dark mode adds an elegant layered background (radial gradient base, drifting skewed cyan light streaks, dot grid, and fractal-noise texture — ported from the `elegant-dark-pattern` component, with the texture inlined as an SVG data URI). The login page gets its own card entrance and a gently floating logo; the theme toggle there shares its `roshan-theme` storage key with the landing page, so a visitor's preference carries over. Changelists and forms are fully scrollable on phones (no horizontal page overflow).
