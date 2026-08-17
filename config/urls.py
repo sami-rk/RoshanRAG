@@ -5,8 +5,13 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
 from core.admin_site import roshan_admin_site
+from core.views import AboutView, ContactView, LandingView, PricingView
 
 urlpatterns = [
+    path("", LandingView.as_view(), name="home"),
+    path("about/", AboutView.as_view(), name="about"),
+    path("pricing/", PricingView.as_view(), name="pricing"),
+    path("contact/", ContactView.as_view(), name="contact"),
     path("admin/", roshan_admin_site.urls),
     path("api/token/", obtain_auth_token, name="api-token"),
     path("api/documents/", include("documents.urls")),
