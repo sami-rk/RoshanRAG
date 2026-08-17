@@ -27,7 +27,9 @@
     font-display: swap;
 }
 
-:root {
+:root,
+html[data-theme="light"],
+html[data-theme="auto"] {
     --primary: #2563eb;
     --secondary: #1e293b;
     --accent: #f59e0b;
@@ -776,14 +778,21 @@ body.login .login-brand .roshan-logo {
     height: 40px;
 }
 
+body.login #main {
+    display: block;
+}
+
 body.login #content {
     padding: 0;
     margin: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 body.login #content-main {
     width: auto;
     margin: 0;
+    float: none;
 }
 
 body.login .login-subtitle {
