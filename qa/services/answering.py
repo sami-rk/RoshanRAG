@@ -56,9 +56,13 @@ def answer_question(question_id: int) -> None:
         question.save(update_fields=["status"])
 
         vectorstore = get_chroma_vectorstore()
-        retrieved = vectorstore.similarity_search(
+        # MMR (maximal marginal relevance) balances relevance with diversity so
+        # the retrieved chunks cover different parts of the documents instead of
+        # near-duplicate passages.
+        retrieved = vectorstore.max_marginal_relevance_search(
             question.question,
             k=settings.RETRIEVAL_TOP_K,
+            fetch_k=settings.RETRIEVAL_FETCH_K,
         )
         retrieved = _dedupe_by_document(retrieved, settings.RETRIEVAL_MAX_DOCS)
 
