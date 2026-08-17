@@ -5,6 +5,7 @@ Django settings for the RoshanRAG project.
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +20,26 @@ def env(key, default=None):
 SECRET_KEY = env("SECRET_KEY", "django-insecure-dev-key")
 DEBUG = env("DEBUG", "true").lower() == "true"
 ALLOWED_HOSTS = env("ALLOWED_HOSTS", "*").split(",")
+
+# Refuse to boot in production with a placeholder secret. The README documents
+# DEBUG=true and the dev secret as local-development-only, so this fails fast
+# instead of silently running on an easily guessable signing key.
+_INSECURE_SECRET_KEYS = {
+    "django-insecure-dev-key",
+    "dev-secret-key",
+    "change-me",
+    "change-me-to-a-long-random-string",
+    "your-secret-key-here",
+    "secret",
+}
+if not DEBUG and (
+    not SECRET_KEY
+    or SECRET_KEY in _INSECURE_SECRET_KEYS
+    or SECRET_KEY.startswith("django-insecure-")
+):
+    raise ImproperlyConfigured(
+        "SECRET_KEY must be set to a strong random value when DEBUG is disabled"
+    )
 
 INSTALLED_APPS = [
     "django.contrib.admin",
