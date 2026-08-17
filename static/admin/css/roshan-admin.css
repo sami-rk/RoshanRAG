@@ -986,6 +986,30 @@ body.login .errornote {
         flex-wrap: wrap;
     }
 
+    #user-tools {
+        flex-wrap: wrap;
+        white-space: normal;
+        row-gap: 2px;
+        max-width: 100%;
+    }
+
+    #content-main {
+        min-width: 0;
+    }
+
+    .content {
+        min-width: 0;
+    }
+
+    #changelist {
+        overflow-x: auto;
+        min-width: 0;
+    }
+
+    fieldset {
+        min-width: 0;
+    }
+
     .stat-cards {
         grid-template-columns: 1fr;
     }
