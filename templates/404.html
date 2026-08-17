@@ -1,0 +1,15 @@
+{% extends "landing/base.html" %}
+{% load i18n static %}
+
+{% block title %}صفحه یافت نشد | روشن RAG{% endblock %}
+
+{% block content %}
+<section class="notfound">
+  <div class="container">
+    <div class="code">۴۰۴</div>
+    <h1>صفحه موردنظر یافت نشد</h1>
+    <p>به نظر می‌رسد آدرس واردشده وجود ندارد یا حذف شده است. به صفحه اصلی بازگردید و مسیر را ادامه دهید.</p>
+    <a class="btn btn-primary" href="{% url 'home' %}">بازگشت به صفحه اصلی</a>
+  </div>
+</section>
+{% endblock %}

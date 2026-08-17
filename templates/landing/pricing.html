@@ -1,0 +1,56 @@
+{% extends "landing/base.html" %}
+{% load i18n static %}
+
+{% block title %}تعرفه‌ها | روشن RAG{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>تعرفه‌ها</h1>
+    <p>راهکارهای متناسب با اندازه سازمان شما؛ از استقرار رایگان تا مدیریت‌شده.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="tiers">
+      <div class="tier">
+        <div class="tier-name">اجتماعی</div>
+        <div class="tier-price">رایگان</div>
+        <p class="tier-desc">برای شروع و استفاده شخصی از روشن RAG.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>استقرار خودمیزبان</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>تا ۵۰ سند</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>۱ کاربر</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>API کامل + مستندات</li>
+        </ul>
+        <a class="btn btn-ghost" href="{% url 'admin:index' %}">شروع کنید</a>
+      </div>
+      <div class="tier featured">
+        <div class="tier-name">حرفه‌ای</div>
+        <div class="tier-price">تماس بگیرید <span>/ ماهانه</span></div>
+        <p class="tier-desc">برای تیم‌ها و سازمان‌های متوسط با نیاز به پشتیبانی.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>اسناد نامحدود</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>کاربران نامحدود</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>پشتیبانی اولویت‌دار</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>استقرار اختصاصی</li>
+        </ul>
+        <a class="btn btn-primary" href="{% url 'contact' %}">تماس با ما</a>
+      </div>
+      <div class="tier">
+        <div class="tier-name">سازمانی</div>
+        <div class="tier-price">توافقی</div>
+        <p class="tier-desc">برای سازمان‌های بزرگ با نیازهای خاص.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>استقرار مدیریت‌شده</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>SLA و مانیتورینگ</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>آموزش تیم</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>قرارداد اختصاصی</li>
+        </ul>
+        <a class="btn btn-ghost" href="{% url 'contact' %}">تماس با ما</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
