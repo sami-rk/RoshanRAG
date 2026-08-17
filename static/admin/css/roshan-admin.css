@@ -1210,6 +1210,79 @@ html[data-theme="dark"] .app-card:hover .card-glow,
     opacity: 0.6;
 }
 
+/* Elegant dark gradient background (ported from elegant-dark-pattern component) */
+.elegant-dark-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: #000;
+    display: none;
+    pointer-events: none;
+}
+
+html[data-theme="dark"] .elegant-dark-bg {
+    display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .elegant-dark-bg,
+    :root:not([data-theme]) .elegant-dark-bg {
+        display: block;
+    }
+}
+
+.elegant-dark-bg .edb-panel,
+.elegant-dark-bg .edb-noise,
+.elegant-dark-bg .edb-dots,
+.elegant-dark-bg .edb-highlight {
+    position: absolute;
+    inset: 0;
+}
+
+.elegant-dark-bg .edb-base,
+.elegant-dark-bg .edb-streak {
+    position: absolute;
+    inset: 0;
+}
+
+.elegant-dark-bg .edb-base {
+    opacity: 1;
+    background: radial-gradient(100% 100% at 0% 0%, rgb(46, 46, 46) 0%, rgb(0, 0, 0) 100%);
+    -webkit-mask: radial-gradient(125% 100% at 0% 0%, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0.224) 88.2883%, rgba(0, 0, 0, 0) 100%);
+    mask: radial-gradient(125% 100% at 0% 0%, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0.224) 88.2883%, rgba(0, 0, 0, 0) 100%);
+}
+
+.elegant-dark-bg .edb-streak {
+    opacity: 0.2;
+    background: linear-gradient(rgb(0, 207, 255) 0%, rgba(0, 207, 255, 0) 100%);
+    -webkit-mask: var(--mask);
+    mask: var(--mask);
+    transform: skewX(45deg);
+}
+
+.elegant-dark-bg .edb-noise {
+    opacity: 0.05;
+    background-repeat: repeat;
+    background-size: 149.76px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.elegant-dark-bg .edb-dots {
+    opacity: 0.2;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.5) 1px, transparent 0);
+    background-size: 20px 20px;
+}
+
+.elegant-dark-bg .edb-highlight {
+    background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(30, 41, 59, 0.2) 0%, transparent 60%);
+}
+
+body.dashboard #content {
+    position: relative;
+    z-index: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
