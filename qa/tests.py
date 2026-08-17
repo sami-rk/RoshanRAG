@@ -2,10 +2,12 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from documents.models import Document
 from qa.models import Question
 from qa.services.answering import _dedupe_by_document, answer_question, friendly_llm_error
 
@@ -94,6 +96,16 @@ class FriendlyErrorTests(APITestCase):
 
 
 class AnsweringServiceTests(APITestCase):
+    def setUp(self):
+        super().setUp()
+        # A ready document lets the answering flow reach the retrieval/LLM steps;
+        # the empty-corpus behavior is covered separately in NoCorpusAnswerTests.
+        self.document = Document.objects.create(
+            title="سند آماده",
+            file="documents/ready.txt",
+            status=Document.Status.READY,
+        )
+
     @staticmethod
     def _fake_doc(document_id, title, content):
         return SimpleNamespace(
@@ -324,3 +336,52 @@ class AnsweringServiceTests(APITestCase):
             # Must not raise even though the row vanished mid-task
             answer_question(question.pk)
         self.assertFalse(Question.objects.filter(pk=question.pk).exists())
+
+
+class NoCorpusAnswerTests(TestCase):
+    def test_answers_without_llm_when_no_ready_documents(self):
+        question = Question.objects.create(question="سوال")
+        with (
+            patch("qa.services.answering.get_chroma_vectorstore") as vectorstore,
+            patch("qa.services.answering.get_llm") as llm,
+        ):
+            answer_question(question.pk)
+
+        vectorstore.assert_not_called()
+        llm.assert_not_called()
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)
+        self.assertIn("سند", question.answer)
+        self.assertEqual(question.error_message, "")
+        self.assertEqual(question.sources, [])
+        self.assertIsNotNone(question.answered_at)
+
+    def test_pending_document_does_not_count_as_a_corpus(self):
+        Document.objects.create(
+            title="در انتظار",
+            file="documents/pending.txt",
+            status=Document.Status.PENDING,
+        )
+        question = Question.objects.create(question="سوال")
+        with (
+            patch("qa.services.answering.get_chroma_vectorstore") as vectorstore,
+            patch("qa.services.answering.get_llm") as llm,
+        ):
+            answer_question(question.pk)
+
+        vectorstore.assert_not_called()
+        llm.assert_not_called()
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)
+
+    def test_failed_only_corpus_answers_without_llm(self):
+        Document.objects.create(
+            title="ناموفق", file="documents/failed.txt", status=Document.Status.FAILED
+        )
+        question = Question.objects.create(question="سوال")
+        with patch("qa.services.answering.get_llm") as llm:
+            answer_question(question.pk)
+
+        llm.assert_not_called()
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)

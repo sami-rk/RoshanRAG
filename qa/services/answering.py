@@ -8,6 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from core.chroma_client import get_chroma_vectorstore
 from core.llm_client import get_llm
 from core.workers import run_in_background
+from documents.models import Document
 from qa.models import Question
 
 logger = logging.getLogger(__name__)
@@ -99,29 +100,39 @@ def answer_question(question_id: int) -> None:
         question.status = Question.Status.GENERATING
         question.save(update_fields=["status"])
 
-        vectorstore = get_chroma_vectorstore()
-        # MMR (maximal marginal relevance) balances relevance with diversity so
-        # the retrieved chunks cover different parts of the documents instead of
-        # near-duplicate passages.
-        retrieved = vectorstore.max_marginal_relevance_search(
-            question.question,
-            k=settings.RETRIEVAL_TOP_K,
-            fetch_k=settings.RETRIEVAL_FETCH_K,
-        )
-        retrieved = _dedupe_by_document(retrieved, settings.RETRIEVAL_MAX_DOCS)
+        if not Document.objects.filter(status=Document.Status.READY).exists():
+            # There is nothing to retrieve or ground the answer on, so skip the
+            # LLM call entirely and answer with a clear, deterministic message.
+            question.answer = (
+                "هنوز سندی برای پاسخ‌دهی ایندکس نشده است؛ ابتدا یک سند بارگذاری کنید."
+            )
+            question.status = Question.Status.DONE
+            question.answered_at = timezone.now()
+            question.error_message = ""
+        else:
+            vectorstore = get_chroma_vectorstore()
+            # MMR (maximal marginal relevance) balances relevance with diversity so
+            # the retrieved chunks cover different parts of the documents instead of
+            # near-duplicate passages.
+            retrieved = vectorstore.max_marginal_relevance_search(
+                question.question,
+                k=settings.RETRIEVAL_TOP_K,
+                fetch_k=settings.RETRIEVAL_FETCH_K,
+            )
+            retrieved = _dedupe_by_document(retrieved, settings.RETRIEVAL_MAX_DOCS)
 
-        context = "\n\n".join(document.page_content for document in retrieved)
-        messages = [
-            SystemMessage(content=_SYSTEM_PROMPT),
-            HumanMessage(content=f"پرسش:\n{question.question}\n\nاسناد:\n{context}"),
-        ]
-        response = get_llm().invoke(messages)
+            context = "\n\n".join(document.page_content for document in retrieved)
+            messages = [
+                SystemMessage(content=_SYSTEM_PROMPT),
+                HumanMessage(content=f"پرسش:\n{question.question}\n\nاسناد:\n{context}"),
+            ]
+            response = get_llm().invoke(messages)
 
-        question.answer = response.content
-        question.sources = _build_sources(retrieved)
-        question.status = Question.Status.DONE
-        question.answered_at = timezone.now()
-        question.error_message = ""
+            question.answer = response.content
+            question.sources = _build_sources(retrieved)
+            question.status = Question.Status.DONE
+            question.answered_at = timezone.now()
+            question.error_message = ""
     except Exception as exc:
         question.status = Question.Status.FAILED
         question.error_message = friendly_llm_error(exc)
