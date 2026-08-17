@@ -13,7 +13,8 @@
 - API rate limiting and a health-check endpoint for Docker healthchecks
 - Multilingual embedding model `BAAI/bge-m3` (Persian + English), GPU-aware
 - Django Admin UI (Persian) + token-authenticated REST API with OpenAPI schema
-- Public Persian landing page (dark/light) with home, about, pricing, contact and a styled 404, including scroll reveals, tilt/spotlight cards, magnetic CTAs and a tech-stack marquee
+- Public Persian landing page (dark/light) with home, about, pricing, contact and a styled 404, including a **chat page** (`/chat/`) for asking questions right from the browser, scroll reveals, tilt/spotlight cards, magnetic CTAs and a tech-stack marquee
+- Uploaded files are protected — `/media/` requires an authenticated session or an API token
 - Docker Compose with optional GPU override
 
 ## Architecture
@@ -66,6 +67,7 @@ docker compose exec web python manage.py load_sample_data
 Then:
 
 - Landing page: <http://localhost:8000/>
+- Ask-your-documents chat UI: <http://localhost:8000/chat/> (login required)
 - Admin: <http://localhost:8000/admin/> (superuser from `.env`, default `admin` / `admin`)
 - Swagger docs: <http://localhost:8000/api/schema/docs/>
 - OpenAPI schema: <http://localhost:8000/api/schema/>
@@ -115,10 +117,10 @@ curl -X POST http://localhost:8000/api/token/ -d 'username=admin&password=admin'
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/api/documents/` | Upload a document (multipart: `file` required, `title` optional) |
-| `GET` | `/api/documents/` | List documents (`?q=<text>` searches title + full text) |
+| `GET` | `/api/documents/` | List documents (`?q=<text>` searches title + full text, `?status=pending|ready|failed` filters) |
 | `GET` / `PATCH` / `DELETE` | `/api/documents/{id}/` | Detail / edit / delete (removes vector chunks too) |
 | `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`) |
-| `GET` | `/api/questions/` | Q&A history |
+| `GET` | `/api/questions/` | Q&A history (`?status=pending|generating|done|failed` filters) |
 | `GET` | `/api/questions/{id}/` | Poll for status / answer / sources |
 | `DELETE` | `/api/questions/{id}/` | Delete a question from the history |
 | `GET` | `/api/health/` | Health check (DB + Chroma), used by the container healthcheck |
@@ -191,6 +193,9 @@ entrypoint.sh      Migrate, recover stuck tasks, create superuser, run gunicorn
 - **Free OpenRouter models with `with_fallbacks`.** Free models get rate-limited, so on error LangChain tries the next model in the chain. Stored errors are unwrapped to the provider's actual message.
 - **MMR retrieval.** Retrieval uses maximal marginal relevance (`fetch_k=20`, `k=4`) to balance relevance with diversity, then dedupes to at most 3 documents.
 - **Answers are cited.** Every answer returns the source documents used, keeping RAG transparent; answers follow the language of the question.
+- **Empty-corpus guard.** Asking a question before any document is indexed skips the LLM call entirely and answers with a deterministic "no documents yet" message, then the admin retry action can re-ask it later.
+- **Uploaded media is protected.** `/media/` files require an authenticated session or an `Authorization: Token` header, so uploaded documents are not downloadable by URL guessing; the API still exposes working file links for token clients.
+- **Fail-fast secret key.** With `DEBUG=false`, the app refuses to start unless `SECRET_KEY` is a strong random value, instead of silently running on a placeholder key.
 - **Separate ChromaDB container** keeps the vector store isolated from the app (pinned to `chromadb/chroma:1.5.9` with a healthcheck).
 - **SQLite** for simplicity and persistence via a Docker volume; chunking at 800/200 via `RecursiveCharacterTextSplitter`.
 - **Hugging Face xet backend disabled** — it can hang on some networks; downloads fall back to plain HTTP.
