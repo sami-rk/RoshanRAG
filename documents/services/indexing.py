@@ -51,7 +51,9 @@ def index_document(document_id: int) -> None:
         document.error_message = str(exc)
         logger.exception("Failed to index document %s", document_id)
 
-    document.save(update_fields=["full_text", "status", "error_message", "updated_at"])
+    # The document may have been deleted while indexing was in flight.
+    if Document.objects.filter(pk=document.pk).exists():
+        document.save(update_fields=["full_text", "status", "error_message", "updated_at"])
 
 
 def schedule_index(document_id: int) -> None:

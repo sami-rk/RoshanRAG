@@ -127,7 +127,11 @@ def answer_question(question_id: int) -> None:
         question.error_message = friendly_llm_error(exc)
         logger.exception("Failed to answer question %s", question_id)
 
-    question.save(update_fields=["answer", "sources", "status", "answered_at", "error_message"])
+    # The question may have been deleted while the LLM call was in flight.
+    if Question.objects.filter(pk=question.pk).exists():
+        question.save(
+            update_fields=["answer", "sources", "status", "answered_at", "error_message"]
+        )
 
 
 def schedule_answering(question_id: int) -> None:
