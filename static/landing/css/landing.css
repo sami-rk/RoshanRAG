@@ -590,6 +590,55 @@ html[data-theme="dark"] .hero::after,
     color: var(--muted);
 }
 
+/* ---- Tech marquee ---- */
+
+.marquee {
+    overflow: hidden;
+    border-block: 1px solid var(--border);
+    background: var(--card-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 14px 0;
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marqueeScroll 32s linear infinite;
+}
+
+.marquee-group {
+    display: flex;
+    align-items: center;
+    gap: 44px;
+    padding-inline-end: 44px;
+}
+
+.marquee span {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.marquee span::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.55;
+}
+
+@keyframes marqueeScroll {
+    to {
+        transform: translateX(-50%);
+    }
+}
+
 /* ---- Sections ---- */
 
 .section {
