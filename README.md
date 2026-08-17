@@ -11,7 +11,7 @@
 - Free OpenRouter LLMs with an automatic fallback chain
 - Multilingual embedding model `BAAI/bge-m3` (Persian + English), GPU-aware
 - Django Admin UI (Persian) + token-authenticated REST API with OpenAPI schema
-- Public Persian landing page (dark/light) with home, about, pricing, contact and a styled 404
+- Public Persian landing page (dark/light) with home, about, pricing, contact and a styled 404, including scroll reveals, tilt/spotlight cards, magnetic CTAs and a tech-stack marquee
 - Docker Compose with optional GPU override
 
 ## Architecture
@@ -151,6 +151,12 @@ Example question response:
 | ![landing](docs/screenshots/10-landing.png) | ![landing dark](docs/screenshots/11-landing-dark.png) |
 | Landing mobile | Styled 404 |
 | ![landing mobile](docs/screenshots/12-landing-mobile.png) | ![404](docs/screenshots/13-landing-404.png) |
+| Admin login (light) | Admin login (dark) |
+| ![login light](docs/screenshots/14-admin-login.png) | ![login dark](docs/screenshots/15-admin-login-dark.png) |
+| Admin dashboard (light) | Admin dashboard (dark) |
+| ![dashboard light](docs/screenshots/16-admin-dashboard.png) | ![dashboard dark](docs/screenshots/17-admin-dashboard-dark.png) |
+| Documents list | Document detail |
+| ![documents](docs/screenshots/18-documents-list.png) | ![document](docs/screenshots/19-document-detail.png) |
 
 ## Project Structure
 
@@ -160,7 +166,7 @@ core/              Shared services (embeddings, chroma_client, llm_client, worke
 documents/         Document model, services (extraction/chunking/indexing), signals, API
 qa/                Question model, RAG answering service, API
 templates/landing/ Public landing pages (home, about, pricing, contact, base)
-static/landing/    Landing CSS/JS (dark-light theme, mobile nav, count-up)
+static/landing/    Landing CSS/JS (dark-light theme, mobile nav, count-up, scroll reveals, tilt, magnetic CTAs, marquee)
 sample_data/       Four Persian sample documents (3 DOCX + 1 TXT)
 Dockerfile         python:3.12-slim; CPU torch by default, CUDA torch via GPU build arg
 compose.yaml       web + chroma services
@@ -179,7 +185,7 @@ entrypoint.sh      Migrate, create superuser, run gunicorn
 - **Separate ChromaDB container** keeps the vector store isolated from the app.
 - **SQLite** for simplicity and persistence via a Docker volume; chunking at 800/200 via `RecursiveCharacterTextSplitter`.
 - **Hugging Face xet backend disabled** — it can hang on some networks; downloads fall back to plain HTTP.
-- **Custom Persian admin theme** — Django Admin is restyled with a Persian-first design system (bundled Vazirmatn font, RTL, light/dark mode, dashboard stat cards, status pills) via a custom `AdminSite` and template overrides, no third-party admin package. Dashboard and app cards are 3D-interactive (mouse-tracked perspective tilt, glassmorphism, layered depth, count-up stats) with `prefers-reduced-motion` respected, and bulk actions render as explicit buttons instead of a dropdown. Dark mode adds an elegant layered background (radial gradient base, skewed cyan light streaks, dot grid, and fractal-noise texture — ported from the `elegant-dark-pattern` component, with the texture inlined as an SVG data URI). The theme toggle on the login page shares its `roshan-theme` storage key with the landing page, so a visitor's preference carries over.
-- **Public landing page** — a bespoke Persian landing (home with hero + bento features + how-it-works + FAQ, plus about, pricing, contact and a styled 404) built in plain Django templates and vanilla CSS, RTL with the bundled Vazirmatn font, dark/light via a shared `data-theme` attribute and `roshan-theme` key. It doubles as the destination for the admin's "View site" link (`AdminSite.site_url = "/"`). Because the home page root is now routed, the admin "View site" link works.
+- **Custom Persian admin theme** — Django Admin is restyled with a Persian-first design system (bundled Vazirmatn font, RTL, light/dark mode, dashboard stat cards, status pills) via a custom `AdminSite` and template overrides, no third-party admin package. Dashboard and app cards are 3D-interactive (mouse-tracked perspective tilt, glassmorphism, layered depth, count-up stats, cursor-tracking spotlight) with `prefers-reduced-motion` respected, and bulk actions render as explicit buttons instead of a dropdown. Movement is layered across every page: header slide-down, staggered card entrance, IntersectionObserver scroll reveals, a pulsing amber "pending" pill, and press/scale on buttons. Dark mode adds an elegant layered background (radial gradient base, drifting skewed cyan light streaks, dot grid, and fractal-noise texture — ported from the `elegant-dark-pattern` component, with the texture inlined as an SVG data URI). The login page gets its own card entrance and a gently floating logo; the theme toggle there shares its `roshan-theme` storage key with the landing page, so a visitor's preference carries over. Changelists and forms are fully scrollable on phones (no horizontal page overflow).
+- **Public landing page** — a bespoke Persian landing (home with hero + bento features + how-it-works + FAQ, plus about, pricing, contact and a styled 404) built in plain Django templates and vanilla CSS, RTL with the bundled Vazirmatn font, dark/light via a shared `data-theme` attribute and `roshan-theme` key. Motion is vanilla JS + CSS only: staggered hero entrance, IntersectionObserver scroll reveals (with a debounced fallback so fast scrolls never skip a reveal), 3D-tilt bento cards with cursor spotlight, magnetic CTA buttons, an infinite tech-stack marquee (bge-m3 · ChromaDB · OpenRouter · LangChain · Django · Persian), smooth FAQ open/close, a rotating/cross-fading theme icon, sliding nav underlines, a hamburger-to-X mobile menu with staggered links, count-up stats, and a drifting streak background — all disabled under `prefers-reduced-motion` and for no-JS visitors. It doubles as the destination for the admin's "View site" link (`AdminSite.site_url = "/"`). Because the home page root is now routed, the admin "View site" link works.
 - **Custom 404 page** — served through `handler404` when `DEBUG = false`. In dev (`DEBUG = true`) Django intentionally shows its technical 404 page instead; the styled page is what visitors see in production.
 - **WhiteNoise serves static files** — installed in a dedicated Docker layer (keeps the torch layer cached) so gunicorn serves the admin's collected assets.
