@@ -7,6 +7,8 @@ from rest_framework.authtoken.views import obtain_auth_token
 from core.admin_site import roshan_admin_site
 from core.views import AboutView, ContactView, LandingView, PricingView
 
+handler404 = "core.views.page_not_found"
+
 urlpatterns = [
     path("", LandingView.as_view(), name="home"),
     path("about/", AboutView.as_view(), name="about"),
