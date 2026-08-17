@@ -138,6 +138,56 @@
         }, { passive: true });
     }
 
+    function canHover() {
+        return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    }
+
+    function setupTilt(el) {
+        if (prefersReducedMotion() || !canHover()) return;
+        el.addEventListener("pointermove", function (e) {
+            var rect = el.getBoundingClientRect();
+            var x = (e.clientX - rect.left) / rect.width - 0.5;
+            var y = (e.clientY - rect.top) / rect.height - 0.5;
+            el.style.setProperty("--rx", (-y * 7).toFixed(2) + "deg");
+            el.style.setProperty("--ry", (x * 7).toFixed(2) + "deg");
+            el.style.setProperty("--mx", (((e.clientX - rect.left) / rect.width) * 100).toFixed(2) + "%");
+            el.style.setProperty("--my", (((e.clientY - rect.top) / rect.height) * 100).toFixed(2) + "%");
+        });
+        el.addEventListener("pointerleave", function () {
+            el.style.setProperty("--rx", "0deg");
+            el.style.setProperty("--ry", "0deg");
+        });
+    }
+
+    function initTilt() {
+        var cards = document.querySelectorAll("[data-tilt]");
+        for (var i = 0; i < cards.length; i++) {
+            setupTilt(cards[i]);
+        }
+    }
+
+    function setupMagnetic(el) {
+        if (prefersReducedMotion() || !canHover()) return;
+        el.addEventListener("pointermove", function (e) {
+            var rect = el.getBoundingClientRect();
+            var x = e.clientX - rect.left - rect.width / 2;
+            var y = e.clientY - rect.top - rect.height / 2;
+            var dx = Math.max(-9, Math.min(9, x * 0.3));
+            var dy = Math.max(-9, Math.min(9, y * 0.3));
+            el.style.translate = dx.toFixed(1) + "px " + dy.toFixed(1) + "px";
+        });
+        el.addEventListener("pointerleave", function () {
+            el.style.translate = "0px 0px";
+        });
+    }
+
+    function initMagnetic() {
+        var els = document.querySelectorAll(".magnetic");
+        for (var i = 0; i < els.length; i++) {
+            setupMagnetic(els[i]);
+        }
+    }
+
     function onReady(fn) {
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", fn);
@@ -151,5 +201,7 @@
         initCountUp();
         initNav();
         initReveal();
+        initTilt();
+        initMagnetic();
     });
 })();
