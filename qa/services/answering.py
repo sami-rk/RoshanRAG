@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.conf import settings
@@ -10,6 +11,49 @@ from core.workers import run_in_background
 from qa.models import Question
 
 logger = logging.getLogger(__name__)
+
+
+def friendly_llm_error(exc: Exception) -> str:
+    """Extract a human-readable message from LLM/HTTP client exceptions.
+
+    Provider SDKs (OpenRouter/OpenAI) wrap the actual error — e.g. an HTTP 403
+    "Access denied by security policy." — inside pydantic validation errors or
+    JSON-string bodies. This digs out the real message so admins see the cause
+    instead of an SDK unmarshalling dump.
+    """
+    # openrouter / openai style: body is a JSON string like
+    # '{ "success": false, "error": "Access denied by security policy." }'
+    body = getattr(exc, "body", None)
+    if isinstance(body, str):
+        try:
+            parsed = json.loads(body)
+        except (ValueError, TypeError):
+            parsed = None
+        if isinstance(parsed, dict):
+            body = parsed
+    if isinstance(body, dict):
+        error = body.get("error")
+        if isinstance(error, dict) and error.get("message"):
+            return str(error["message"])
+        if isinstance(error, str) and error:
+            return error
+
+    # pydantic ValidationError (some SDK versions raise it directly)
+    errors = getattr(exc, "errors", None)
+    if callable(errors):
+        try:
+            for err in errors():
+                value = err.get("input_value")
+                if isinstance(value, str) and value:
+                    return value
+        except Exception:
+            pass
+
+    message = getattr(exc, "message", None)
+    if isinstance(message, str) and message and "validation error" not in message.lower():
+        return message
+
+    return str(exc)
 
 _SYSTEM_PROMPT = (
     "تو دستیار پاسخ‌دهی بر اساس اسناد (RoshanRAG) هستی. "
@@ -80,7 +124,7 @@ def answer_question(question_id: int) -> None:
         question.error_message = ""
     except Exception as exc:
         question.status = Question.Status.FAILED
-        question.error_message = str(exc)
+        question.error_message = friendly_llm_error(exc)
         logger.exception("Failed to answer question %s", question_id)
 
     question.save(update_fields=["answer", "sources", "status", "answered_at", "error_message"])
