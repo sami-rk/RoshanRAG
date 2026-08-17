@@ -221,6 +221,7 @@ summary:focus-visible,
 }
 
 .nav-links a {
+    position: relative;
     color: var(--muted);
     font-size: 14px;
     font-weight: 500;
@@ -228,9 +229,26 @@ summary:focus-visible,
     border-radius: 8px;
 }
 
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    inset-inline: 12px;
+    bottom: 3px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .nav-links a:hover {
     color: var(--fg);
-    background: var(--accent-soft);
+}
+
+.nav-links a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
 }
 
 .nav-actions {
@@ -307,6 +325,7 @@ summary:focus-visible,
 /* ---- Theme toggle ---- */
 
 .theme-toggle {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -326,20 +345,27 @@ summary:focus-visible,
 }
 
 .theme-toggle svg {
+    position: absolute;
+    inset: 0;
+    margin: auto;
     width: 18px;
     height: 18px;
+    transition: opacity 260ms ease, transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .theme-toggle .icon-sun {
-    display: none;
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
 }
 
 html[data-theme="dark"] .theme-toggle .icon-moon {
-    display: none;
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
 }
 
 html[data-theme="dark"] .theme-toggle .icon-sun {
-    display: block;
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
 }
 
 /* ---- Elegant dark gradient background ---- */
@@ -391,6 +417,17 @@ html[data-theme="dark"] .elegant-dark-bg {
     -webkit-mask: var(--mask);
     mask: var(--mask);
     transform: skewX(45deg);
+    animation: edbDrift 28s ease-in-out infinite;
+}
+
+@keyframes edbDrift {
+    0%,
+    100% {
+        transform: skewX(45deg) translateX(-2.5%);
+    }
+    50% {
+        transform: skewX(45deg) translateX(2.5%);
+    }
 }
 
 .elegant-dark-bg .edb-noise {
@@ -527,6 +564,13 @@ html[data-theme="dark"] .hero::after,
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     box-shadow: var(--shadow-sm);
+    transition: translate 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.stat-chip:hover {
+    translate: 0 -3px;
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
 }
 
 .stat-chip .stat-num {
@@ -873,13 +917,22 @@ html[data-theme="dark"] .hero::after,
 }
 
 .faq .faq-a {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.faq .faq-a p {
+    margin: 0;
+    min-height: 0;
+    overflow: hidden;
     padding: 0 22px 18px;
     color: var(--muted);
     font-size: 14.5px;
 }
 
-.faq .faq-a p {
-    margin: 0;
+.faq details[open] .faq-a {
+    grid-template-rows: 1fr;
 }
 
 /* ---- CTA ---- */
@@ -1311,6 +1364,31 @@ html.js-anim [data-reveal].in-view {
         height: 18px;
     }
 
+    .nav-toggle line {
+        transform-origin: 12px 6px;
+        transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease;
+    }
+
+    .nav-toggle .l2 {
+        transform-origin: 12px 12px;
+    }
+
+    .nav-toggle .l3 {
+        transform-origin: 12px 18px;
+    }
+
+    .nav-toggle.open .l1 {
+        transform: translateY(6px) rotate(45deg);
+    }
+
+    .nav-toggle.open .l2 {
+        opacity: 0;
+    }
+
+    .nav-toggle.open .l3 {
+        transform: translateY(-6px) rotate(-45deg);
+    }
+
     .nav-links {
         position: fixed;
         top: 64px;
@@ -1331,6 +1409,37 @@ html.js-anim [data-reveal].in-view {
 
     .nav-links.open {
         transform: translateY(0);
+    }
+
+    .nav-links a {
+        opacity: 0;
+        translate: 0 -8px;
+        transition: opacity 240ms ease, translate 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .nav-links.open a {
+        opacity: 1;
+        translate: 0 0;
+    }
+
+    .nav-links.open a:nth-child(1) {
+        transition-delay: 70ms;
+    }
+
+    .nav-links.open a:nth-child(2) {
+        transition-delay: 110ms;
+    }
+
+    .nav-links.open a:nth-child(3) {
+        transition-delay: 150ms;
+    }
+
+    .nav-links.open a:nth-child(4) {
+        transition-delay: 190ms;
+    }
+
+    .nav-links.open a:nth-child(5) {
+        transition-delay: 230ms;
     }
 
     .nav-links a {

@@ -73,12 +73,14 @@
         if (!toggle || !links) return;
         toggle.addEventListener("click", function () {
             var open = links.classList.toggle("open");
+            toggle.classList.toggle("open", open);
             toggle.setAttribute("aria-expanded", open ? "true" : "false");
         });
         var items = links.querySelectorAll("a");
         for (var i = 0; i < items.length; i++) {
             items[i].addEventListener("click", function () {
                 links.classList.remove("open");
+                toggle.classList.remove("open");
                 toggle.setAttribute("aria-expanded", "false");
             });
         }
