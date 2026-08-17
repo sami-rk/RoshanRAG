@@ -2,7 +2,7 @@
     "use strict";
 
     var root = document.documentElement;
-    var STORAGE_KEY = "roshan-landing-theme";
+    var STORAGE_KEY = "roshan-theme";
 
     function resolvedTheme() {
         return root.getAttribute("data-theme") ||

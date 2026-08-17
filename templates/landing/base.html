@@ -11,7 +11,7 @@
   <script>
     (function () {
       var t = null;
-      try { t = localStorage.getItem("roshan-landing-theme"); } catch (e) {}
+      try { t = localStorage.getItem("roshan-theme"); } catch (e) {}
       if (t === "light" || t === "dark") {
         document.documentElement.setAttribute("data-theme", t);
       }
