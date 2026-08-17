@@ -100,6 +100,18 @@ class MediaAccessTests(TestCase):
             username="tester", password="pass"
         )
 
+    def test_chat_page_is_public_for_anonymous_visitors(self):
+        response = self.client.get("/chat/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "وارد شوید")
+
+    def test_chat_page_shows_form_for_authenticated_users(self):
+        self.client.force_login(self.user)
+        response = self.client.get("/chat/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ask-form")
+        self.assertContains(response, "csrfmiddlewaretoken")
+
     @staticmethod
     def _media_root():
         directory = tempfile.mkdtemp()

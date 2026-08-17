@@ -6,6 +6,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from core.admin_site import roshan_admin_site
 from core.views import (
     AboutView,
+    ChatView,
     ContactView,
     LandingView,
     PricingView,
@@ -20,6 +21,7 @@ urlpatterns = [
     path("about/", AboutView.as_view(), name="about"),
     path("pricing/", PricingView.as_view(), name="pricing"),
     path("contact/", ContactView.as_view(), name="contact"),
+    path("chat/", ChatView.as_view(), name="chat"),
     path("admin/", roshan_admin_site.urls),
     path("api/token/", obtain_auth_token, name="api-token"),
     path("api/health/", health_check, name="health"),

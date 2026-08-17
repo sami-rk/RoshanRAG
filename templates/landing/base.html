@@ -31,6 +31,7 @@
       <nav class="nav-links" aria-label="ناوبری اصلی">
         <a href="{% url 'home' %}#features">ویژگی‌ها</a>
         <a href="{% url 'home' %}#how">نحوه کار</a>
+        <a href="{% url 'chat' %}">پرسش از اسناد</a>
         <a href="{% url 'pricing' %}">تعرفه‌ها</a>
         <a href="{% url 'about' %}">درباره</a>
         <a href="{% url 'contact' %}">تماس</a>
@@ -86,6 +87,7 @@
           <h4>دسترسی</h4>
           <ul>
             <li><a href="{% url 'admin:index' %}">پنل مدیریت</a></li>
+            <li><a href="{% url 'chat' %}">پرسش از اسناد</a></li>
             <li><a href="{% url 'schema-docs' %}">مستندات API</a></li>
             <li><a href="{% url 'home' %}#faq">سوالات متداول</a></li>
           </ul>
@@ -106,5 +108,6 @@
   </footer>
 
   <script defer src="{% static 'landing/js/landing.js' %}"></script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

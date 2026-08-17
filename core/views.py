@@ -95,3 +95,7 @@ class PricingView(PublicContextMixin, TemplateView):
 
 class ContactView(PublicContextMixin, TemplateView):
     template_name = "landing/contact.html"
+
+
+class ChatView(PublicContextMixin, TemplateView):
+    template_name = "landing/chat.html"
