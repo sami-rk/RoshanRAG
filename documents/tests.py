@@ -230,3 +230,12 @@ class DocumentSignalsTests(TestCase):
         with patch("core.chroma_client.delete_document_chunks") as delete_chunks:
             doc.delete()
         delete_chunks.assert_called_once_with(pk)
+
+    def test_deleting_document_tolerates_chroma_outage(self):
+        doc = _make_document("note.txt", "متن".encode("utf-8"))
+        with patch(
+            "core.chroma_client.delete_document_chunks",
+            side_effect=RuntimeError("chroma unreachable"),
+        ):
+            doc.delete()
+        self.assertFalse(Document.objects.filter(pk=doc.pk).exists())

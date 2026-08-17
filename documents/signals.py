@@ -1,8 +1,12 @@
+import logging
+
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 
 from .models import Document
 from .services.indexing import schedule_index
+
+logger = logging.getLogger(__name__)
 
 _old_files = {}
 
@@ -33,4 +37,11 @@ def on_document_saved(sender, instance, created, **kwargs):
 def on_document_deleted(sender, instance, **kwargs):
     from core.chroma_client import delete_document_chunks
 
-    delete_document_chunks(instance.pk)
+    try:
+        delete_document_chunks(instance.pk)
+    except Exception:
+        # Chroma might be unreachable or have lost the collection. The row is
+        # already gone from the database, so do not fail the deletion; the
+        # orphaned chunks will be replaced the next time the document is
+        # re-uploaded (indexing deletes leftovers before adding new ones).
+        logger.exception("Failed to remove vector chunks for document %s", instance.pk)
