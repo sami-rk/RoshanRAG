@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.urls import include, path
+from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -26,5 +26,12 @@ urlpatterns = [
     ),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve uploaded media in all environments (DEBUG-independent) so document
+# files remain accessible behind gunicorn with DEBUG=false.
+urlpatterns += [
+    path(
+        f"{settings.MEDIA_URL.lstrip('/')}<path:path>",
+        serve,
+        {"document_root": settings.MEDIA_ROOT},
+    ),
+]
