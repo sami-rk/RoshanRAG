@@ -11,6 +11,7 @@
 - Free OpenRouter LLMs with an automatic fallback chain
 - Multilingual embedding model `BAAI/bge-m3` (Persian + English), GPU-aware
 - Django Admin UI (Persian) + token-authenticated REST API with OpenAPI schema
+- Public Persian landing page (dark/light) with home, about, pricing, contact and a styled 404
 - Docker Compose with optional GPU override
 
 ## Architecture
@@ -60,6 +61,7 @@ docker compose exec web python manage.py load_sample_data
 
 Then:
 
+- Landing page: <http://localhost:8000/>
 - Admin: <http://localhost:8000/admin/> (superuser from `.env`, default `admin` / `admin`)
 - Swagger docs: <http://localhost:8000/api/schema/docs/>
 - OpenAPI schema: <http://localhost:8000/api/schema/>
@@ -145,6 +147,10 @@ Example question response:
 | ![api docs](docs/screenshots/7-api-docs.png) | |
 | Dark mode | Mobile |
 | ![dark](docs/screenshots/8-admin-dark.png) | ![mobile](docs/screenshots/9-admin-mobile.png) |
+| Landing page | Landing dark mode |
+| ![landing](docs/screenshots/10-landing.png) | ![landing dark](docs/screenshots/11-landing-dark.png) |
+| Landing mobile | Styled 404 |
+| ![landing mobile](docs/screenshots/12-landing-mobile.png) | ![404](docs/screenshots/13-landing-404.png) |
 
 ## Project Structure
 
@@ -153,6 +159,8 @@ config/            Django settings and URLs
 core/              Shared services (embeddings, chroma_client, llm_client, workers)
 documents/         Document model, services (extraction/chunking/indexing), signals, API
 qa/                Question model, RAG answering service, API
+templates/landing/ Public landing pages (home, about, pricing, contact, base)
+static/landing/    Landing CSS/JS (dark-light theme, mobile nav, count-up)
 sample_data/       Four Persian sample documents (3 DOCX + 1 TXT)
 Dockerfile         python:3.12-slim; CPU torch by default, CUDA torch via GPU build arg
 compose.yaml       web + chroma services
@@ -171,5 +179,7 @@ entrypoint.sh      Migrate, create superuser, run gunicorn
 - **Separate ChromaDB container** keeps the vector store isolated from the app.
 - **SQLite** for simplicity and persistence via a Docker volume; chunking at 800/200 via `RecursiveCharacterTextSplitter`.
 - **Hugging Face xet backend disabled** — it can hang on some networks; downloads fall back to plain HTTP.
-- **Custom Persian admin theme** — Django Admin is restyled with a Persian-first design system (bundled Vazirmatn font, RTL, light/dark mode, dashboard stat cards, status pills) via a custom `AdminSite` and template overrides, no third-party admin package. Dashboard and app cards are 3D-interactive (mouse-tracked perspective tilt, glassmorphism, layered depth, count-up stats) with `prefers-reduced-motion` respected, and bulk actions render as explicit buttons instead of a dropdown. Dark mode adds an elegant layered background (radial gradient base, skewed cyan light streaks, dot grid, and fractal-noise texture — ported from the `elegant-dark-pattern` component, with the texture inlined as an SVG data URI).
+- **Custom Persian admin theme** — Django Admin is restyled with a Persian-first design system (bundled Vazirmatn font, RTL, light/dark mode, dashboard stat cards, status pills) via a custom `AdminSite` and template overrides, no third-party admin package. Dashboard and app cards are 3D-interactive (mouse-tracked perspective tilt, glassmorphism, layered depth, count-up stats) with `prefers-reduced-motion` respected, and bulk actions render as explicit buttons instead of a dropdown. Dark mode adds an elegant layered background (radial gradient base, skewed cyan light streaks, dot grid, and fractal-noise texture — ported from the `elegant-dark-pattern` component, with the texture inlined as an SVG data URI). The theme toggle on the login page shares its `roshan-theme` storage key with the landing page, so a visitor's preference carries over.
+- **Public landing page** — a bespoke Persian landing (home with hero + bento features + how-it-works + FAQ, plus about, pricing, contact and a styled 404) built in plain Django templates and vanilla CSS, RTL with the bundled Vazirmatn font, dark/light via a shared `data-theme` attribute and `roshan-theme` key. It doubles as the destination for the admin's "View site" link (`AdminSite.site_url = "/"`). Because the home page root is now routed, the admin "View site" link works.
+- **Custom 404 page** — served through `handler404` when `DEBUG = false`. In dev (`DEBUG = true`) Django intentionally shows its technical 404 page instead; the styled page is what visitors see in production.
 - **WhiteNoise serves static files** — installed in a dedicated Docker layer (keeps the torch layer cached) so gunicorn serves the admin's collected assets.
