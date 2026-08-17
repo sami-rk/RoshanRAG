@@ -9,6 +9,8 @@ SUPPORTED_EXTENSIONS = {"docx", "txt"}
 
 
 class DocumentSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=False)
+
     class Meta:
         model = Document
         fields = [
