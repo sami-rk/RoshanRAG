@@ -18,14 +18,14 @@
     <div class="edb-highlight"></div>
   </div>
   <div class="container hero-inner">
-    <span class="hero-badge"><span class="dot" aria-hidden="true"></span>سامانه هوشمند پرسش از اسناد سازمانی</span>
-    <h1>از اسناد سازمانی، <span class="grad">پاسخ بگیر</span></h1>
-    <p class="lead">روشن RAG اسناد متنی سازمان شما را به یک پایگاه دانش هوشمند تبدیل می‌کند؛ سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید.</p>
-    <div class="hero-actions">
+    <span class="hero-badge" data-hero style="--i:0"><span class="dot" aria-hidden="true"></span>سامانه هوشمند پرسش از اسناد سازمانی</span>
+    <h1 data-hero style="--i:1">از اسناد سازمانی، <span class="grad">پاسخ بگیر</span></h1>
+    <p class="lead" data-hero style="--i:2">روشن RAG اسناد متنی سازمان شما را به یک پایگاه دانش هوشمند تبدیل می‌کند؛ سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید.</p>
+    <div class="hero-actions" data-hero style="--i:3">
       <a class="btn btn-primary btn-lg" href="{% url 'admin:index' %}">ورود به پنل مدیریت</a>
       <a class="btn btn-ghost btn-lg" href="{% url 'schema-docs' %}">مستندات API</a>
     </div>
-    <div class="hero-stats">
+    <div class="hero-stats" data-hero style="--i:4">
       <div class="stat-chip">
         <span class="stat-num" data-count="{{ stats.documents_ready }}"><em>۰</em></span>
         <span class="stat-lbl">سند آماده</span>
@@ -44,13 +44,13 @@
 
 <section class="section" id="features">
   <div class="container">
-    <div class="section-head center">
+    <div class="section-head center" data-reveal>
       <span class="kicker">قابلیت‌ها</span>
       <h2>هر آنچه برای پرسش از اسناد نیاز دارید</h2>
       <p>از استخراج خودکار متن تا پاسخ‌های دقیق با ذکر منبع؛ یکپارچه، سریع و با پشتیبانی کامل از زبان فارسی.</p>
     </div>
     <div class="bento">
-      <article class="bento-card large">
+      <article class="bento-card large" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 3l1.9 5.7a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/>
@@ -64,7 +64,7 @@
           <span class="blue">جستجوی برداری</span>
         </div>
       </article>
-      <article class="bento-card">
+      <article class="bento-card" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -75,7 +75,7 @@
         <h3>پاسخ با ذکر منبع</h3>
         <p>هر پاسخ به اسناد منبع استناد می‌کند؛ شفافیت کامل در اینکه پاسخ از کجا آمده است.</p>
       </article>
-      <article class="bento-card">
+      <article class="bento-card" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="3" width="7" height="9" rx="1"/>
@@ -87,7 +87,7 @@
         <h3>پنل مدیریت فارسی</h3>
         <p>مدیریت اسناد و پرسش‌ها، پیگیری وضعیت پردازش، و پاسخ‌دهی دستی — همه در یک پنل راست‌به‌چپ.</p>
       </article>
-      <article class="bento-card">
+      <article class="bento-card" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
@@ -96,7 +96,7 @@
         <h3>API REST + OpenAPI</h3>
         <p>احراز هویت مبتنی بر توکن، مستندات تعاملی Swagger و اتصال آسان به سامانه‌های سازمانی.</p>
       </article>
-      <article class="bento-card">
+      <article class="bento-card" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
@@ -111,13 +111,13 @@
 
 <section class="section" id="how" style="background: var(--card); border-block: 1px solid var(--border);">
   <div class="container">
-    <div class="section-head center">
+    <div class="section-head center" data-reveal>
       <span class="kicker">نحوه کار</span>
       <h2>از سند تا پاسخ در چهار گام</h2>
       <p>خط لوله RAG روشن به صورت خودکار اسناد را به پایگاه دانش تبدیل می‌کند.</p>
     </div>
     <div class="steps">
-      <div class="step">
+      <div class="step" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -127,7 +127,7 @@
         <h3>آپلود سند</h3>
         <p>اسناد متنی سازمان (DOCX، TXT و …) را در پنل بارگذاری کنید.</p>
       </div>
-      <div class="step">
+      <div class="step" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="2" y="7" width="20" height="14" rx="2"/>
@@ -138,7 +138,7 @@
         <h3>استخراج و قطعه‌بندی</h3>
         <p>متن استخراج و به قطعات معنادار با هم‌پوشانی مناسب تقسیم می‌شود.</p>
       </div>
-      <div class="step">
+      <div class="step" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
@@ -147,7 +147,7 @@
         <h3>ساخت بردار و ذخیره</h3>
         <p>هر قطعه با bge-m3 به بردار تبدیل و در پایگاه برداری ChromaDB ایندکس می‌شود.</p>
       </div>
-      <div class="step">
+      <div class="step" data-reveal>
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -163,13 +163,13 @@
 <section class="section" id="sample">
   <div class="container">
     <div class="sample-grid">
-      <div class="section-head">
+      <div class="section-head" data-reveal>
         <span class="kicker">نمونه پاسخ</span>
         <h2>پاسخی شفاف، همراه با منبع</h2>
         <p>روشن RAG پاسخ را از متن خودِ اسناد شما می‌گیرد؛ نه از خاطرات عمومی مدل. هر پاسخ لیست منابع استنادشده را نشان می‌دهد تا قابل راستی‌آزمایی باشد.</p>
         <a class="btn btn-ghost" href="{% url 'admin:index' %}">مشاهده در پنل مدیریت</a>
       </div>
-      <div class="qa-card">
+      <div class="qa-card" data-reveal>
         <div class="qa-q">
           <span class="avatar" aria-hidden="true">س</span>
           مراحل استخدام در شرکت چیست؟
@@ -193,32 +193,32 @@
 
 <section class="section" id="faq" style="background: var(--card); border-block: 1px solid var(--border);">
   <div class="container">
-    <div class="section-head center">
+    <div class="section-head center" data-reveal>
       <span class="kicker">سوالات متداول</span>
       <h2>هر آنچه باید بدانید</h2>
     </div>
     <div class="faq">
-      <details>
+      <details data-reveal>
         <summary>روشن RAG چیست؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="faq-a"><p>روشن RAG یک سامانه پرسش از اسناد است که با ترکیب بازیابی اطلاعات و مدل‌های زبانی (RAG)، به پرسش‌های شما بر اساس محتوای اسناد سازمان‌تان پاسخ می‌دهد.</p></div>
       </details>
-      <details>
+      <details data-reveal>
         <summary>چه فرمت‌هایی پشتیبانی می‌شود؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="faq-a"><p>اسناد متنی مانند DOCX و TXT پشتیبانی می‌شوند و هر سند به صورت خودکار پردازش و ایندکس می‌شود.</p></div>
       </details>
-      <details>
+      <details data-reveal>
         <summary>جستجو چه زبانی را پشتیبانی می‌کند؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="faq-a"><p>مدل bge-m3 فارسی و انگلیسی را در یک فضای برداری واحد پشتیبانی می‌کند؛ سؤال به هر زبان مطرح شود، پاسخ بر اساس محتوای اسناد داده می‌شود.</p></div>
       </details>
-      <details>
+      <details data-reveal>
         <summary>چرا می‌توان به پاسخ‌ها اعتماد کرد؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="faq-a"><p>چون هر پاسخ فقط از محتوای اسناد خودِ شما ساخته می‌شود و منابع استنادشده به صورت کامل نمایش داده می‌شود تا قابل راستی‌آزمایی باشد.</p></div>
       </details>
-      <details>
+      <details data-reveal>
         <summary>حریم خصوصی داده‌ها چگونه حفظ می‌شود؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="faq-a"><p>سامانه به صورت خودمیزبان (self-hosted) اجرا می‌شود؛ اسناد و پایگاه برداری داخل زیرساخت خود شما باقی می‌ماند.</p></div>
       </details>
-      <details>
+      <details data-reveal>
         <summary>آیا API در دسترس است؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="faq-a"><p>بله؛ یک REST API کامل با مستندات تعاملی OpenAPI و احراز هویت مبتنی بر توکن برای اتصال به سامانه‌های سازمانی فراهم است.</p></div>
       </details>
@@ -228,7 +228,7 @@
 
 <section class="section cta">
   <div class="container">
-    <div class="cta-card">
+    <div class="cta-card" data-reveal>
       <h2>همین حالا اسناد خود را هوشمند کنید</h2>
       <p>سندها را بارگذاری کنید، سؤال بپرسید و پاسخ را با منبع دریافت کنید. یک دقیقه تا راه‌اندازی.</p>
       <div class="hero-actions">

@@ -84,6 +84,60 @@
         }
     }
 
+    function initReveal() {
+        var els = document.querySelectorAll("[data-reveal]");
+        if (!els.length) return;
+        document.documentElement.classList.add("js-anim");
+        if (prefersReducedMotion() || !("IntersectionObserver" in window)) {
+            for (var i = 0; i < els.length; i++) {
+                els[i].classList.add("in-view");
+            }
+            return;
+        }
+        var groups = {};
+        for (var j = 0; j < els.length; j++) {
+            var parent = els[j].parentNode;
+            var list = groups[parent] || (groups[parent] = []);
+            list.push(els[j]);
+        }
+        Object.keys(groups).forEach(function (key) {
+            var list = groups[key];
+            for (var k = 0; k < list.length; k++) {
+                list[k].style.setProperty("--i", k);
+            }
+        });
+        function show(el) {
+            el.classList.add("in-view");
+        }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    show(entry.target);
+                    io.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0, rootMargin: "0px 0px 15% 0px" });
+        for (var m = 0; m < els.length; m++) {
+            io.observe(els[m]);
+        }
+        var timer = null;
+        window.addEventListener("scroll", function () {
+            if (timer) return;
+            timer = setTimeout(function () {
+                timer = null;
+                var vh = window.innerHeight;
+                for (var n = 0; n < els.length; n++) {
+                    var el = els[n];
+                    if (el.classList.contains("in-view")) continue;
+                    if (el.getBoundingClientRect().top <= vh + 80) {
+                        show(el);
+                        io.unobserve(el);
+                    }
+                }
+            }, 90);
+        }, { passive: true });
+    }
+
     function onReady(fn) {
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", fn);
@@ -96,5 +150,6 @@
         initTheme();
         initCountUp();
         initNav();
+        initReveal();
     });
 })();

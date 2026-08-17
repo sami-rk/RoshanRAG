@@ -5,7 +5,7 @@
 
 {% block content %}
 <section class="page-hero">
-  <div class="container">
+  <div class="container" data-hero style="--i:0">
     <h1>تعرفه‌ها</h1>
     <p>راهکارهای متناسب با اندازه سازمان شما؛ از استقرار رایگان تا مدیریت‌شده.</p>
   </div>
@@ -14,7 +14,7 @@
 <section class="section" style="padding-top: 0;">
   <div class="container">
     <div class="tiers">
-      <div class="tier">
+      <div class="tier" data-reveal>
         <div class="tier-name">اجتماعی</div>
         <div class="tier-price">رایگان</div>
         <p class="tier-desc">برای شروع و استفاده شخصی از روشن RAG.</p>
@@ -26,7 +26,7 @@
         </ul>
         <a class="btn btn-ghost" href="{% url 'admin:index' %}">شروع کنید</a>
       </div>
-      <div class="tier featured">
+      <div class="tier featured" data-reveal>
         <div class="tier-name">حرفه‌ای</div>
         <div class="tier-price">تماس بگیرید <span>/ ماهانه</span></div>
         <p class="tier-desc">برای تیم‌ها و سازمان‌های متوسط با نیاز به پشتیبانی.</p>
@@ -38,7 +38,7 @@
         </ul>
         <a class="btn btn-primary" href="{% url 'contact' %}">تماس با ما</a>
       </div>
-      <div class="tier">
+      <div class="tier" data-reveal>
         <div class="tier-name">سازمانی</div>
         <div class="tier-price">توافقی</div>
         <p class="tier-desc">برای سازمان‌های بزرگ با نیازهای خاص.</p>
