@@ -23,6 +23,8 @@ def on_document_saved(sender, instance, created, **kwargs):
     old = _old_files.pop(instance.pk, None)
     new = instance.file.name if instance.file else None
     if created or old != new:
+        if old and old != new:
+            instance.file.storage.delete(old)
         if new:
             schedule_index(instance.pk)
 
