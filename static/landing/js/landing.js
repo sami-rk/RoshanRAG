@@ -3,6 +3,7 @@
 
     var root = document.documentElement;
     var STORAGE_KEY = "roshan-theme";
+    var PERSIAN_DIGITS = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
 
     function resolvedTheme() {
         return root.getAttribute("data-theme") ||
@@ -44,20 +45,30 @@
         var target = parseInt(el.getAttribute("data-count"), 10) || 0;
         var duration = 700;
         var start = null;
+        var digit = el.querySelector("em") || el;
+        function setValue(value) {
+            digit.textContent = toPersianDigits(value);
+        }
         if (prefersReducedMotion()) {
-            el.textContent = target;
+            setValue(target);
             return;
         }
         function frame(ts) {
             if (!start) start = ts;
             var progress = Math.min((ts - start) / duration, 1);
             var eased = 1 - Math.pow(1 - progress, 3);
-            el.textContent = Math.round(target * eased);
+            setValue(Math.round(target * eased));
             if (progress < 1) {
                 window.requestAnimationFrame(frame);
             }
         }
         window.requestAnimationFrame(frame);
+    }
+
+    function toPersianDigits(value) {
+        return String(value).replace(/\d/g, function (d) {
+            return PERSIAN_DIGITS[d];
+        });
     }
 
     function initCountUp() {
