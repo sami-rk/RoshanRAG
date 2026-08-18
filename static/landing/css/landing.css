@@ -690,15 +690,15 @@ html[data-theme="dark"] .hero::after,
     border-radius: 18px;
     border: 1px solid var(--border);
     background: var(--card-glass);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     box-shadow: var(--shadow-sm);
     transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transition:
-        transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
         translate 240ms cubic-bezier(0.22, 1, 0.36, 1),
         box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
         border-color 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bento-card.is-tilting {
     will-change: transform;
 }
 

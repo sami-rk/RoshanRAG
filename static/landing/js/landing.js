@@ -146,6 +146,9 @@
 
     function setupTilt(el) {
         if (prefersReducedMotion() || !canHover()) return;
+        el.addEventListener("pointerenter", function () {
+            el.classList.add("is-tilting");
+        });
         el.addEventListener("pointermove", function (e) {
             var rect = el.getBoundingClientRect();
             var x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -156,6 +159,7 @@
             el.style.setProperty("--my", (((e.clientY - rect.top) / rect.height) * 100).toFixed(2) + "%");
         });
         el.addEventListener("pointerleave", function () {
+            el.classList.remove("is-tilting");
             el.style.setProperty("--rx", "0deg");
             el.style.setProperty("--ry", "0deg");
         });
