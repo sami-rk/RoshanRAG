@@ -2,6 +2,7 @@
 {% load i18n static %}
 
 {% block content %}
+<script defer src="{% static 'landing/js/demo.js' %}"></script>
 <section class="hero">
   <div class="elegant-dark-bg" aria-hidden="true">
     <div class="edb-panel">
@@ -38,6 +39,16 @@
         <span class="stat-num" data-count="{{ stats.documents }}"><em>۰</em></span>
         <span class="stat-lbl">کل اسناد</span>
       </div>
+    </div>
+    <div class="demo-widget" data-hero style="--i:5">
+      <form class="demo-form" id="demo-form">
+        <label class="demo-label" for="demo-input">یک پرسش نمونه را همینجا امتحان کنید</label>
+        <div class="demo-row">
+          <input type="text" class="demo-input" id="demo-input" placeholder="مثلاً: مهم‌ترین نکات این سند چیست؟" aria-label="پرسش آزمایشی" maxlength="500" autocomplete="off">
+          <button type="submit" class="btn btn-primary demo-send">بپرس</button>
+        </div>
+      </form>
+      <div class="demo-answer" id="demo-answer" hidden aria-live="polite"></div>
     </div>
   </div>
 </section>

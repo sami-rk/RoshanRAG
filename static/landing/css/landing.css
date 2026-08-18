@@ -593,6 +593,98 @@ html[data-theme="dark"] .hero::after,
     color: var(--muted);
 }
 
+/* ---- Landing demo widget ---- */
+
+.demo-widget {
+    width: min(560px, 100%);
+    margin: 40px auto 0;
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: var(--card-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    text-align: start;
+}
+
+.demo-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+
+.demo-row {
+    display: flex;
+    gap: 10px;
+}
+
+.demo-input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    font-size: 14px;
+    transition: border-color 160ms ease;
+}
+
+.demo-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.demo-input:disabled {
+    opacity: 0.6;
+}
+
+.demo-send {
+    white-space: nowrap;
+}
+
+.demo-answer {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--fg);
+}
+
+.demo-pending {
+    color: var(--muted);
+}
+
+.demo-error {
+    color: var(--danger, #ef4444);
+}
+
+.demo-sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.demo-sources-label {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.demo-source {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 /* ---- Tech marquee ---- */
 
 .marquee {
