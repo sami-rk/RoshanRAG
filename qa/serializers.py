@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import Question, Thread
@@ -48,5 +49,6 @@ class ThreadSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "question_count", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
+    @extend_schema_field(serializers.IntegerField())
     def get_question_count(self, obj):
         return obj.questions.count()
