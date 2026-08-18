@@ -1,11 +1,20 @@
 import uuid
 
+from django.conf import settings
 from django.db import models
 
 
 class Thread(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField("عنوان", max_length=200, blank=True, default="")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name="کاربر",
+        on_delete=models.CASCADE,
+        related_name="threads",
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField("تاریخ ایجاد", auto_now_add=True)
     updated_at = models.DateTimeField("تاریخ به‌روزرسانی", auto_now=True)
 
@@ -32,6 +41,14 @@ class Question(models.Model):
 
     question = models.TextField("پرسش")
     answer = models.TextField("پاسخ", blank=True, default="")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name="کاربر",
+        on_delete=models.CASCADE,
+        related_name="questions",
+        null=True,
+        blank=True,
+    )
     thread = models.ForeignKey(
         Thread,
         verbose_name="گفتگو",
