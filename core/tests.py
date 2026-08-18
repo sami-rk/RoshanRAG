@@ -103,6 +103,24 @@ class RecoverStuckTasksTests(TestCase):
         self.assertEqual(question.status, Question.Status.DONE)
 
 
+class ErrorPageTests(TestCase):
+    def test_server_error_renders_styled_page(self):
+        from django.test import RequestFactory
+
+        from core.views import server_error
+
+        request = RequestFactory().get("/")
+        response = server_error(request)
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, "خطایی در سرور رخ داد", status_code=500)
+
+    @override_settings(DEBUG=False)
+    def test_not_found_renders_styled_page(self):
+        response = self.client.get("/no-such-page/")
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "صفحه موردنظر یافت نشد", status_code=404)
+
+
 class MediaAccessTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(

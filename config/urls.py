@@ -15,6 +15,7 @@ from core.views import (
 )
 
 handler404 = "core.views.page_not_found"
+handler500 = "core.views.server_error"
 
 urlpatterns = [
     path("", LandingView.as_view(), name="home"),

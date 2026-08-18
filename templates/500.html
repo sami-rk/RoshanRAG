@@ -1,0 +1,15 @@
+{% extends "landing/base.html" %}
+{% load i18n static %}
+
+{% block title %}خطای سرور | روشن RAG{% endblock %}
+
+{% block content %}
+<section class="notfound">
+  <div class="container">
+    <div class="code">۵۰۰</div>
+    <h1>خطایی در سرور رخ داد</h1>
+    <p>مشکلی در پردازش درخواست شما پیش آمده است. لطفاً لحظاتی بعد دوباره تلاش کنید یا به صفحه اصلی بازگردید.</p>
+    <a class="btn btn-primary" href="{% url 'home' %}">بازگشت به صفحه اصلی</a>
+  </div>
+</section>
+{% endblock %}
