@@ -33,8 +33,9 @@ jobs:
           set -eo pipefail
           python manage.py test core 2>&1 | tee core-tests.log
           # Background tasks log failures that the suite itself may not fail
-          # on; treat any such message as a test failure.
-          if grep -q "Background task failed" core-tests.log; then
+          # on; treat any such message as a test failure. A healthy run emits
+          # none of these markers, so any match is a swallowed failure.
+          if grep -qE "Background task failed|Failed to answer question|Failed to index document|Failed to remove vector chunks|Failed to remove stored file|Exception in thread|Traceback" core-tests.log; then
             echo "::error::Background task failed during core tests"
             exit 1
           fi
@@ -59,8 +60,9 @@ jobs:
           set -eo pipefail
           python manage.py test documents 2>&1 | tee documents-tests.log
           # Background tasks log failures that the suite itself may not fail
-          # on; treat any such message as a test failure.
-          if grep -q "Background task failed" documents-tests.log; then
+          # on; treat any such message as a test failure. A healthy run emits
+          # none of these markers, so any match is a swallowed failure.
+          if grep -qE "Background task failed|Failed to answer question|Failed to index document|Failed to remove vector chunks|Failed to remove stored file|Exception in thread|Traceback" documents-tests.log; then
             echo "::error::Background task failed during documents tests"
             exit 1
           fi
@@ -85,8 +87,9 @@ jobs:
           set -eo pipefail
           python manage.py test qa 2>&1 | tee qa-tests.log
           # Background tasks log failures that the suite itself may not fail
-          # on; treat any such message as a test failure.
-          if grep -q "Background task failed" qa-tests.log; then
+          # on; treat any such message as a test failure. A healthy run emits
+          # none of these markers, so any match is a swallowed failure.
+          if grep -qE "Background task failed|Failed to answer question|Failed to index document|Failed to remove vector chunks|Failed to remove stored file|Exception in thread|Traceback" qa-tests.log; then
             echo "::error::Background task failed during qa tests"
             exit 1
           fi
