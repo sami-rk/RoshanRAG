@@ -1,5 +1,8 @@
+import csv
+
 from django.contrib import admin
 from django.contrib.admin import actions as admin_actions
+from django.http import HttpResponse
 from django.utils.html import format_html
 
 from core.admin_site import roshan_admin_site
@@ -15,7 +18,7 @@ STATUS_PILLS = {
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    actions = ("delete_selected", "retry_answering")
+    actions = ("delete_selected", "retry_answering", "export_csv")
     list_display = ("question", "status_badge", "feedback_badge", "created_at", "answered_at")
     list_filter = ("status", "feedback", "created_at")
     search_fields = ("question", "answer")
@@ -58,6 +61,30 @@ class QuestionAdmin(admin.ModelAdmin):
 
     retry_answering.short_description = "پاسخ‌دهی مجدد پرسش‌های انتخاب‌شده"
     retry_answering.allowed_permissions = ("change",)
+
+    def export_csv(self, request, queryset):
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="questions.csv"'
+        response.write("\ufeff")
+        writer = csv.writer(response)
+        writer.writerow(
+            ["id", "question", "answer", "status", "feedback", "created_at"]
+        )
+        for question in queryset:
+            writer.writerow(
+                [
+                    question.pk,
+                    question.question,
+                    question.answer,
+                    question.get_status_display(),
+                    question.get_feedback_display(),
+                    question.created_at,
+                ]
+            )
+        return response
+
+    export_csv.short_description = "خروجی CSV از پرسش‌های انتخاب‌شده"
+    export_csv.allowed_permissions = ("view",)
 
 
 roshan_admin_site.register(Question, QuestionAdmin)
