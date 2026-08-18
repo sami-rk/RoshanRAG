@@ -73,6 +73,10 @@ except ImportError:
 else:
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
+# LocaleMiddleware reads the session language and translates template strings;
+# it must sit after SessionMiddleware and before CommonMiddleware.
+MIDDLEWARE.insert(3, "django.middleware.locale.LocaleMiddleware")
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -114,11 +118,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "fa-ir"
+LANGUAGE_CODE = "fa"
 LANGUAGES = [
     ("fa", "فارسی"),
     ("en", "English"),
 ]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "Asia/Tehran"
 USE_I18N = True
 USE_TZ = True

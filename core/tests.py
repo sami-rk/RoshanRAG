@@ -125,6 +125,27 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, "تماس با ما")
 
 
+class LanguageToggleTests(TestCase):
+    def test_switching_to_english_sticks_in_session(self):
+        response = self.client.get("/set-language/?lang=en&next=/pricing/")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/pricing/")
+        response = self.client.get("/pricing/")
+        self.assertContains(response, "pricing")
+
+    def test_invalid_language_falls_back_to_default(self):
+        response = self.client.get("/set-language/?lang=xx&next=/")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/")
+
+    def test_offsite_next_is_dropped(self):
+        response = self.client.get(
+            "/set-language/?lang=en&next=https://evil.example/phish"
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/")
+
+
 class ErrorPageTests(TestCase):
     def test_server_error_renders_styled_page(self):
         from django.test import RequestFactory

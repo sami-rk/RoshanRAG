@@ -13,6 +13,7 @@ from core.views import (
     PricingView,
     health_check,
     protected_media,
+    set_language,
 )
 
 handler404 = "core.views.page_not_found"
@@ -25,6 +26,7 @@ urlpatterns = [
     path("pricing/", PricingView.as_view(), name="pricing"),
     path("contact/", ContactView.as_view(), name="contact"),
     path("chat/", ChatView.as_view(), name="chat"),
+    path("set-language/", set_language, name="set-language"),
     path("admin/", roshan_admin_site.urls),
     path("api/token/", obtain_auth_token, name="api-token"),
     path("api/health/", health_check, name="health"),

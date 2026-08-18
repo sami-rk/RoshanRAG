@@ -2,11 +2,41 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db import connection
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import TemplateView
 from django.views.static import serve
 
 from core.stats import get_dashboard_stats
+
+
+def set_language(request):
+    """Switch the UI language via the Django language cookie.
+
+    Mirrors ``django.views.i18n.set_language`` but accepts a plain GET link so
+    the navbar toggle needs no form. Only ``lang`` values from ``LANGUAGES``
+    are accepted; ``next`` must stay on this host.
+    """
+    lang = (request.GET.get("lang") or request.POST.get("lang") or "").strip()
+    if lang not in dict(settings.LANGUAGES):
+        lang = settings.LANGUAGE_CODE
+    next_url = request.GET.get("next") or request.POST.get("next") or "/"
+    if not url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}
+    ):
+        next_url = "/"
+    response = redirect(next_url)
+    response.set_cookie(
+        settings.LANGUAGE_COOKIE_NAME,
+        lang,
+        max_age=settings.LANGUAGE_COOKIE_AGE,
+        path=settings.LANGUAGE_COOKIE_PATH,
+        domain=settings.LANGUAGE_COOKIE_DOMAIN,
+        secure=settings.LANGUAGE_COOKIE_SECURE,
+        httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+        samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+    )
+    return response
 
 
 def protected_media(request, path):
