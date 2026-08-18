@@ -101,6 +101,11 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": env("SQLITE_PATH", str(BASE_DIR / "db.sqlite3")),
+        # Background indexing/answering threads write to SQLite while other
+        # requests may be mid-transaction. A generous busy timeout lets those
+        # writers wait for the lock instead of failing with
+        # "database table is locked".
+        "OPTIONS": {"timeout": int(env("SQLITE_BUSY_TIMEOUT", "20"))},
     }
 }
 
