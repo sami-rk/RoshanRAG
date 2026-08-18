@@ -1,0 +1,74 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Roshan RAG
+# This file is distributed under the same license as the RoshanRAG package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: RoshanRAG 1.0\n"
+"Report-Msgid-Bugs-To: info@roshan-rag.example\n"
+"POT-Creation-Date: 2026-08-18 00:00+0000\n"
+"PO-Revision-Date: 2026-08-18 00:00+0000\n"
+"Last-Translator: Roshan RAG Team\n"
+"Language-Team: English <info@roshan-rag.example>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "روشن RAG — سامانه پرسش از اسناد"
+msgstr "Roshan RAG — Ask Your Documents"
+
+msgid "روشن RAG؛ سامانه هوشمند پرسش و پاسخ از اسناد سازمانی با موتور RAG، پشتیبانی از زبان فارسی و پاسخ همراه با ذکر منبع."
+msgstr "Roshan RAG; an intelligent Q&A system over organizational documents with a RAG engine, Persian language support and cited answers."
+
+msgid "ناوبری اصلی"
+msgstr "Main navigation"
+
+msgid "ویژگی‌ها"
+msgstr "Features"
+
+msgid "نحوه کار"
+msgstr "How it works"
+
+msgid "پرسش از اسناد"
+msgstr "Ask your documents"
+
+msgid "تعرفه‌ها"
+msgstr "Pricing"
+
+msgid "درباره"
+msgstr "About"
+
+msgid "تماس"
+msgstr "Contact"
+
+msgid "تغییر حالت روشن و تاریک"
+msgstr "Toggle light and dark mode"
+
+msgid "ورود به پنل مدیریت"
+msgstr "Admin login"
+
+msgid "سامانه هوشمند پرسش از اسناد سازمانی؛ پاسخ دقیق همراه با ذکر منبع، مبتنی بر موتور RAG و مدل‌های زبانی پیشرفته."
+msgstr "An intelligent Q&A system over organizational documents; precise answers with cited sources, powered by a RAG engine and advanced language models."
+
+msgid "محصول"
+msgstr "Product"
+
+msgid "دسترسی"
+msgstr "Access"
+
+msgid "پنل مدیریت"
+msgstr "Admin panel"
+
+msgid "مستندات API"
+msgstr "API docs"
+
+msgid "سوالات متداول"
+msgstr "FAQ"
+
+msgid "صفحه تماس"
+msgstr "Contact page"
+
+msgid "ساخته‌شده با Django و مدل BAAI/bge-m3"
+msgstr "Built with Django and the BAAI/bge-m3 model"

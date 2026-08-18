@@ -1,11 +1,12 @@
-{% load static %}
+{% load i18n static %}
+{% get_current_language as CURRENT_LANGUAGE %}
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="{{ CURRENT_LANGUAGE }}" dir="{% if CURRENT_LANGUAGE == 'fa' %}rtl{% else %}ltr{% endif %}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}روشن RAG — سامانه پرسش از اسناد{% endblock %}</title>
-  <meta name="description" content="روشن RAG؛ سامانه هوشمند پرسش و پاسخ از اسناد سازمانی با موتور RAG، پشتیبانی از زبان فارسی و پاسخ همراه با ذکر منبع.">
+  <title>{% block title %}{% trans "روشن RAG — سامانه پرسش از اسناد" %}{% endblock %}</title>
+  <meta name="description" content="{% trans "روشن RAG؛ سامانه هوشمند پرسش و پاسخ از اسناد سازمانی با موتور RAG، پشتیبانی از زبان فارسی و پاسخ همراه با ذکر منبع." %}">
   <link rel="icon" type="image/svg+xml" href="{% static 'admin/img/roshan-favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'landing/css/landing.css' %}">
   <script>
@@ -28,16 +29,21 @@
         </svg>
         <span class="brand-name">روشن <strong>RAG</strong></span>
       </a>
-      <nav class="nav-links" aria-label="ناوبری اصلی">
-        <a href="{% url 'home' %}#features">ویژگی‌ها</a>
-        <a href="{% url 'home' %}#how">نحوه کار</a>
-        <a href="{% url 'chat' %}">پرسش از اسناد</a>
-        <a href="{% url 'pricing' %}">تعرفه‌ها</a>
-        <a href="{% url 'about' %}">درباره</a>
-        <a href="{% url 'contact' %}">تماس</a>
+      <nav class="nav-links" aria-label="{% trans 'ناوبری اصلی' %}">
+        <a href="{% url 'home' %}#features">{% trans "ویژگی‌ها" %}</a>
+        <a href="{% url 'home' %}#how">{% trans "نحوه کار" %}</a>
+        <a href="{% url 'chat' %}">{% trans "پرسش از اسناد" %}</a>
+        <a href="{% url 'pricing' %}">{% trans "تعرفه‌ها" %}</a>
+        <a href="{% url 'about' %}">{% trans "درباره" %}</a>
+        <a href="{% url 'contact' %}">{% trans "تماس" %}</a>
       </nav>
       <div class="nav-actions">
-        <button type="button" class="theme-toggle" aria-label="تغییر حالت روشن و تاریک">
+        {% if CURRENT_LANGUAGE == "fa" %}
+          <a class="lang-toggle" href="{% url 'set-language' %}?lang=en&next={{ request.path }}" title="English" aria-label="English">EN</a>
+        {% else %}
+          <a class="lang-toggle" href="{% url 'set-language' %}?lang=fa&next={{ request.path }}" title="فارسی" aria-label="فارسی">فا</a>
+        {% endif %}
+        <button type="button" class="theme-toggle" aria-label="{% trans 'تغییر حالت روشن و تاریک' %}">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
@@ -49,7 +55,7 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
           </svg>
         </button>
-        <a class="btn btn-primary" href="{% url 'admin:index' %}">ورود به پنل مدیریت</a>
+        <a class="btn btn-primary" href="{% url 'admin:index' %}">{% trans "ورود به پنل مدیریت" %}</a>
         <button type="button" class="nav-toggle" aria-label="باز و بسته کردن منو" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <line class="l1" x1="3" y1="6" x2="21" y2="6"/><line class="l2" x1="3" y1="12" x2="21" y2="12"/><line class="l3" x1="3" y1="18" x2="21" y2="18"/>
@@ -72,37 +78,37 @@
             </svg>
             <span class="brand-name">روشن <strong>RAG</strong></span>
           </a>
-          <p class="brand-desc">سامانه هوشمند پرسش از اسناد سازمانی؛ پاسخ دقیق همراه با ذکر منبع، مبتنی بر موتور RAG و مدل‌های زبانی پیشرفته.</p>
+          <p class="brand-desc">{% trans "سامانه هوشمند پرسش از اسناد سازمانی؛ پاسخ دقیق همراه با ذکر منبع، مبتنی بر موتور RAG و مدل‌های زبانی پیشرفته." %}</p>
         </div>
         <div>
-          <h4>محصول</h4>
+          <h4>{% trans "محصول" %}</h4>
           <ul>
-            <li><a href="{% url 'home' %}#features">ویژگی‌ها</a></li>
-            <li><a href="{% url 'home' %}#how">نحوه کار</a></li>
-            <li><a href="{% url 'pricing' %}">تعرفه‌ها</a></li>
-            <li><a href="{% url 'about' %}">درباره</a></li>
+            <li><a href="{% url 'home' %}#features">{% trans "ویژگی‌ها" %}</a></li>
+            <li><a href="{% url 'home' %}#how">{% trans "نحوه کار" %}</a></li>
+            <li><a href="{% url 'pricing' %}">{% trans "تعرفه‌ها" %}</a></li>
+            <li><a href="{% url 'about' %}">{% trans "درباره" %}</a></li>
           </ul>
         </div>
         <div>
-          <h4>دسترسی</h4>
+          <h4>{% trans "دسترسی" %}</h4>
           <ul>
-            <li><a href="{% url 'admin:index' %}">پنل مدیریت</a></li>
-            <li><a href="{% url 'chat' %}">پرسش از اسناد</a></li>
-            <li><a href="{% url 'schema-docs' %}">مستندات API</a></li>
-            <li><a href="{% url 'home' %}#faq">سوالات متداول</a></li>
+            <li><a href="{% url 'admin:index' %}">{% trans "پنل مدیریت" %}</a></li>
+            <li><a href="{% url 'chat' %}">{% trans "پرسش از اسناد" %}</a></li>
+            <li><a href="{% url 'schema-docs' %}">{% trans "مستندات API" %}</a></li>
+            <li><a href="{% url 'home' %}#faq">{% trans "سوالات متداول" %}</a></li>
           </ul>
         </div>
         <div>
-          <h4>تماس</h4>
+          <h4>{% trans "تماس" %}</h4>
           <ul>
-            <li><a href="{% url 'contact' %}">صفحه تماس</a></li>
+            <li><a href="{% url 'contact' %}">{% trans "صفحه تماس" %}</a></li>
             <li><a href="mailto:info@roshan-rag.example">info@roshan-rag.example</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
         <span>© ۱۴۰۳ روشن RAG</span>
-        <span>ساخته‌شده با Django و مدل BAAI/bge-m3</span>
+        <span>{% trans "ساخته‌شده با Django و مدل BAAI/bge-m3" %}</span>
       </div>
     </div>
   </footer>
