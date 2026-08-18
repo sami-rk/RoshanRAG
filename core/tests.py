@@ -12,9 +12,26 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APITestCase
 
 from documents.models import Document
 from qa.models import Question
+
+
+class OpenApiSchemaTests(APITestCase):
+    def test_schema_endpoint_serves_openapi(self):
+        response = self.client.get("/api/schema/", HTTP_ACCEPT="application/json")
+        self.assertEqual(response.status_code, 200)
+        schema = response.json()
+        self.assertEqual(schema["info"]["title"], "RoshanRAG API")
+        self.assertEqual(schema["openapi"].split(".")[0], "3")
+
+    def test_thread_question_count_is_an_integer(self):
+        response = self.client.get("/api/schema/", HTTP_ACCEPT="application/json")
+        prop = response.json()["components"]["schemas"]["Thread"]["properties"][
+            "question_count"
+        ]
+        self.assertEqual(prop["type"], "integer")
 
 
 class SqlitePragmaTests(TestCase):
