@@ -1,9 +1,12 @@
+import importlib.util
+import re
 import tempfile
 from datetime import timedelta
 from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase, override_settings
@@ -159,6 +162,105 @@ class DefaultLanguageTests(TestCase):
         self.assertContains(response, 'dir="rtl"')
 
 
+class EnglishPagesTests(TestCase):
+    PAGES = {
+        "/": [
+            "get answers",
+            "Everything you need to ask your documents",
+            'lang="en"',
+            'dir="ltr"',
+        ],
+        "/about/": ["About Roshan RAG"],
+        "/pricing/": ["Pricing", "Get started"],
+        "/contact/": ["Contact channels"],
+        "/chat/": ["Ask your documents"],
+    }
+
+    def test_english_pages_render_key_strings(self):
+        for path, probes in self.PAGES.items():
+            with self.subTest(path=path):
+                self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = "en"
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200)
+                body = response.content.decode()
+                for probe in probes:
+                    self.assertIn(probe, body)
+
+    def test_authenticated_chat_page_is_english(self):
+        user = get_user_model().objects.create_user("en-chat", "en@example.com", "pw")
+        self.client.force_login(user)
+        self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = "en"
+        response = self.client.get("/chat/")
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn("Conversations", body)
+        self.assertIn("New conversation", body)
+
+
+class TranslationCatalogTests(TestCase):
+    PO_PATH = settings.BASE_DIR / "locale" / "en" / "LC_MESSAGES" / "django.po"
+    MO_PATH = settings.BASE_DIR / "locale" / "en" / "LC_MESSAGES" / "django.mo"
+    TEMPLATES_DIR = settings.BASE_DIR / "templates"
+
+    PERSIAN = re.compile(r"[\u0600-\u06FF]")
+    TRANS_TAG = re.compile(r"{%\s*trans\s+(['\"])(?P<text>.*?)\1\s*%}")
+
+    def _catalog(self):
+        spec = importlib.util.spec_from_file_location(
+            "msgfmt_vendored", settings.BASE_DIR / "scripts" / "msgfmt.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        out = tempfile.mkstemp(suffix=".mo")[1]
+        module.make(str(self.PO_PATH), out)
+        compiled = Path(out).read_bytes()
+        catalog = {
+            msgid.decode("utf-8"): msgstr.decode("utf-8")
+            for msgid, msgstr in module.MESSAGES.items()
+        }
+        return compiled, catalog
+
+    def _persian_trans_literals(self):
+        found = set()
+        for path in self.TEMPLATES_DIR.rglob("*.html"):
+            text = path.read_text(encoding="utf-8")
+            for match in self.TRANS_TAG.finditer(text):
+                literal = match.group("text")
+                if self.PERSIAN.search(literal):
+                    found.add(literal)
+        return found
+
+    def test_every_persian_trans_string_has_a_translation(self):
+        compiled, catalog = self._catalog()
+        missing = sorted(
+            literal
+            for literal in self._persian_trans_literals()
+            if not catalog.get(literal)
+        )
+        self.assertEqual(missing, [])
+
+    def test_no_untranslated_entries_in_the_catalog(self):
+        compiled, catalog = self._catalog()
+        untranslated = sorted(
+            msgid for msgid, msgstr in catalog.items() if not msgstr
+        )
+        self.assertEqual(untranslated, [])
+
+    def test_committed_mo_matches_the_compiled_catalog(self):
+        compiled, catalog = self._catalog()
+        self.assertTrue(self.MO_PATH.exists(), "django.mo must be committed")
+        self.assertEqual(self.MO_PATH.read_bytes(), compiled)
+
+    def test_blocktrans_string_has_a_translation(self):
+        compiled, catalog = self._catalog()
+        msgid = (
+            "موتور embedding مدل <strong>bge-m3</strong> فارسی و انگلیسی را در یک "
+            "فضای برداری واحد جست‌وجو می‌کند؛ دیگر نگران کلمه‌به‌کلمه جست‌وجو نیستید — "
+            "مفهوم سؤال را می‌فهمد و مرتبط‌ترین بخش‌های اسناد را برمی‌گرداند."
+        )
+        self.assertTrue(catalog.get(msgid))
+
+
 class ErrorPageTests(TestCase):
     def test_server_error_renders_styled_page(self):
         from django.test import RequestFactory
@@ -170,11 +272,38 @@ class ErrorPageTests(TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertContains(response, "خطایی در سرور رخ داد", status_code=500)
 
+    def test_server_error_renders_english_when_requested(self):
+        from django.test import RequestFactory
+        from django.utils import translation
+
+        from core.views import server_error
+
+        request = RequestFactory().get("/")
+        with translation.override("en"):
+            response = server_error(request)
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(
+            response, "Something went wrong on the server", status_code=500
+        )
+
     @override_settings(DEBUG=False)
     def test_not_found_renders_styled_page(self):
         response = self.client.get("/no-such-page/")
         self.assertEqual(response.status_code, 404)
         self.assertContains(response, "صفحه موردنظر یافت نشد", status_code=404)
+
+    @override_settings(DEBUG=False)
+    def test_not_found_renders_english_when_requested(self):
+        response = self.client.get(
+            "/no-such-page/",
+            HTTP_COOKIE=f"{settings.LANGUAGE_COOKIE_NAME}=en",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(
+            response,
+            "The page you were looking for was not found",
+            status_code=404,
+        )
 
     def test_favicon_redirects_to_the_svg(self):
         response = self.client.get("/favicon.ico")

@@ -283,6 +283,9 @@ msgstr "Make your documents smart right now"
 msgid "سندها را بارگذاری کنید، سؤال بپرسید و پاسخ را با منبع دریافت کنید. یک دقیقه تا راه‌اندازی."
 msgstr "Upload documents, ask questions and get answers with sources. You are one minute from setup."
 
+msgid "روشن RAG — سامانه پرسش از اسناد"
+msgstr "Roshan RAG — Q&A over your documents"
+
 msgid "صفحه یافت نشد | روشن RAG"
 msgstr "Page not found | Roshan RAG"
 
