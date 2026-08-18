@@ -20,8 +20,12 @@ RUN sed -i '/^torch==/d' requirements.txt \
 
 COPY . .
 
+# The image runs with DEBUG=false, which uses CompressedManifestStaticFilesStorage
+# and requires staticfiles.json. Collect under DEBUG=false so the manifest is
+# baked in. SECRET_KEY here is a build-time dummy, overridden at runtime.
 RUN pip install --no-cache-dir "whitenoise==6.9.0" \
-    && python manage.py collectstatic --noinput
+    && DEBUG=false SECRET_KEY=build-only-static-secret-7f3c9a2b1d4e8f0a \
+    python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
