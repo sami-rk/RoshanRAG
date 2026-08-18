@@ -214,6 +214,34 @@ class IndexingServiceTests(TestCase):
         self.assertFalse(Document.objects.filter(pk=doc.pk).exists())
 
 
+class DocumentAdminFormTests(TestCase):
+    def test_admin_form_rejects_unsupported_extension(self):
+        from documents.forms import DocumentAdminForm
+
+        file = SimpleUploadedFile("readme.pdf", b"%PDF-1.4", content_type="application/pdf")
+        form = DocumentAdminForm(data={"title": "سند"}, files={"file": file})
+        self.assertFalse(form.is_valid())
+        self.assertIn("file", form.errors)
+
+    def test_admin_form_rejects_oversized_file(self):
+        from documents.forms import DocumentAdminForm
+
+        with override_settings(MAX_UPLOAD_SIZE_MB=0):
+            file = SimpleUploadedFile("big.txt", b"x" * 100, content_type="text/plain")
+            form = DocumentAdminForm(data={"title": "سند"}, files={"file": file})
+            self.assertFalse(form.is_valid())
+            self.assertIn("file", form.errors)
+
+    def test_admin_form_accepts_supported_extension(self):
+        from documents.forms import DocumentAdminForm
+
+        file = SimpleUploadedFile("note.txt", b"hello", content_type="text/plain")
+        form = DocumentAdminForm(
+            data={"title": "سند", "status": Document.Status.PENDING}, files={"file": file}
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+
+
 class DocumentSignalsTests(TestCase):
     def test_replacing_file_deletes_old_file_and_reindexes(self):
         doc = _make_document("first.txt", "نسخه اول".encode("utf-8"))

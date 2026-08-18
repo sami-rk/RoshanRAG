@@ -3,6 +3,7 @@ from django.contrib.admin import actions as admin_actions
 from django.utils.html import format_html
 
 from core.admin_site import roshan_admin_site
+from .forms import DocumentAdminForm
 from .models import Document
 from .services.indexing import schedule_index
 
@@ -14,6 +15,7 @@ STATUS_PILLS = {
 
 
 class DocumentAdmin(admin.ModelAdmin):
+    form = DocumentAdminForm
     actions = ("delete_selected", "retry_indexing")
     list_display = ("title", "status_badge", "created_at", "updated_at")
     list_filter = ("status", "created_at")
