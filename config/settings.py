@@ -133,8 +133,16 @@ STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
+    # The manifest storage hashes filenames for cache-busting, but it needs a
+    # `collectstatic`-generated manifest to resolve {% static %} tags. Use it
+    # only in production; development and tests fall back to the plain storage
+    # so a fresh checkout works without running collectstatic first.
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
     },
 }
 
