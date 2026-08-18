@@ -16,3 +16,4 @@ torch==2.6.0
 python-docx==1.2.0
 python-dotenv==1.2.2
 gunicorn==26.0.0
+whitenoise==6.9.0
