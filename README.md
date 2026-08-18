@@ -1,5 +1,7 @@
 # RoshanRAG
 
+[![CI](https://github.com/sami-rk/RoshanRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/sami-rk/RoshanRAG/actions/workflows/ci.yml)
+
 **A RAG-based Document Q&A system.** Upload your text documents (DOCX/TXT), ask questions in natural language, and get accurate answers grounded in your documents, with cited sources. Built with Django, LangChain, and ChromaDB, powered by free OpenRouter LLMs with automatic fallback — fully containerized with Docker.
 
 ## Features
