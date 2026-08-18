@@ -23,6 +23,11 @@ jobs:
         run: |
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
           pip install -r requirements.txt
+      - name: Collect static files
+        # Populate STATIC_ROOT so the staticfiles handler has a directory to
+        # serve from during the tests and stops emitting the "No directory at:
+        # .../staticfiles/" warning.
+        run: python manage.py collectstatic --noinput
       - name: Run core tests
         run: |
           set -eo pipefail
@@ -47,6 +52,8 @@ jobs:
         run: |
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
           pip install -r requirements.txt
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
       - name: Run documents tests
         run: |
           set -eo pipefail
@@ -71,6 +78,8 @@ jobs:
         run: |
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
           pip install -r requirements.txt
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
       - name: Run qa tests
         run: |
           set -eo pipefail
