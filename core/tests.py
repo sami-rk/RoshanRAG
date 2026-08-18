@@ -120,6 +120,12 @@ class ErrorPageTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertContains(response, "صفحه موردنظر یافت نشد", status_code=404)
 
+    def test_favicon_redirects_to_the_svg(self):
+        response = self.client.get("/favicon.ico")
+        self.assertEqual(response.status_code, 301)
+        self.assertIn("/static/admin/img/roshan-favicon", response["Location"])
+        self.assertTrue(response["Location"].endswith(".svg"))
+
 
 class MediaAccessTests(TestCase):
     def setUp(self):
