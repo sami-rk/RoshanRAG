@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -295,3 +296,40 @@ class DocumentSignalsTests(TestCase):
             with patch("core.chroma_client.delete_document_chunks"):
                 doc.delete()
             self.assertFalse(Path(stored_path).exists())
+
+
+class LoadSampleDataCommandTests(TestCase):
+    SAMPLE_TITLES = {
+        "دستورالعمل-استخدام",
+        "سوالات-متداول",
+        "سیاست-حریم-خصوصی",
+        "گزارش-فروش-سه-ماهه-اول-1403",
+    }
+
+    def test_loads_all_sample_documents(self):
+        with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            with patch("documents.management.commands.load_sample_data.index_document") as index:
+                call_command("load_sample_data")
+            titles = set(Document.objects.values_list("title", flat=True))
+            self.assertEqual(titles, self.SAMPLE_TITLES)
+            self.assertEqual(index.call_count, 4)
+
+    def test_second_run_skips_existing(self):
+        with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            with patch("documents.management.commands.load_sample_data.index_document") as index:
+                call_command("load_sample_data")
+                call_command("load_sample_data")
+            self.assertEqual(Document.objects.count(), 4)
+            self.assertEqual(index.call_count, 4)
+
+    def test_post_save_signal_is_reconnected(self):
+        with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
+            call_command("load_sample_data")
+            with patch("documents.signals.schedule_index") as schedule:
+                with tempfile.TemporaryDirectory() as tmp:
+                    path = Path(tmp) / "extra.txt"
+                    path.write_bytes("متن".encode("utf-8"))
+                    Document.objects.create(
+                        title="extra", file=File(path.open("rb"), name="extra.txt")
+                    )
+                schedule.assert_called_once()
