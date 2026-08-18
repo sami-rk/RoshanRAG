@@ -83,6 +83,8 @@ jobs:
         run: python manage.py check --deploy
       - name: Check migrations are in sync
         run: python manage.py makemigrations --check --dry-run
+      - name: Validate the OpenAPI schema
+        run: python manage.py spectacular --validate
 
   js-check:
     name: JavaScript syntax and i18n check
