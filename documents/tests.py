@@ -512,3 +512,33 @@ class DocumentUploadAdminTests(TestCase):
         response = self.client.get("/admin/documents/document/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "/admin/documents/document/upload/")
+
+
+class ScheduleIndexTests(TestCase):
+    def test_marks_document_failed_when_worker_dies(self):
+        from documents.services.indexing import schedule_index
+
+        with patch("documents.signals.schedule_index"):
+            document = Document.objects.create(
+                title="سند", file="documents/x.txt"
+            )
+        with patch("documents.services.indexing.run_in_background") as run:
+            schedule_index(document.pk)
+        on_error = run.call_args.kwargs["on_error"]
+        on_error(RuntimeError("kaboom"))
+        document.refresh_from_db()
+        self.assertEqual(document.status, Document.Status.FAILED)
+        self.assertEqual(document.error_message, "kaboom")
+
+    def test_ignores_deleted_document(self):
+        from documents.services.indexing import schedule_index
+
+        with patch("documents.signals.schedule_index"):
+            document = Document.objects.create(
+                title="سند", file="documents/x.txt"
+            )
+        with patch("documents.services.indexing.run_in_background") as run:
+            schedule_index(document.pk)
+        document.delete()
+        run.call_args.kwargs["on_error"](RuntimeError("kaboom"))
+        self.assertFalse(Document.objects.filter(pk=document.pk).exists())

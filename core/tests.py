@@ -9,6 +9,7 @@ from unittest.mock import patch
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
+from django.db import OperationalError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -434,3 +435,66 @@ class AnalyticsTests(TestCase):
     def test_analytics_page_requires_staff(self):
         response = self.client.get("/admin/analytics/")
         self.assertEqual(response.status_code, 302)
+
+
+class RunInBackgroundTests(TestCase):
+    def test_retries_database_lock_then_succeeds(self):
+        from core.workers import run_in_background
+
+        calls = []
+
+        def flaky():
+            calls.append(1)
+            if len(calls) < 3:
+                raise OperationalError("database table is locked")
+
+        thread = run_in_background(flaky, retries=5, backoff_seconds=0.01)
+        thread.join(timeout=10)
+        self.assertEqual(len(calls), 3)
+
+    def test_retries_and_then_calls_on_error_when_lock_persists(self):
+        from core.workers import run_in_background
+
+        errors = []
+
+        def always_locked():
+            raise OperationalError("database table is locked")
+
+        with self.assertLogs("core.workers", level="ERROR") as captured:
+            thread = run_in_background(
+                always_locked,
+                retries=1,
+                backoff_seconds=0.01,
+                on_error=lambda exc: errors.append(exc),
+            )
+            thread.join(timeout=10)
+        self.assertEqual(len(errors), 1)
+        self.assertIsInstance(errors[0], OperationalError)
+        self.assertTrue(
+            any("Background task failed: always_locked" in line for line in captured.output)
+        )
+
+    def test_non_lock_error_is_not_retried_but_calls_on_error(self):
+        from core.workers import run_in_background
+
+        errors = []
+        calls = []
+
+        def plain_failure():
+            calls.append(1)
+            raise RuntimeError("boom")
+
+        with self.assertLogs("core.workers", level="ERROR") as captured:
+            thread = run_in_background(
+                plain_failure,
+                retries=3,
+                backoff_seconds=0.01,
+                on_error=lambda exc: errors.append(exc),
+            )
+            thread.join(timeout=10)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(str(errors[0]), "boom")
+        self.assertTrue(
+            any("Background task failed: plain_failure" in line for line in captured.output)
+        )

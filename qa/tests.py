@@ -971,3 +971,27 @@ class NoCorpusAnswerTests(TestCase):
         llm.assert_not_called()
         question.refresh_from_db()
         self.assertEqual(question.status, Question.Status.DONE)
+
+
+class ScheduleAnsweringTests(TestCase):
+    def test_marks_question_failed_when_worker_dies(self):
+        from qa.services.answering import schedule_answering
+
+        question = Question.objects.create(question="پرسش")
+        with patch("qa.services.answering.run_in_background") as run:
+            schedule_answering(question.pk)
+        on_error = run.call_args.kwargs["on_error"]
+        on_error(RuntimeError("boom"))
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.FAILED)
+        self.assertEqual(question.error_message, "boom")
+
+    def test_ignores_deleted_question(self):
+        from qa.services.answering import schedule_answering
+
+        question = Question.objects.create(question="پرسش")
+        with patch("qa.services.answering.run_in_background") as run:
+            schedule_answering(question.pk)
+        question.delete()
+        run.call_args.kwargs["on_error"](RuntimeError("boom"))
+        self.assertFalse(Question.objects.filter(pk=question.pk).exists())
