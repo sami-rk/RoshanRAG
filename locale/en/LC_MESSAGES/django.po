@@ -283,6 +283,27 @@ msgstr "Make your documents smart right now"
 msgid "سندها را بارگذاری کنید، سؤال بپرسید و پاسخ را با منبع دریافت کنید. یک دقیقه تا راه‌اندازی."
 msgstr "Upload documents, ask questions and get answers with sources. You are one minute from setup."
 
+msgid "صفحه یافت نشد | روشن RAG"
+msgstr "Page not found | Roshan RAG"
+
+msgid "صفحه موردنظر یافت نشد"
+msgstr "The page you were looking for was not found"
+
+msgid "به نظر می‌رسد آدرس واردشده وجود ندارد یا حذف شده است. به صفحه اصلی بازگردید و مسیر را ادامه دهید."
+msgstr "It looks like the address you entered does not exist or has been removed. Return to the home page and continue from there."
+
+msgid "بازگشت به صفحه اصلی"
+msgstr "Back to home"
+
+msgid "خطای سرور | روشن RAG"
+msgstr "Server error | Roshan RAG"
+
+msgid "خطایی در سرور رخ داد"
+msgstr "Something went wrong on the server"
+
+msgid "مشکلی در پردازش درخواست شما پیش آمده است. لطفاً لحظاتی بعد دوباره تلاش کنید یا به صفحه اصلی بازگردید."
+msgstr "There was a problem processing your request. Please try again in a moment or return to the home page."
+
 msgid "درباره | روشن RAG"
 msgstr "About | Roshan RAG"
 
