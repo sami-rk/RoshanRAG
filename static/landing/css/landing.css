@@ -1649,6 +1649,50 @@ html.js-anim [data-reveal].in-view {
     font-weight: 600;
 }
 
+.chat-feedback {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.chat-feedback-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-inline-end: 4px;
+}
+
+.chat-feedback button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.chat-feedback button svg {
+    width: 15px;
+    height: 15px;
+}
+
+.chat-feedback button:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.chat-feedback button.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
 .chat-source p {
     margin: 4px 0 0;
     color: var(--muted);

@@ -16,13 +16,14 @@ STATUS_PILLS = {
 
 class QuestionAdmin(admin.ModelAdmin):
     actions = ("delete_selected", "retry_answering")
-    list_display = ("question", "status_badge", "created_at", "answered_at")
-    list_filter = ("status", "created_at")
+    list_display = ("question", "status_badge", "feedback_badge", "created_at", "answered_at")
+    list_filter = ("status", "feedback", "created_at")
     search_fields = ("question", "answer")
     readonly_fields = ("status", "error_message", "sources", "created_at", "answered_at")
     fieldsets = (
         ("پرسش", {"fields": ("question",)}),
         ("پاسخ", {"fields": ("answer", "sources")}),
+        ("بازخورد", {"fields": ("feedback",)}),
         ("وضعیت", {"fields": ("status", "error_message")}),
         ("زمان", {"fields": ("created_at", "answered_at")}),
     )
@@ -31,6 +32,16 @@ class QuestionAdmin(admin.ModelAdmin):
     def status_badge(self, obj):
         pill_class = STATUS_PILLS.get(obj.status, "pill-pending")
         return format_html('<span class="pill {}">{}</span>', pill_class, obj.get_status_display())
+
+    @admin.display(description="بازخورد", ordering="feedback")
+    def feedback_badge(self, obj):
+        if obj.feedback == Question.Feedback.UP:
+            pill_class = "pill-ready"
+        elif obj.feedback == Question.Feedback.DOWN:
+            pill_class = "pill-failed"
+        else:
+            return "—"
+        return format_html('<span class="pill {}">{}</span>', pill_class, obj.get_feedback_display())
 
     def delete_selected(self, request, queryset):
         return admin_actions.delete_selected(self, request, queryset)
