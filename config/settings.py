@@ -173,6 +173,10 @@ REST_FRAMEWORK = {
         # The anonymous demo widget consumes LLM credits per request, so it
         # gets a stricter dedicated limit than the shared anonymous scope.
         "demo": env("THROTTLE_DEMO_RATE", "10/minute"),
+        # demo_retrieve is polled by the demo widget every couple of seconds
+        # while an answer streams, so it gets its own generous limit instead of
+        # competing with demo_ask on the same scope.
+        "demo_poll": env("THROTTLE_DEMO_POLL_RATE", "240/minute"),
     },
 }
 

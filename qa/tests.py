@@ -203,6 +203,38 @@ class QuestionAPITests(APITestCase):
             )
             self.assertEqual(second.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
+    def test_demo_retrieve_has_its_own_poll_throttle(self):
+        from django.core.cache import cache
+        from rest_framework.throttling import SimpleRateThrottle
+
+        cache.clear()
+        self.addCleanup(cache.clear)
+        rates = {
+            "user": "300/minute",
+            "anon": "30/minute",
+            "demo": "1/minute",
+            "demo_poll": "1/second",
+        }
+        with (
+            patch("qa.views.schedule_answering"),
+            patch.object(SimpleRateThrottle, "THROTTLE_RATES", rates),
+        ):
+            question = Question.objects.create(
+                question="پرسش", demo_token=uuid4()
+            )
+            url = f"/api/questions/{question.pk}/demo/?token={question.demo_token}"
+            anonymous = self.client_class()
+            # demo_ask budget is already exhausted by other requests in this
+            # window, but the poll endpoint must not share that scope.
+            self.client.post("/api/questions/demo_ask/", {"question": "اول"}, format="json")
+            response = anonymous.get(url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data["question"], "پرسش")
+            # And it honors its own rate: a second poll within the same second
+            # is throttled.
+            second = anonymous.get(url)
+            self.assertEqual(second.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
     def test_create_question_without_thread_creates_one(self):
         with patch("qa.views.schedule_answering"):
             response = self.client.post(

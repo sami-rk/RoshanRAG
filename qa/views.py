@@ -8,7 +8,7 @@ from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import ScopedRateThrottle, SimpleRateThrottle
 
 from .models import Question, Thread
 from .serializers import QuestionSerializer, ThreadSerializer
@@ -63,6 +63,18 @@ def _sse_events(pk, poll_interval=0.3, keepalive_interval=15):
             yield f"data: {json.dumps({'type': 'timeout'})}\n\n"
             return
         time.sleep(poll_interval)
+
+
+class DemoPollRateThrottle(SimpleRateThrottle):
+    scope = "demo_poll"
+
+    def get_cache_key(self, request, view):
+        if request.user and request.user.is_authenticated:
+            return None
+        return self.cache_format % {
+            "scope": self.scope,
+            "ident": self.get_ident(request),
+        }
 
 
 class QuestionViewSet(
@@ -154,7 +166,7 @@ class QuestionViewSet(
         data["demo_token"] = str(question.demo_token)
         return Response(data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["get"], permission_classes=[AllowAny], throttle_classes=[ScopedRateThrottle], url_path="demo")
+    @action(detail=True, methods=["get"], permission_classes=[AllowAny], throttle_classes=[DemoPollRateThrottle], url_path="demo")
     def demo_retrieve(self, request, pk=None):
         question = Question.objects.filter(pk=pk).first()
         token = request.query_params.get("token")
