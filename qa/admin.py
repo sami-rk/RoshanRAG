@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.utils.html import format_html
 
 from core.admin_site import roshan_admin_site
-from .models import Question
+from .models import Question, Thread
 from .services.answering import schedule_answering
 
 STATUS_PILLS = {
@@ -19,12 +19,12 @@ STATUS_PILLS = {
 
 class QuestionAdmin(admin.ModelAdmin):
     actions = ("delete_selected", "retry_answering", "export_csv")
-    list_display = ("question", "status_badge", "feedback_badge", "created_at", "answered_at")
-    list_filter = ("status", "feedback", "created_at")
+    list_display = ("question", "user", "status_badge", "feedback_badge", "created_at", "answered_at")
+    list_filter = ("status", "feedback", "user", "created_at")
     search_fields = ("question", "answer")
     readonly_fields = ("status", "error_message", "sources", "created_at", "answered_at")
     fieldsets = (
-        ("پرسش", {"fields": ("question",)}),
+        ("پرسش", {"fields": ("question", "user")}),
         ("پاسخ", {"fields": ("answer", "sources")}),
         ("بازخورد", {"fields": ("feedback",)}),
         ("وضعیت", {"fields": ("status", "error_message")}),
@@ -88,3 +88,21 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 roshan_admin_site.register(Question, QuestionAdmin)
+
+
+class ThreadAdmin(admin.ModelAdmin):
+    list_display = ("title", "user", "question_count", "updated_at")
+    list_filter = ("user",)
+    search_fields = ("title",)
+    readonly_fields = ("created_at", "updated_at")
+    fieldsets = (
+        ("گفتگو", {"fields": ("title", "user")}),
+        ("زمان", {"fields": ("created_at", "updated_at")}),
+    )
+
+    @admin.display(description="تعداد پرسش")
+    def question_count(self, obj):
+        return obj.questions.count()
+
+
+roshan_admin_site.register(Thread, ThreadAdmin)
