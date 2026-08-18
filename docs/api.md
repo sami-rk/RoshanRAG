@@ -29,6 +29,8 @@ Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 
 Requests without a valid token receive `403 Forbidden`. An unauthenticated client is limited by `THROTTLE_ANON_RATE`; authenticated clients by `THROTTLE_USER_RATE` (default `300/minute`).
 
+Questions and threads are scoped to their owner: every authenticated client only sees its own questions and threads (`/api/questions/` and `/api/threads/` return only the caller's records). The anonymous demo endpoints create records with no owner.
+
 ## Endpoints
 
 | Method | Path | Description |
@@ -211,6 +213,10 @@ curl "http://localhost:8000/api/questions/10/demo/?token=8030b871-..."
 ```
 
 Wrong or missing tokens return `404 Not Found`.
+
+## Language
+
+The site is Persian by default (RTL). A cookie-based language toggle is available at `GET /set-language/?lang=fa|en&next=<path>`: it sets the `django_language` cookie and redirects to `next` (off-site values are dropped). Browsers that send an English `Accept-Language` header still get Persian until the visitor toggles.
 
 ## Status reference
 
