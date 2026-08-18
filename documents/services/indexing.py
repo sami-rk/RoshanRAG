@@ -57,4 +57,13 @@ def index_document(document_id: int) -> None:
 
 
 def schedule_index(document_id: int) -> None:
-    run_in_background(index_document, document_id)
+    def mark_failed(exc: Exception) -> None:
+        # The indexing worker crashed before it could finish; record that so
+        # the document is not left stuck in pending forever.
+        if Document.objects.filter(pk=document_id).exists():
+            Document.objects.filter(pk=document_id).update(
+                status=Document.Status.FAILED,
+                error_message=str(exc),
+            )
+
+    run_in_background(index_document, document_id, on_error=mark_failed)

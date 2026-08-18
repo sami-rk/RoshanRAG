@@ -209,4 +209,13 @@ def answer_question(question_id: int) -> None:
 
 
 def schedule_answering(question_id: int) -> None:
-    run_in_background(answer_question, question_id)
+    def mark_failed(exc: Exception) -> None:
+        # The answering worker crashed before it could finish; record that so
+        # the question is not left stuck in pending/generating forever.
+        if Question.objects.filter(pk=question_id).exists():
+            Question.objects.filter(pk=question_id).update(
+                status=Question.Status.FAILED,
+                error_message=friendly_llm_error(exc),
+            )
+
+    run_in_background(answer_question, question_id, on_error=mark_failed)
