@@ -129,18 +129,27 @@ def answer_question(question_id: int) -> None:
             )
             retrieved = _dedupe_by_document(retrieved, settings.RETRIEVAL_MAX_DOCS)
 
-            context = "\n\n".join(document.page_content for document in retrieved)
-            messages = [
-                SystemMessage(content=_SYSTEM_PROMPT),
-                HumanMessage(content=f"پرسش:\n{question.question}\n\nاسناد:\n{context}"),
-            ]
-            response = get_llm().invoke(messages)
+            if not retrieved:
+                question.answer = (
+                    "در اسناد موجود محتوایی مرتبط با پرسش شما یافت نشد."
+                )
+                question.sources = []
+                question.status = Question.Status.DONE
+                question.answered_at = timezone.now()
+                question.error_message = ""
+            else:
+                context = "\n\n".join(document.page_content for document in retrieved)
+                messages = [
+                    SystemMessage(content=_SYSTEM_PROMPT),
+                    HumanMessage(content=f"پرسش:\n{question.question}\n\nاسناد:\n{context}"),
+                ]
+                response = get_llm().invoke(messages)
 
-            question.answer = _coerce_answer_content(response.content)
-            question.sources = _build_sources(retrieved)
-            question.status = Question.Status.DONE
-            question.answered_at = timezone.now()
-            question.error_message = ""
+                question.answer = _coerce_answer_content(response.content)
+                question.sources = _build_sources(retrieved)
+                question.status = Question.Status.DONE
+                question.answered_at = timezone.now()
+                question.error_message = ""
     except Exception as exc:
         question.status = Question.Status.FAILED
         question.error_message = friendly_llm_error(exc)

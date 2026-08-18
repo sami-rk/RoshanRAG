@@ -204,6 +204,25 @@ class AnsweringServiceTests(APITestCase):
         self.assertEqual(document_ids, [1, 2, 3])  # one chunk per document, max 3 docs
         self.assertEqual(len(question.sources), 3)
 
+    def test_answer_skips_llm_when_retrieval_is_empty(self):
+        question = Question.objects.create(question="سوال بدون سند مرتبط")
+        vectorstore = self.FakeVectorStore([])
+        llm = self.FakeLLM()
+
+        with (
+            patch("qa.services.answering.get_chroma_vectorstore", return_value=vectorstore),
+            patch("qa.services.answering.get_llm", return_value=llm),
+        ):
+            answer_question(question.pk)
+
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)
+        self.assertIn("مرتبط", question.answer)
+        self.assertEqual(question.sources, [])
+        self.assertIsNotNone(question.answered_at)
+        self.assertEqual(question.error_message, "")
+        self.assertIsNone(llm.messages)  # the LLM was never invoked
+
     def test_answer_llm_failure_sets_failed_status(self):
         question = Question.objects.create(question="سوال")
 
@@ -214,7 +233,7 @@ class AnsweringServiceTests(APITestCase):
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
-                return_value=self.FakeVectorStore([]),
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
             ),
             patch("qa.services.answering.get_llm", return_value=ExplodingLLM()),
         ):
@@ -235,7 +254,7 @@ class AnsweringServiceTests(APITestCase):
             self.assertEqual(question.status, Question.Status.GENERATING)
 
         llm = self.FakeLLM()
-        vectorstore = self.FakeVectorStore([])
+        vectorstore = self.FakeVectorStore([self._fake_doc(1, "سند", "متن")])
 
         # Simulate the status being saved mid-flight by wrapping the LLM call
         original_invoke = llm.invoke
@@ -279,7 +298,7 @@ class AnsweringServiceTests(APITestCase):
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
-                return_value=self.FakeVectorStore([]),
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
             ),
             patch("qa.services.answering.get_llm", return_value=llm),
         ):
@@ -288,7 +307,8 @@ class AnsweringServiceTests(APITestCase):
         question.refresh_from_db()
         self.assertEqual(question.status, Question.Status.DONE)
         self.assertEqual(question.answer, "")
-        self.assertEqual(question.sources, [])
+        self.assertEqual(len(question.sources), 1)
+        self.assertEqual(question.sources[0]["document_id"], 1)
 
     def test_answer_content_list_is_coerced_to_text(self):
         question = Question.objects.create(question="سوال")
@@ -296,7 +316,7 @@ class AnsweringServiceTests(APITestCase):
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
-                return_value=self.FakeVectorStore([]),
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
             ),
             patch("qa.services.answering.get_llm", return_value=llm),
         ):
@@ -313,7 +333,7 @@ class AnsweringServiceTests(APITestCase):
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
-                return_value=self.FakeVectorStore([]),
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
             ),
             patch("qa.services.answering.get_llm", return_value=llm),
         ):
@@ -333,7 +353,7 @@ class AnsweringServiceTests(APITestCase):
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
-                return_value=self.FakeVectorStore([]),
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
             ),
             patch("qa.services.answering.get_llm", side_effect=ProviderError()),
         ):
@@ -352,7 +372,7 @@ class AnsweringServiceTests(APITestCase):
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
-                return_value=self.FakeVectorStore([]),
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
             ),
             patch("qa.services.answering.get_llm", side_effect=PlainError("boom")),
         ):
@@ -374,7 +394,7 @@ class AnsweringServiceTests(APITestCase):
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
-                return_value=self.FakeVectorStore([]),
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
             ),
             patch("qa.services.answering.get_llm", return_value=llm),
         ):
