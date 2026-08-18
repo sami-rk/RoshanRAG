@@ -109,7 +109,13 @@
             }
         });
         function show(el) {
+            el.style.willChange = "opacity, translate";
             el.classList.add("in-view");
+            el.addEventListener("transitionend", function handler(e) {
+                if (e.target !== el) return;
+                el.style.willChange = "";
+                el.removeEventListener("transitionend", handler);
+            });
         }
         var io = new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {

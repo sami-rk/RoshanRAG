@@ -1322,7 +1322,6 @@ html.js-anim [data-reveal] {
         opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
         translate 560ms cubic-bezier(0.22, 1, 0.36, 1);
     transition-delay: calc(var(--i, 0) * 70ms);
-    will-change: opacity;
 }
 
 html.js-anim [data-reveal].in-view {
