@@ -416,6 +416,30 @@ class FriendlyErrorTests(APITestCase):
         self.assertEqual(friendly_llm_error(Exc("connection refused")), "connection refused")
 
 
+class AdminOwnerDisplayTests(TestCase):
+    def test_question_admin_shows_the_owner(self):
+        from qa.admin import QuestionAdmin
+
+        self.assertIn("user", QuestionAdmin.list_display)
+        self.assertIn("user", QuestionAdmin.list_filter)
+
+    def test_thread_admin_is_registered_with_its_owner(self):
+        from qa.admin import ThreadAdmin
+        from qa.admin import roshan_admin_site
+
+        model_admin = roshan_admin_site._registry[Thread]
+        self.assertIsInstance(model_admin, ThreadAdmin)
+        self.assertIn("user", model_admin.list_display)
+        self.assertIn("user", model_admin.list_filter)
+
+    def test_question_admin_is_registered_with_the_owner(self):
+        from qa.admin import QuestionAdmin
+        from qa.admin import roshan_admin_site
+
+        model_admin = roshan_admin_site._registry[Question]
+        self.assertIsInstance(model_admin, QuestionAdmin)
+
+
 class AnsweringServiceTests(APITestCase):
     def setUp(self):
         super().setUp()
