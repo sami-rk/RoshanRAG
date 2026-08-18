@@ -1,13 +1,13 @@
 {% extends "landing/base.html" %}
 {% load i18n static %}
 
-{% block title %}درباره | روشن RAG{% endblock %}
+{% block title %}{% trans "درباره | روشن RAG" %}{% endblock %}
 
 {% block content %}
 <section class="page-hero">
   <div class="container" data-hero style="--i:0">
-    <h1>درباره روشن RAG</h1>
-    <p>سامانه‌ای که اسناد پراکنده سازمان را به یک پایگاه دانش پاسخ‌گو تبدیل می‌کند.</p>
+    <h1>{% trans "درباره روشن RAG" %}</h1>
+    <p>{% trans "سامانه‌ای که اسناد پراکنده سازمان را به یک پایگاه دانش پاسخ‌گو تبدیل می‌کند." %}</p>
   </div>
 </section>
 
@@ -41,32 +41,32 @@
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
             <polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
-          چه می‌کنیم؟
+          {% trans "چه می‌کنیم؟" %}
         </h3>
-        <p>اسناد متنی سازمان شما — از سوالات متداول تا گزارش‌های رسمی — بارگذاری، پردازش و ایندکس می‌شوند. سپس به جای جستجوی کلمه‌ای، می‌توانید از سامانه به زبان طبیعی سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید.</p>
+        <p>{% trans "اسناد متنی سازمان شما — از سوالات متداول تا گزارش‌های رسمی — بارگذاری، پردازش و ایندکس می‌شوند. سپس به جای جستجوی کلمه‌ای، می‌توانید از سامانه به زبان طبیعی سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید." %}</p>
       </div>
       <div class="about-card" data-reveal>
         <h3>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
           </svg>
-          فناوری ما
+          {% trans "فناوری ما" %}
         </h3>
-        <p>روشن RAG با Django ساخته شده و از مدل embedding چندزبانه BAAI/bge-m3 برای جستجوی برداری، پایگاه ChromaDB برای نگهداری بردارها، و مدل‌های زبانی پیشرفته برای تولید پاسخ استفاده می‌کند.</p>
+        <p>{% trans "روشن RAG با Django ساخته شده و از مدل embedding چندزبانه BAAI/bge-m3 برای جستجوی برداری، پایگاه ChromaDB برای نگهداری بردارها، و مدل‌های زبانی پیشرفته برای تولید پاسخ استفاده می‌کند." %}</p>
       </div>
     </div>
     <div class="about-stats">
       <div class="stat-chip" style="justify-content: center;">
         <span class="stat-num" data-count="{{ stats.documents }}"><em>۰</em></span>
-        <span class="stat-lbl">سند پردازش‌شده</span>
+        <span class="stat-lbl">{% trans "سند پردازش‌شده" %}</span>
       </div>
       <div class="stat-chip" style="justify-content: center;">
         <span class="stat-num" data-count="{{ stats.questions_done }}"><em>۰</em></span>
-        <span class="stat-lbl">پاسخ ارائه‌شده</span>
+        <span class="stat-lbl">{% trans "پاسخ ارائه‌شده" %}</span>
       </div>
       <div class="stat-chip" style="justify-content: center;">
         <span class="stat-num"><em>۲</em></span>
-        <span class="stat-lbl">زبان پشتیبانی‌شده</span>
+        <span class="stat-lbl">{% trans "زبان پشتیبانی‌شده" %}</span>
       </div>
     </div>
   </div>

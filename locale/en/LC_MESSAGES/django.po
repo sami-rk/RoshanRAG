@@ -282,3 +282,138 @@ msgstr "Make your documents smart right now"
 
 msgid "سندها را بارگذاری کنید، سؤال بپرسید و پاسخ را با منبع دریافت کنید. یک دقیقه تا راه‌اندازی."
 msgstr "Upload documents, ask questions and get answers with sources. You are one minute from setup."
+
+msgid "درباره | روشن RAG"
+msgstr "About | Roshan RAG"
+
+msgid "درباره روشن RAG"
+msgstr "About Roshan RAG"
+
+msgid "سامانه‌ای که اسناد پراکنده سازمان را به یک پایگاه دانش پاسخ‌گو تبدیل می‌کند."
+msgstr "A system that turns your organization's scattered documents into a responsive knowledge base."
+
+msgid "چه می‌کنیم؟"
+msgstr "What do we do?"
+
+msgid "اسناد متنی سازمان شما — از سوالات متداول تا گزارش‌های رسمی — بارگذاری، پردازش و ایندکس می‌شوند. سپس به جای جستجوی کلمه‌ای، می‌توانید از سامانه به زبان طبیعی سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید."
+msgstr "Your organization's text documents — from FAQs to official reports — are uploaded, processed and indexed. Then, instead of keyword search, you can ask the system in natural language and get accurate answers with cited sources."
+
+msgid "فناوری ما"
+msgstr "Our technology"
+
+msgid "روشن RAG با Django ساخته شده و از مدل embedding چندزبانه BAAI/bge-m3 برای جستجوی برداری، پایگاه ChromaDB برای نگهداری بردارها، و مدل‌های زبانی پیشرفته برای تولید پاسخ استفاده می‌کند."
+msgstr "Roshan RAG is built with Django and uses the multilingual BAAI/bge-m3 embedding model for vector search, ChromaDB for storing vectors, and advanced language models to generate answers."
+
+msgid "سند پردازش‌شده"
+msgstr "documents processed"
+
+msgid "زبان پشتیبانی‌شده"
+msgstr "languages supported"
+
+msgid "تعرفه‌ها | روشن RAG"
+msgstr "Pricing | Roshan RAG"
+
+msgid "تعرفه‌ها"
+msgstr "Pricing"
+
+msgid "راهکارهای متناسب با اندازه سازمان شما؛ از استقرار رایگان تا مدیریت‌شده."
+msgstr "Solutions tailored to your organization's size; from free self-hosted deployment to fully managed."
+
+msgid "اجتماعی"
+msgstr "Community"
+
+msgid "رایگان"
+msgstr "Free"
+
+msgid "برای شروع و استفاده شخصی از روشن RAG."
+msgstr "For getting started and personal use of Roshan RAG."
+
+msgid "استقرار خودمیزبان"
+msgstr "Self-hosted deployment"
+
+msgid "تا ۵۰ سند"
+msgstr "Up to 50 documents"
+
+msgid "۱ کاربر"
+msgstr "1 user"
+
+msgid "API کامل + مستندات"
+msgstr "Full API + documentation"
+
+msgid "شروع کنید"
+msgstr "Get started"
+
+msgid "حرفه‌ای"
+msgstr "Professional"
+
+msgid "تماس بگیرید"
+msgstr "Contact us"
+
+msgid "ماهانه"
+msgstr "monthly"
+
+msgid "برای تیم‌ها و سازمان‌های متوسط با نیاز به پشتیبانی."
+msgstr "For teams and mid-size organizations that need support."
+
+msgid "اسناد نامحدود"
+msgstr "Unlimited documents"
+
+msgid "کاربران نامحدود"
+msgstr "Unlimited users"
+
+msgid "پشتیبانی اولویت‌دار"
+msgstr "Priority support"
+
+msgid "استقرار اختصاصی"
+msgstr "Dedicated deployment"
+
+msgid "سازمانی"
+msgstr "Enterprise"
+
+msgid "توافقی"
+msgstr "Negotiable"
+
+msgid "برای سازمان‌های بزرگ با نیازهای خاص."
+msgstr "For large organizations with specific needs."
+
+msgid "استقرار مدیریت‌شده"
+msgstr "Managed deployment"
+
+msgid "SLA و مانیتورینگ"
+msgstr "SLA and monitoring"
+
+msgid "آموزش تیم"
+msgstr "Team training"
+
+msgid "قرارداد اختصاصی"
+msgstr "Custom contract"
+
+msgid "تماس با ما"
+msgstr "Contact us"
+
+msgid "تماس | روشن RAG"
+msgstr "Contact | Roshan RAG"
+
+msgid "پرسشی دارید یا به دنبال راهکاری برای سازمان خود هستید؟ در ارتباط باشید."
+msgstr "Have a question or looking for a solution for your organization? Get in touch."
+
+msgid "راه‌های ارتباطی"
+msgstr "Contact channels"
+
+msgid "سوالی درباره روشن RAG دارید؟"
+msgstr "Have a question about Roshan RAG?"
+
+msgid "پاسخ بسیاری از پرسش‌های شما در بخش"
+msgstr "Many of your questions are answered in the"
+
+msgid "موجود است. همچنین می‌توانید برای پیگیری وضعیت اسناد و پرسش‌ها به"
+msgstr "section. You can also visit the"
+
+msgid "پنل مدیریت"
+msgstr "admin panel"
+
+msgid "مراجعه کنید."
+msgstr "to track your documents and questions."
+
+msgid "برای مشاوره استقرار در سازمان خود، از طریق راه‌های ارتباطی با ما در تماس باشید."
+msgstr "For deployment consulting in your organization, reach out through the contact channels."

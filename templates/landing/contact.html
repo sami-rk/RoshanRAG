@@ -1,13 +1,13 @@
 {% extends "landing/base.html" %}
 {% load i18n static %}
 
-{% block title %}تماس | روشن RAG{% endblock %}
+{% block title %}{% trans "تماس | روشن RAG" %}{% endblock %}
 
 {% block content %}
 <section class="page-hero">
   <div class="container" data-hero style="--i:0">
-    <h1>تماس با ما</h1>
-    <p>پرسشی دارید یا به دنبال راهکاری برای سازمان خود هستید؟ در ارتباط باشید.</p>
+    <h1>{% trans "تماس با ما" %}</h1>
+    <p>{% trans "پرسشی دارید یا به دنبال راهکاری برای سازمان خود هستید؟ در ارتباط باشید." %}</p>
   </div>
 </section>
 
@@ -41,7 +41,7 @@
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
           </svg>
-          راه‌های ارتباطی
+          {% trans "راه‌های ارتباطی" %}
         </h3>
         <ul class="contact-list">
           <li>
@@ -63,10 +63,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
-          سوالی درباره روشن RAG دارید؟
+          {% trans "سوالی درباره روشن RAG دارید؟" %}
         </h3>
-        <p>پاسخ بسیاری از پرسش‌های شما در بخش <a href="{% url 'home' %}#faq">سوالات متداول</a> موجود است. همچنین می‌توانید برای پیگیری وضعیت اسناد و پرسش‌ها به <a href="{% url 'admin:index' %}">پنل مدیریت</a> مراجعه کنید.</p>
-        <p>برای مشاوره استقرار در سازمان خود، از طریق راه‌های ارتباطی با ما در تماس باشید.</p>
+        <p>{% trans "پاسخ بسیاری از پرسش‌های شما در بخش" %} <a href="{% url 'home' %}#faq">{% trans "سوالات متداول" %}</a> {% trans "موجود است. همچنین می‌توانید برای پیگیری وضعیت اسناد و پرسش‌ها به" %} <a href="{% url 'admin:index' %}">{% trans "پنل مدیریت" %}</a> {% trans "مراجعه کنید." %}</p>
+        <p>{% trans "برای مشاوره استقرار در سازمان خود، از طریق راه‌های ارتباطی با ما در تماس باشید." %}</p>
       </div>
     </div>
   </div>
