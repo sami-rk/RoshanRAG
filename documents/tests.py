@@ -252,7 +252,8 @@ class IndexingServiceTests(TestCase):
             patch("documents.services.indexing.get_chroma_vectorstore"),
             patch("documents.services.indexing.delete_document_chunks"),
         ):
-            index_document(doc.pk)
+            with self.assertLogs("documents.services.indexing", level="ERROR"):
+                index_document(doc.pk)
 
         doc.refresh_from_db()
         self.assertEqual(doc.status, Document.Status.FAILED)
@@ -279,7 +280,8 @@ class IndexingServiceTests(TestCase):
             patch("documents.services.indexing.get_chroma_vectorstore"),
             patch("documents.services.indexing.delete_document_chunks"),
         ):
-            index_document(doc.pk)
+            with self.assertLogs("documents.services.indexing", level="ERROR"):
+                index_document(doc.pk)
 
         doc.refresh_from_db()
         self.assertEqual(doc.status, Document.Status.FAILED)
@@ -407,7 +409,8 @@ class DocumentSignalsTests(TestCase):
             "core.chroma_client.delete_document_chunks",
             side_effect=RuntimeError("chroma unreachable"),
         ):
-            doc.delete()
+            with self.assertLogs("documents.signals", level="ERROR"):
+                doc.delete()
         self.assertFalse(Document.objects.filter(pk=doc.pk).exists())
 
     def test_deleting_document_removes_stored_file(self):
