@@ -313,7 +313,6 @@ summary:focus-visible,
         background 160ms ease,
         border-color 160ms ease,
         color 160ms ease,
-        translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
         box-shadow 160ms ease;
 }
 
