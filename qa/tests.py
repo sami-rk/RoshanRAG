@@ -667,7 +667,8 @@ class AnsweringServiceTests(APITestCase):
             ),
             patch("qa.services.answering.get_llm", return_value=ExplodingLLM()),
         ):
-            answer_question(question.pk)
+            with self.assertLogs("qa.services.answering", level="ERROR"):
+                answer_question(question.pk)
 
         question.refresh_from_db()
         self.assertEqual(question.status, Question.Status.FAILED)
@@ -787,7 +788,8 @@ class AnsweringServiceTests(APITestCase):
             ),
             patch("qa.services.answering.get_llm", side_effect=ProviderError()),
         ):
-            answer_question(question.pk)
+            with self.assertLogs("qa.services.answering", level="ERROR"):
+                answer_question(question.pk)
 
         question.refresh_from_db()
         self.assertEqual(question.status, Question.Status.FAILED)
@@ -806,7 +808,8 @@ class AnsweringServiceTests(APITestCase):
             ),
             patch("qa.services.answering.get_llm", side_effect=PlainError("boom")),
         ):
-            answer_question(question.pk)
+            with self.assertLogs("qa.services.answering", level="ERROR"):
+                answer_question(question.pk)
 
         question.refresh_from_db()
         self.assertEqual(question.status, Question.Status.FAILED)
