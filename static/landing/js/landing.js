@@ -200,6 +200,19 @@
         }
     }
 
+    function initPauseOffscreen() {
+        var els = document.querySelectorAll(".marquee, .elegant-dark-bg");
+        if (!els.length || !("IntersectionObserver" in window)) return;
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                entry.target.classList.toggle("paused", !entry.isIntersecting);
+            });
+        }, { threshold: 0 });
+        for (var i = 0; i < els.length; i++) {
+            io.observe(els[i]);
+        }
+    }
+
     function onReady(fn) {
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", fn);
@@ -215,5 +228,6 @@
         initReveal();
         initTilt();
         initMagnetic();
+        initPauseOffscreen();
     });
 })();

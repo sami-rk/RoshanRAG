@@ -382,6 +382,10 @@ html[data-theme="dark"] .elegant-dark-bg {
     display: block;
 }
 
+.elegant-dark-bg.paused .edb-streak {
+    animation-play-state: paused;
+}
+
 @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] .elegant-dark-bg,
     :root:not([data-theme]) .elegant-dark-bg {
@@ -611,6 +615,10 @@ html[data-theme="dark"] .hero::after,
     align-items: center;
     gap: 44px;
     padding-inline-end: 44px;
+}
+
+.marquee.paused .marquee-track {
+    animation-play-state: paused;
 }
 
 .marquee span {
@@ -1338,6 +1346,11 @@ html.js-anim [data-reveal].in-view {
         opacity: 1;
         translate: 0 0;
         transition: none;
+    }
+
+    .marquee-track,
+    .elegant-dark-bg .edb-streak {
+        animation: none;
     }
 }
 
