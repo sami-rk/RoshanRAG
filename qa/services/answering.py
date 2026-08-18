@@ -79,6 +79,14 @@ def _dedupe_by_document(documents, max_docs):
     return result
 
 
+def _coerce_answer_content(content) -> str:
+    if isinstance(content, str):
+        return content
+    if content is None:
+        return ""
+    return str(content)
+
+
 def _build_sources(retrieved):
     sources = []
     for document in retrieved:
@@ -128,7 +136,7 @@ def answer_question(question_id: int) -> None:
             ]
             response = get_llm().invoke(messages)
 
-            question.answer = response.content
+            question.answer = _coerce_answer_content(response.content)
             question.sources = _build_sources(retrieved)
             question.status = Question.Status.DONE
             question.answered_at = timezone.now()

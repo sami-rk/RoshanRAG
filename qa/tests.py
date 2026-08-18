@@ -273,6 +273,40 @@ class AnsweringServiceTests(APITestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual([d.metadata["document_id"] for d in result], [1, 2])
 
+    def test_answer_content_none_is_stored_as_empty_string(self):
+        question = Question.objects.create(question="سوال")
+        llm = self.FakeLLM(content=None)
+        with (
+            patch(
+                "qa.services.answering.get_chroma_vectorstore",
+                return_value=self.FakeVectorStore([]),
+            ),
+            patch("qa.services.answering.get_llm", return_value=llm),
+        ):
+            answer_question(question.pk)
+
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)
+        self.assertEqual(question.answer, "")
+        self.assertEqual(question.sources, [])
+
+    def test_answer_content_list_is_coerced_to_text(self):
+        question = Question.objects.create(question="سوال")
+        llm = self.FakeLLM(content=["بخش اول", {"text": "بخش دوم"}])
+        with (
+            patch(
+                "qa.services.answering.get_chroma_vectorstore",
+                return_value=self.FakeVectorStore([]),
+            ),
+            patch("qa.services.answering.get_llm", return_value=llm),
+        ):
+            answer_question(question.pk)
+
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)
+        self.assertIsInstance(question.answer, str)
+        self.assertIn("بخش اول", question.answer)
+
     def test_answered_at_is_set_only_on_success(self):
         question = Question.objects.create(question="سوال")
         llm = self.FakeLLM()
