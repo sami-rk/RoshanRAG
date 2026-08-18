@@ -58,7 +58,7 @@ curl -X POST http://localhost:8000/api/documents/ \
   -F "title=سوالات متداول"
 ```
 
-- Supported formats: `docx`, `txt` (max `MAX_UPLOAD_SIZE_MB`, default 25 MB).
+- Supported formats: `docx`, `pdf`, `txt` (max `MAX_UPLOAD_SIZE_MB`, default 25 MB).
 - `title` defaults to the file name if omitted.
 - The document is created with status `pending`; text extraction, chunking and vector indexing run in the background. Poll the detail endpoint until `status` becomes `ready` or `failed`.
 
