@@ -94,6 +94,36 @@ class QuestionAPITests(APITestCase):
         question.refresh_from_db()
         self.assertEqual(question.feedback, Question.Feedback.NONE)
 
+    def test_export_csv_returns_selected_questions(self):
+        Question.objects.create(
+            question="سوال اول", answer="پاسخ اول", status=Question.Status.DONE
+        )
+        response = self.client.get("/api/questions/export/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+        self.assertIn("Content-Disposition", response)
+        content = response.content.decode("utf-8")
+        self.assertTrue(content.startswith("\ufeff"))
+        self.assertIn("id,question,answer,status,feedback", content)
+        self.assertIn("سوال اول", content)
+        self.assertIn("پاسخ اول", content)
+
+    def test_export_json_returns_selected_questions(self):
+        Question.objects.create(question="سوال دوم")
+        response = self.client.get("/api/questions/export/?format=json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.json()
+        self.assertEqual(payload["results"][0]["question"], "سوال دوم")
+
+    def test_export_respects_status_filter(self):
+        Question.objects.create(question="انجام شده", status=Question.Status.DONE)
+        Question.objects.create(question="در انتظار")
+        response = self.client.get("/api/questions/export/?status=pending")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        content = response.content.decode("utf-8")
+        self.assertIn("در انتظار", content)
+        self.assertNotIn("انجام شده", content)
+
 
 class FriendlyErrorTests(APITestCase):
     def test_json_string_body_is_unwrapped(self):
