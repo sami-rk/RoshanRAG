@@ -34,20 +34,25 @@
         <a class="btn btn-primary btn-lg magnetic" href="{% url 'admin:index' %}">ورود به پنل مدیریت</a>
       </div>
     {% else %}
-      <div class="chat-card reveal in-view" data-reveal>
-        {% csrf_token %}
-        <form id="ask-form" autocomplete="off">
-          <label for="ask-input" class="visually-hidden">پرسش شما</label>
-          <textarea id="ask-input" name="question" rows="3" placeholder="پرسش خود را بنویسید؛ مثلاً «میزان فروش در سه ماهه اول چقدر بود؟»" required></textarea>
-          <div class="chat-actions">
-            <button class="btn btn-primary" type="submit" id="ask-submit">پرسیدن</button>
-            <span class="chat-hint">پاسخ فقط بر اساس محتوای اسناد بارگذاری‌شده تولید می‌شود.</span>
+      <div class="chat-layout reveal in-view" data-reveal>
+        <aside class="chat-threads">
+          <div class="chat-threads-head">
+            <h3>گفتگوها</h3>
+            <button type="button" id="chat-new-thread" class="chat-new-thread">گفتگوی جدید</button>
           </div>
-        </form>
-        <div id="chat-stream" class="chat-stream" aria-live="polite"></div>
-        <div class="chat-history" id="chat-history">
-          <h3>پرسش‌های اخیر</h3>
-          <ul id="chat-history-list"></ul>
+          <ul id="chat-threads-list"></ul>
+        </aside>
+        <div class="chat-card">
+          <form id="ask-form" autocomplete="off">
+            {% csrf_token %}
+            <label for="ask-input" class="visually-hidden">پرسش شما</label>
+            <textarea id="ask-input" name="question" rows="3" placeholder="پرسش خود را بنویسید؛ مثلاً «میزان فروش در سه ماهه اول چقدر بود؟»" required></textarea>
+            <div class="chat-actions">
+              <button class="btn btn-primary" type="submit" id="ask-submit">پرسیدن</button>
+              <span class="chat-hint">پاسخ فقط بر اساس محتوای اسناد بارگذاری‌شده تولید می‌شود.</span>
+            </div>
+          </form>
+          <div id="chat-stream" class="chat-stream" aria-live="polite"></div>
         </div>
       </div>
     {% endif %}

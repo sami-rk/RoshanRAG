@@ -34,18 +34,18 @@ def _sse_events(pk, poll_interval=0.3):
         try:
             question = Question.objects.get(pk=pk)
         except Question.DoesNotExist:
-            yield f"data: {json.dumps({'type': 'error', 'detail': 'پرسش یافت نشد'}, ensure_ascii=False)}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'detail': 'پرسش یافت نشد'}, ensure_ascii=False, default=str)}\n\n"
             return
         data = question.stream_data
         if len(data) > sent:
             yield (
-                f"data: {json.dumps({'type': 'token', 'text': data[sent:]}, ensure_ascii=False)}\n\n"
+                f"data: {json.dumps({'type': 'token', 'text': data[sent:]}, ensure_ascii=False, default=str)}\n\n"
             )
             sent = len(data)
         if question.status in (Question.Status.DONE, Question.Status.FAILED):
             payload = QuestionSerializer(question).data
             yield (
-                f"data: {json.dumps({'type': 'done', 'question': payload}, ensure_ascii=False)}\n\n"
+                f"data: {json.dumps({'type': 'done', 'question': payload}, ensure_ascii=False, default=str)}\n\n"
             )
             return
         if time.time() > deadline:

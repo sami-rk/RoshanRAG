@@ -253,6 +253,21 @@ class ThreadAPITests(APITestCase):
         self.assertIn("پاسخ کامل", body)
         self.assertIn('"type": "done"', body)
 
+    def test_stream_done_frame_serializes_question_in_thread(self):
+        thread = Thread.objects.create(title="گفتگو")
+        question = Question.objects.create(
+            question="سوال در گفتگو",
+            answer="پاسخ",
+            status=Question.Status.DONE,
+            stream_data="",
+            thread=thread,
+        )
+        response = self.client.get(f"/api/questions/{question.pk}/stream/")
+        body = b"".join(response.streaming_content).decode("utf-8")
+        done = [line for line in body.split("\n") if '"type": "done"' in line]
+        self.assertTrue(done)
+        self.assertIn(str(thread.pk), done[0])
+
     def test_stream_endpoint_emits_buffered_tokens_then_done(self):
         question = Question.objects.create(
             question="سوال",

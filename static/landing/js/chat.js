@@ -4,12 +4,14 @@
   var form = document.getElementById("ask-form");
   if (!form) return;
 
-  var csrfEl = form.querySelector("input[name='csrfmiddlewaretoken']");
+  var csrfEl = document.querySelector("input[name='csrfmiddlewaretoken']");
   var csrf = csrfEl ? csrfEl.value : "";
   var input = document.getElementById("ask-input");
   var submit = document.getElementById("ask-submit");
   var stream = document.getElementById("chat-stream");
-  var historyList = document.getElementById("chat-history-list");
+  var threadsList = document.getElementById("chat-threads-list");
+  var newThreadBtn = document.getElementById("chat-new-thread");
+  var currentThread = null;
 
   function esc(value) {
     if (value == null) return "";
@@ -18,24 +20,12 @@
     return div.innerHTML;
   }
 
-  function statusLabel(status) {
-    return {
-      pending: "در انتظار",
-      generating: "در حال تولید",
-      done: "پاسخ داده شده",
-      failed: "ناموفق",
-    }[status] || status;
-  }
-
   function addMessage(kind, html) {
     if (!stream) return;
     var el = document.createElement("div");
     el.className = "chat-msg chat-msg-" + kind;
     el.innerHTML = html;
     stream.appendChild(el);
-    if (historyList) {
-      historyList.closest(".chat-history").style.display = "none";
-    }
   }
 
   function renderSources(sources) {
@@ -121,21 +111,23 @@
     );
   }
 
-  function renderAnswer(question) {
+  function renderAnswerHtml(question) {
     if (question.status === "failed") {
-      addMessage(
-        "error",
-        "<p>پاسخی تولید نشد: " + esc(question.error_message || "خطای ناشناخته") + "</p>"
-      );
-      return;
+      return "<p>پاسخی تولید نشد: " + esc(question.error_message || "خطای ناشناخته") + "</p>";
     }
-    addMessage(
-      "answer",
+    return (
       "<p>" +
-        withCitations(esc(question.answer), question.sources) +
-        "</p>" +
-        renderSources(question.sources) +
-        renderFeedback(question)
+      withCitations(esc(question.answer), question.sources) +
+      "</p>" +
+      renderSources(question.sources) +
+      renderFeedback(question)
+    );
+  }
+
+  function renderAnswer(question) {
+    addMessage(
+      question.status === "failed" ? "error" : "answer",
+      renderAnswerHtml(question)
     );
   }
 
@@ -160,46 +152,109 @@
     });
   }
 
-  function poll(questionId) {
-    fetch("/api/questions/" + questionId + "/").then(function (response) {
+  function openStream(questionId, container) {
+    var pending = document.createElement("p");
+    pending.className = "chat-streaming";
+    pending.textContent = "در حال تولید پاسخ…";
+    container.appendChild(pending);
+
+    fetch("/api/questions/" + questionId + "/stream/", {
+      headers: { "X-CSRFToken": csrf },
+    }).then(function (response) {
       if (response.status === 401 || response.status === 403) {
         window.location.href = "/admin/login/?next=" + encodeURIComponent("/chat/");
-        return;
+        throw new Error("unauthorized");
       }
-      return response.json();
-    }).then(function (question) {
-      if (!question) return;
-      if (question.status === "done" || question.status === "failed") {
-        setBusy(false);
-        renderAnswer(question);
-      } else {
-        setTimeout(function () {
-          poll(questionId);
-        }, 1500);
+      if (!response.body) throw new Error("no stream");
+      var reader = response.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer = "";
+
+      function handle(frame) {
+        var line = frame.trim();
+        if (line.indexOf("data:") !== 0) return;
+        var data;
+        try {
+          data = JSON.parse(line.slice(5).trim());
+        } catch (e) {
+          return;
+        }
+        if (data.type === "token") {
+          if (pending.isConnected) pending.textContent += data.text;
+        } else if (data.type === "done") {
+          setBusy(false);
+          container.innerHTML = renderAnswerHtml(data.question);
+        } else if (data.type === "error" || data.type === "timeout") {
+          setBusy(false);
+          container.innerHTML = "<p>پاسخی دریافت نشد؛ دوباره تلاش کنید.</p>";
+        }
       }
+
+      function pump() {
+        return reader.read().then(function (result) {
+          if (result.done) {
+            setBusy(false);
+            return;
+          }
+          buffer += decoder.decode(result.value, { stream: true });
+          var frames = buffer.split("\n\n");
+          buffer = frames.pop();
+          frames.forEach(handle);
+          return pump();
+        });
+      }
+
+      return pump();
     }).catch(function () {
       setBusy(false);
-      addMessage("error", "<p>دریافت پاسخ ناموفق بود؛ دوباره تلاش کنید.</p>");
+      if (pending.isConnected) {
+        container.innerHTML = "<p>دریافت پاسخ ناموفق بود؛ دوباره تلاش کنید.</p>";
+      }
     });
   }
 
-  function loadHistory() {
-    if (!historyList) return;
-    api("/api/questions/?page=1").then(function (data) {
-      var items = (data.results || []).slice(0, 5);
+  function renderThread(thread) {
+    api("/api/threads/" + thread.id + "/").then(function (data) {
+      stream.innerHTML = "";
+      currentThread = thread.id;
+      (data.questions || []).forEach(function (question) {
+        addMessage("question", "<p>" + esc(question.question) + "</p>");
+        if (question.status === "pending" || question.status === "generating") {
+          addMessage("answer", '<p class="chat-streaming">در حال تولید پاسخ…</p>');
+        } else {
+          renderAnswer(question);
+        }
+      });
+      var btn = threadsList.querySelector('[data-thread="' + thread.id + '"]');
+      if (btn) btn.classList.add("active");
+      input.focus();
+    }).catch(function () {
+      addMessage("error", "<p>باز کردن گفتگو ناموفق بود.</p>");
+    });
+  }
+
+  function loadThreads() {
+    if (!threadsList) return;
+    api("/api/threads/").then(function (data) {
+      var items = data.results || [];
       if (!items.length) {
-        historyList.innerHTML = '<li class="chat-empty">هنوز پرسشی ثبت نشده است.</li>';
+        threadsList.innerHTML = '<li class="chat-empty">هنوز گفتگویی نیست.</li>';
         return;
       }
-      historyList.innerHTML = items
-        .map(function (item) {
-          var badge =
-            '<span class="chat-badge chat-badge-' +
-            item.status +
-            '">' +
-            statusLabel(item.status) +
-            "</span>";
-          return '<li><span class="chat-q">' + esc(item.question) + " " + badge + "</span></li>";
+      threadsList.innerHTML = items
+        .map(function (thread) {
+          var active = currentThread === thread.id ? " active" : "";
+          return (
+            '<li><button type="button" class="chat-thread' +
+            active +
+            '" data-thread="' +
+            thread.id +
+            '"><span class="chat-thread-title">' +
+            esc(thread.title) +
+            '</span><span class="chat-thread-meta">' +
+            thread.question_count +
+            " پرسش</span></button></li>"
+          );
         })
         .join("");
     });
@@ -243,6 +298,28 @@
     });
   }
 
+  if (threadsList) {
+    threadsList.addEventListener("click", function (event) {
+      var btn = event.target.closest("button[data-thread]");
+      if (!btn) return;
+      threadsList.querySelectorAll("button").forEach(function (b) {
+        b.classList.remove("active");
+      });
+      renderThread({ id: btn.getAttribute("data-thread") });
+    });
+  }
+
+  if (newThreadBtn) {
+    newThreadBtn.addEventListener("click", function () {
+      currentThread = null;
+      stream.innerHTML = "";
+      threadsList.querySelectorAll("button").forEach(function (b) {
+        b.classList.remove("active");
+      });
+      input.focus();
+    });
+  }
+
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     var text = (input.value || "").trim();
@@ -252,16 +329,24 @@
     addMessage("question", "<p>" + esc(text) + "</p>");
     input.value = "";
 
+    var payload = { question: text };
+    if (currentThread) payload.thread = currentThread;
+
     api("/api/questions/", {
       method: "POST",
-      body: JSON.stringify({ question: text }),
+      body: JSON.stringify(payload),
     }).then(function (question) {
-      poll(question.id);
+      if (question.thread) currentThread = question.thread;
+      loadThreads();
+      var container = document.createElement("div");
+      container.className = "chat-msg chat-msg-answer";
+      stream.appendChild(container);
+      openStream(question.id, container);
     }).catch(function () {
       setBusy(false);
       addMessage("error", "<p>ثبت پرسش ناموفق بود؛ دوباره تلاش کنید.</p>");
     });
   });
 
-  loadHistory();
+  loadThreads();
 })();
