@@ -402,3 +402,28 @@ class DocumentAdminActionTests(TestCase):
                 request, Document.objects.filter(pk=doc.pk)
             )
         self.assertEqual(len(request._messages), 1)
+
+
+class DocumentUploadAdminTests(TestCase):
+    def test_upload_page_requires_staff(self):
+        response = self.client.get("/admin/documents/document/upload/")
+        self.assertEqual(response.status_code, 302)
+
+    def test_upload_page_renders_for_staff(self):
+        user = get_user_model().objects.create_user(
+            username="staff", password="pass", is_staff=True
+        )
+        self.client.force_login(user)
+        response = self.client.get("/admin/documents/document/upload/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "dropzone")
+        self.assertContains(response, "document-upload.js")
+
+    def test_batch_upload_link_on_changelist(self):
+        user = get_user_model().objects.create_user(
+            username="staff", password="pass", is_staff=True, is_superuser=True
+        )
+        self.client.force_login(user)
+        response = self.client.get("/admin/documents/document/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "/admin/documents/document/upload/")

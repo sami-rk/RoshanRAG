@@ -1,0 +1,142 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .upload-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .upload-toolbar a {
+    font-weight: 700;
+  }
+  .dropzone {
+    border: 2px dashed var(--border, #d0d5dd);
+    border-radius: 14px;
+    padding: 42px 24px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--card, #fff);
+    transition: border-color 160ms ease, background 160ms ease;
+  }
+  .dropzone:hover,
+  .dropzone:focus,
+  .dropzone-active {
+    border-color: var(--accent, #2563eb);
+    background: var(--accent-soft, #eff6ff);
+  }
+  .dropzone svg {
+    width: 36px;
+    height: 36px;
+    color: var(--muted, #6b7280);
+    margin-bottom: 8px;
+  }
+  .dropzone-title {
+    margin: 0 0 4px;
+    font-weight: 700;
+  }
+  .dropzone-hint {
+    margin: 0;
+    color: var(--muted, #6b7280);
+    font-size: 13px;
+  }
+  .upload-file-list {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+  }
+  .upload-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .upload-file-remove {
+    border: 0;
+    background: transparent;
+    color: var(--muted, #6b7280);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .upload-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .upload-status {
+    color: var(--muted, #6b7280);
+    font-size: 13px;
+  }
+  .upload-results {
+    margin-top: 16px;
+  }
+  .upload-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .upload-result-ok {
+    border: 1px solid var(--border, #e5e7eb);
+    background: var(--card, #fff);
+  }
+  .upload-result-err {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script defer src="{% static 'admin/js/document-upload.js' %}"></script>
+{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="upload-toolbar">
+    <h1>{{ title }}</h1>
+    <a href="{% url 'admin:documents_document_changelist' %}">&larr; {% translate 'Back to documents' %}</a>
+  </div>
+  <div id="dropzone" class="dropzone" tabindex="0" role="button"
+       aria-label="{% translate 'Choose files to upload' %}">
+    <input type="file" id="file-input" accept=".docx,.txt" multiple hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    <p class="dropzone-title">{% translate 'Drop files here or click to choose' %}</p>
+    <p class="dropzone-hint">{% translate 'Allowed formats: docx and txt' %}</p>
+  </div>
+  <ul id="file-list" class="upload-file-list"></ul>
+  <div class="upload-actions">
+    <button type="button" id="upload-button" class="button" disabled>
+      {% translate 'Upload documents' %}
+    </button>
+    <span id="upload-status" class="upload-status"></span>
+  </div>
+  <div id="upload-results" class="upload-results"></div>
+</div>
+{% endblock %}

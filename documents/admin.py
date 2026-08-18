@@ -49,5 +49,25 @@ class DocumentAdmin(admin.ModelAdmin):
     retry_indexing.short_description = "ایندکس‌سازی مجدد اسناد انتخاب‌شده"
     retry_indexing.allowed_permissions = ("change",)
 
+    def get_urls(self):
+        from django.urls import path
+
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "upload/",
+                self.admin_site.admin_view(self.upload_view),
+                name="documents_document_upload",
+            ),
+        ]
+        return custom_urls + urls
+
+    def upload_view(self, request):
+        from django.shortcuts import render
+
+        context = self.admin_site.each_context(request)
+        context["title"] = "بارگذاری گروهی اسناد"
+        return render(request, "admin/document_upload.html", context)
+
 
 roshan_admin_site.register(Document, DocumentAdmin)
