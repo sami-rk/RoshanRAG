@@ -410,6 +410,22 @@ class ThreadAPITests(APITestCase):
         response = anonymous.get(f"/api/questions/{question.pk}/stream/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_stream_emits_keepalive_while_idle(self):
+        import itertools
+
+        from qa.views import _sse_events
+
+        question = Question.objects.create(
+            question="سوال", status=Question.Status.PENDING, user=self.user
+        )
+        frames = list(
+            itertools.islice(
+                _sse_events(question.pk, poll_interval=0.01, keepalive_interval=0),
+                3,
+            )
+        )
+        self.assertEqual(frames, [": keepalive\n\n"] * 3)
+
 
 class FriendlyErrorTests(APITestCase):
     def test_json_string_body_is_unwrapped(self):

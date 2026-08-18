@@ -135,6 +135,8 @@ The endpoint keeps the connection open, polling the worker's progress buffer, an
 - `{"type": "done", "question": {...}}` — final frame carrying the serialized question (full `answer`, `sources`, `status`).
 - `{"type": "timeout"}` — after 300 seconds without completion.
 
+While the stream is idle (no new tokens), a comment line (`: keepalive`) is emitted periodically so reverse proxies do not drop the silent connection.
+
 A request for a question that is already finished emits a single `done` frame immediately. The chat page consumes this stream to render the answer token-by-token.
 
 ```bash

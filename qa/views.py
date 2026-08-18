@@ -27,9 +27,15 @@ EXPORT_COLUMNS = [
 ]
 
 
-def _sse_events(pk, poll_interval=0.3):
-    """Yield Server-Sent Events for a question's answer stream."""
+def _sse_events(pk, poll_interval=0.3, keepalive_interval=15):
+    """Yield Server-Sent Events for a question's answer stream.
+
+    ``keepalive_interval`` controls how often an SSE comment line (ignored by
+    EventSource clients) is emitted while the stream is idle, so reverse
+    proxies that drop silent connections do not cut the stream off mid-answer.
+    """
     sent = 0
+    last_activity = time.time()
     deadline = time.time() + 300
     while True:
         try:
@@ -43,6 +49,10 @@ def _sse_events(pk, poll_interval=0.3):
                 f"data: {json.dumps({'type': 'token', 'text': data[sent:]}, ensure_ascii=False, default=str)}\n\n"
             )
             sent = len(data)
+            last_activity = time.time()
+        elif time.time() - last_activity >= keepalive_interval:
+            yield ": keepalive\n\n"
+            last_activity = time.time()
         if question.status in (Question.Status.DONE, Question.Status.FAILED):
             payload = QuestionSerializer(question).data
             yield (
