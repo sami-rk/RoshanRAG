@@ -103,6 +103,28 @@ class RecoverStuckTasksTests(TestCase):
         self.assertEqual(question.status, Question.Status.DONE)
 
 
+class PublicPagesTests(TestCase):
+    def test_home_page_renders(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "روشن")
+
+    def test_about_page_renders(self):
+        response = self.client.get("/about/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "درباره روشن RAG")
+
+    def test_pricing_page_renders(self):
+        response = self.client.get("/pricing/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "تعرفه‌ها")
+
+    def test_contact_page_renders(self):
+        response = self.client.get("/contact/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "تماس با ما")
+
+
 class ErrorPageTests(TestCase):
     def test_server_error_renders_styled_page(self):
         from django.test import RequestFactory
