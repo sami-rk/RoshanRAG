@@ -71,6 +71,29 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Question.objects.filter(pk=question.pk).exists())
 
+    def test_feedback_defaults_to_none(self):
+        question = Question.objects.create(question="پرسش")
+        self.assertEqual(question.feedback, Question.Feedback.NONE)
+
+    def test_feedback_can_be_updated(self):
+        question = Question.objects.create(question="پرسش", status=Question.Status.DONE)
+        response = self.client.patch(
+            f"/api/questions/{question.pk}/", {"feedback": "up"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["feedback"], "up")
+        question.refresh_from_db()
+        self.assertEqual(question.feedback, Question.Feedback.UP)
+
+    def test_feedback_rejects_invalid_values(self):
+        question = Question.objects.create(question="پرسش")
+        response = self.client.patch(
+            f"/api/questions/{question.pk}/", {"feedback": "maybe"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        question.refresh_from_db()
+        self.assertEqual(question.feedback, Question.Feedback.NONE)
+
 
 class FriendlyErrorTests(APITestCase):
     def test_json_string_body_is_unwrapped(self):

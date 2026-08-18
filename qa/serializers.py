@@ -11,6 +11,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             "question",
             "answer",
             "status",
+            "feedback",
             "sources",
             "error_message",
             "created_at",
