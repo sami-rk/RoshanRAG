@@ -34,6 +34,7 @@ Requests without a valid token receive `403 Forbidden`. An unauthenticated clien
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/api/documents/` | Upload a document (multipart: `file` required, `title` optional) |
+| `POST` | `/api/documents/batch/` | Upload several documents at once (multipart: repeat `files`) |
 | `GET` | `/api/documents/` | List documents (`?q=<text>` searches title + full text, `?status=pending\|ready\|failed` filters) |
 | `GET` | `/api/documents/{id}/` | Document detail (includes full text and status) |
 | `PATCH` | `/api/documents/{id}/` | Edit a document (e.g. rename, or replace `file` to re-index) |
@@ -41,7 +42,11 @@ Requests without a valid token receive `403 Forbidden`. An unauthenticated clien
 | `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`) — starts background answering |
 | `GET` | `/api/questions/` | Q&A history (`?status=pending\|generating\|done\|failed` filters, paginated, 20/page) |
 | `GET` | `/api/questions/{id}/` | Poll for status / answer / sources |
+| `PATCH` | `/api/questions/{id}/` | Record answer feedback (`{"feedback": "up"\|"down"\|"none"}`) |
 | `DELETE` | `/api/questions/{id}/` | Delete a question from the history |
+| `GET` | `/api/questions/export/` | Export Q&A history (`?format=csv` default, `?format=json`) |
+| `POST` | `/api/questions/demo_ask/` | Anonymous demo question (no token) — returns `demo_token` for polling |
+| `GET` | `/api/questions/{id}/demo/?token=...` | Poll a demo question's status (token-gated, no auth) |
 | `GET` | `/api/health/` | Health check (DB + Chroma), no authentication required |
 
 ## Uploading a document
@@ -73,6 +78,28 @@ Response (`201 Created`):
 ```
 
 > The `file` URL points to protected media — a session login or the same `Authorization: Token` header is required to download it.
+
+## Batch upload
+
+Send several files in one multipart request; every file is validated independently and the ones that pass are created and queued for indexing in the background:
+
+```bash
+curl -X POST http://localhost:8000/api/documents/batch/ \
+  -H "Authorization: Token <token>" \
+  -F "files=@sample_data/سوالات-متداول.txt" \
+  -F "files=@sample_data/قوانین-داخلی.txt"
+```
+
+Response (`201 Created` when at least one file passes):
+
+```json
+{
+  "created": [ { "id": 1, "title": "سوالات متداول", "status": "pending" } ],
+  "errors": [ { "file": "قوانین.pdf", "errors": { "file": ["فرمت فایل باید docx یا txt باشد"] } } ]
+}
+```
+
+An empty request (no `files`) returns `400 Bad Request`.
 
 ## Asking a question
 
@@ -119,6 +146,50 @@ Notes:
 - If no document has been indexed yet, the answer is a deterministic "no documents yet" message without calling the LLM.
 - If no relevant content is retrieved for the question, the answer explains that no matching content was found.
 - On LLM/provider failure the question is marked `failed` and `error_message` holds the readable provider error; the admin offers a "پاسخ‌دهی مجدد" (re-answer) action.
+
+## Answer feedback
+
+Record whether an answer was useful (`up`), not useful (`down`), or clear it (`none`):
+
+```bash
+curl -X PATCH http://localhost:8000/api/questions/1/ \
+  -H "Authorization: Token <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"feedback": "up"}'
+```
+
+## Exporting Q&A history
+
+```bash
+curl -X GET http://localhost:8000/api/questions/export/ \
+  -H "Authorization: Token <token>" > questions.csv
+curl -X GET "http://localhost:8000/api/questions/export/?format=json" \
+  -H "Authorization: Token <token>"
+```
+
+CSV includes a UTF-8 BOM so Excel opens Persian text correctly. The admin also offers "خروجی CSV" as a bulk action on the question list.
+
+## Demo widget (no authentication)
+
+The landing page's demo box uses two anonymous endpoints. They are rate-limited by `THROTTLE_ANON_RATE` and the poll endpoint is gated by a per-question token, so answers cannot be enumerated:
+
+```bash
+curl -X POST http://localhost:8000/api/questions/demo_ask/ \
+  -H "Content-Type: application/json" \
+  -d '{"question": "سوال دمو"}'
+```
+
+```json
+{ "id": 10, "question": "سوال دمو", "status": "pending", "demo_token": "8030b871-..." }
+```
+
+Then poll with the token:
+
+```bash
+curl "http://localhost:8000/api/questions/10/demo/?token=8030b871-..."
+```
+
+Wrong or missing tokens return `404 Not Found`.
 
 ## Status reference
 
