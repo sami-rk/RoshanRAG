@@ -65,7 +65,7 @@ jobs:
       # Run the checks under production settings so `check --deploy` actually
       # validates the security configuration instead of being skipped by DEBUG.
       DEBUG: "false"
-      SECRET_KEY: ci-check-only-strong-secret-0123456789abcdef
+      SECRET_KEY: ci-check-only-strong-secret-0123456789abcdef-0123456789abcdef
       ALLOWED_HOSTS: example.com
     steps:
       - uses: actions/checkout@v4
