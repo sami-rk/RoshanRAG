@@ -39,14 +39,18 @@ Requests without a valid token receive `403 Forbidden`. An unauthenticated clien
 | `GET` | `/api/documents/{id}/` | Document detail (includes full text and status) |
 | `PATCH` | `/api/documents/{id}/` | Edit a document (e.g. rename, or replace `file` to re-index) |
 | `DELETE` | `/api/documents/{id}/` | Delete a document (removes vector chunks and the stored file) |
-| `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`) — starts background answering |
-| `GET` | `/api/questions/` | Q&A history (`?status=pending\|generating\|done\|failed` filters, paginated, 20/page) |
+| `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`, optional `"thread": "<uuid>"`) — starts background answering |
+| `GET` | `/api/questions/` | Q&A history (`?status=...` filters, `?thread=<uuid>` scopes to a thread, paginated, 20/page) |
 | `GET` | `/api/questions/{id}/` | Poll for status / answer / sources |
+| `GET` | `/api/questions/{id}/stream/` | Server-Sent Events: live answer streaming (token frames + final `done` frame) |
 | `PATCH` | `/api/questions/{id}/` | Record answer feedback (`{"feedback": "up"\|"down"\|"none"}`) |
 | `DELETE` | `/api/questions/{id}/` | Delete a question from the history |
 | `GET` | `/api/questions/export/` | Export Q&A history (`?format=csv` default, `?format=json`) |
 | `POST` | `/api/questions/demo_ask/` | Anonymous demo question (no token) — returns `demo_token` for polling |
 | `GET` | `/api/questions/{id}/demo/?token=...` | Poll a demo question's status (token-gated, no auth) |
+| `GET` | `/api/threads/` | List conversation threads |
+| `POST` | `/api/threads/` | Create a conversation thread (`{"title": "..."}`) |
+| `GET` | `/api/threads/{id}/` | Thread detail including its ordered `questions` |
 | `GET` | `/api/health/` | Health check (DB + Chroma), no authentication required |
 
 ## Uploading a document
@@ -110,9 +114,26 @@ curl -X POST http://localhost:8000/api/questions/ \
   -d '{"question": "میزان کل فروش در سه ماهه اول چقدر بوده است؟"}'
 ```
 
-The question is created with status `pending` and answering starts in the background. Poll `GET /api/questions/{id}/` until it finishes.
+The question is created with status `pending` and answering starts in the background. Poll `GET /api/questions/{id}/` until it finishes, or subscribe to `GET /api/questions/{id}/stream/` for live streaming.
+
+When `thread` is omitted, the server creates a new thread titled with the question's first 60 characters, so consecutive questions naturally group into conversations.
 
 Question lifecycle: `pending → generating → done | failed`.
+
+## Streaming answers (Server-Sent Events)
+
+```bash
+curl -N http://localhost:8000/api/questions/1/stream/ \
+  -H "Authorization: Token <token>"
+```
+
+The endpoint keeps the connection open, polling the worker's progress buffer, and emits `data:` frames:
+
+- `{"type": "token", "text": "..."}` — an incremental chunk of the answer, emitted as soon as the worker flushes it.
+- `{"type": "done", "question": {...}}` — final frame carrying the serialized question (full `answer`, `sources`, `status`).
+- `{"type": "timeout"}` — after 300 seconds without completion.
+
+A request for a question that is already finished emits a single `done` frame immediately. The chat page consumes this stream to render the answer token-by-token.
 
 ```bash
 curl -X GET http://localhost:8000/api/questions/1/ \
