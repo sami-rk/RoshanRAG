@@ -43,17 +43,49 @@
     var items = sources
       .map(function (source) {
         var id = source.document_id != null ? source.document_id : "";
+        var citation = source.citation != null ? source.citation : "";
         var title = esc(source.title || "سند بدون نام");
         var excerpt = esc((source.excerpt || "").slice(0, 220));
         var link = id
           ? '<a href="/admin/documents/document/' + id + '/change/">' + title + "</a>"
           : title;
+        var badge = citation
+          ? '<span class="chat-citation-badge">[' + citation + "]</span>"
+          : "";
         return (
-          '<li class="chat-source"><strong>' + link + "</strong><p>" + excerpt + "</p></li>"
+          '<li class="chat-source" data-source="' +
+          citation +
+          '">' +
+          badge +
+          "<strong>" +
+          link +
+          "</strong><p>" +
+          excerpt +
+          "</p></li>"
         );
       })
       .join("");
     return '<div class="chat-sources-title">منابع:</div><ul class="chat-sources">' + items + "</ul>";
+  }
+
+  function withCitations(html, sources) {
+    if (!sources || !sources.length) return html;
+    var valid = {};
+    sources.forEach(function (source) {
+      if (source.citation != null) valid[String(source.citation)] = true;
+    });
+    return html.replace(/\[(\d+)\]/g, function (match, number) {
+      if (!valid[number]) return match;
+      return (
+        '<button type="button" class="citation" data-source="' +
+        number +
+        '" aria-label="نمایش منبع ' +
+        number +
+        '">[' +
+        number +
+        "]</button>"
+      );
+    });
   }
 
   function renderFeedback(question) {
@@ -99,7 +131,11 @@
     }
     addMessage(
       "answer",
-      "<p>" + esc(question.answer) + "</p>" + renderSources(question.sources) + renderFeedback(question)
+      "<p>" +
+        withCitations(esc(question.answer), question.sources) +
+        "</p>" +
+        renderSources(question.sources) +
+        renderFeedback(question)
     );
   }
 
@@ -171,6 +207,23 @@
 
   if (stream) {
     stream.addEventListener("click", function (event) {
+      var citation = event.target.closest("button.citation[data-source]");
+      if (citation) {
+        var number = citation.getAttribute("data-source");
+        var sources = stream.querySelectorAll(".chat-source");
+        var active = null;
+        sources.forEach(function (source) {
+          if (source.getAttribute("data-source") === number) {
+            active = source;
+          } else {
+            source.classList.remove("chat-source-active");
+          }
+        });
+        if (!active) return;
+        active.classList.add("chat-source-active");
+        active.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        return;
+      }
       var btn = event.target.closest("button[data-feedback]");
       if (!btn) return;
       var id = btn.getAttribute("data-id");

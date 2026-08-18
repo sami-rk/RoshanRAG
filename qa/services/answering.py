@@ -61,6 +61,8 @@ _SYSTEM_PROMPT = (
     "فقط بر اساس متن‌های داخل بخش «اسناد» پاسخ بده و از دانش عمومی خارجی استفاده نکن. "
     "اگر پاسخ پرسش در اسناد موجود نیست، صراحتاً بگو که اطلاعات کافی در اسناد وجود ندارد. "
     "به همان زبانی پاسخ بده که پرسش کاربر با آن زبان نوشته شده است. "
+    "برای هر ادعایی که از یک سند گرفته می‌شود، شماره آن سند را به صورت [1] یا [2] همان‌جا درون متن بیاور؛ "
+    "شماره‌ها با ترتیب اسناد در فهرست «منابع» یکی است. "
     "در پایان پاسخ، فهرست «منابع:» را با عنوان اسناد استفاده‌شده بیاور."
 )
 
@@ -89,12 +91,13 @@ def _coerce_answer_content(content) -> str:
 
 def _build_sources(retrieved):
     sources = []
-    for document in retrieved:
+    for index, document in enumerate(retrieved, start=1):
         sources.append(
             {
                 "document_id": document.metadata.get("document_id"),
                 "title": document.metadata.get("title"),
                 "excerpt": document.page_content[:300],
+                "citation": index,
             }
         )
     return sources

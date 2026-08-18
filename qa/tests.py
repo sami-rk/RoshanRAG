@@ -264,8 +264,18 @@ class AnsweringServiceTests(APITestCase):
         self.assertEqual(
             question.sources,
             [
-                {"document_id": 1, "title": "گزارش فروش", "excerpt": "متن گزارش فروش کامل"},
-                {"document_id": 2, "title": "گزارش دوم", "excerpt": "متن گزارش دوم"},
+                {
+                    "document_id": 1,
+                    "title": "گزارش فروش",
+                    "excerpt": "متن گزارش فروش کامل",
+                    "citation": 1,
+                },
+                {
+                    "document_id": 2,
+                    "title": "گزارش دوم",
+                    "excerpt": "متن گزارش دوم",
+                    "citation": 2,
+                },
             ],
         )
         self.assertIsNotNone(question.answered_at)
