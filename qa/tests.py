@@ -40,7 +40,7 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_write_fields_are_read_only(self):
-        Question.objects.create(question="q", answer="existing")
+        Question.objects.create(question="q", answer="existing", user=self.user)
         response = self.client.post(
             "/api/questions/",
             {"question": "q", "answer": "forged", "status": Question.Status.DONE},
@@ -52,32 +52,36 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(created.status, Question.Status.PENDING)
 
     def test_history_is_listed(self):
-        Question.objects.create(question="اولی")
-        Question.objects.create(question="دومی")
+        Question.objects.create(question="اولی", user=self.user)
+        Question.objects.create(question="دومی", user=self.user)
         response = self.client.get("/api/questions/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 2)
 
     def test_status_filter(self):
-        Question.objects.create(question="پاسخ داده شده", status=Question.Status.DONE)
-        Question.objects.create(question="در انتظار")
+        Question.objects.create(
+            question="پاسخ داده شده", status=Question.Status.DONE, user=self.user
+        )
+        Question.objects.create(question="در انتظار", user=self.user)
         response = self.client.get("/api/questions/?status=pending")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
         self.assertEqual(response.data["results"][0]["question"], "در انتظار")
 
     def test_delete_question_via_api(self):
-        question = Question.objects.create(question="برای حذف")
+        question = Question.objects.create(question="برای حذف", user=self.user)
         response = self.client.delete(f"/api/questions/{question.pk}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Question.objects.filter(pk=question.pk).exists())
 
     def test_feedback_defaults_to_none(self):
-        question = Question.objects.create(question="پرسش")
+        question = Question.objects.create(question="پرسش", user=self.user)
         self.assertEqual(question.feedback, Question.Feedback.NONE)
 
     def test_feedback_can_be_updated(self):
-        question = Question.objects.create(question="پرسش", status=Question.Status.DONE)
+        question = Question.objects.create(
+            question="پرسش", status=Question.Status.DONE, user=self.user
+        )
         response = self.client.patch(
             f"/api/questions/{question.pk}/", {"feedback": "up"}, format="json"
         )
@@ -87,7 +91,7 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(question.feedback, Question.Feedback.UP)
 
     def test_feedback_rejects_invalid_values(self):
-        question = Question.objects.create(question="پرسش")
+        question = Question.objects.create(question="پرسش", user=self.user)
         response = self.client.patch(
             f"/api/questions/{question.pk}/", {"feedback": "maybe"}, format="json"
         )
@@ -97,7 +101,10 @@ class QuestionAPITests(APITestCase):
 
     def test_export_csv_returns_selected_questions(self):
         Question.objects.create(
-            question="سوال اول", answer="پاسخ اول", status=Question.Status.DONE
+            question="سوال اول",
+            answer="پاسخ اول",
+            status=Question.Status.DONE,
+            user=self.user,
         )
         response = self.client.get("/api/questions/export/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -110,15 +117,17 @@ class QuestionAPITests(APITestCase):
         self.assertIn("پاسخ اول", content)
 
     def test_export_json_returns_selected_questions(self):
-        Question.objects.create(question="سوال دوم")
+        Question.objects.create(question="سوال دوم", user=self.user)
         response = self.client.get("/api/questions/export/?format=json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         payload = response.json()
         self.assertEqual(payload["results"][0]["question"], "سوال دوم")
 
     def test_export_respects_status_filter(self):
-        Question.objects.create(question="انجام شده", status=Question.Status.DONE)
-        Question.objects.create(question="در انتظار")
+        Question.objects.create(
+            question="انجام شده", status=Question.Status.DONE, user=self.user
+        )
+        Question.objects.create(question="در انتظار", user=self.user)
         response = self.client.get("/api/questions/export/?status=pending")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         content = response.content.decode("utf-8")
@@ -179,7 +188,7 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(question.thread.title, "پرسش بدون گفتگو")
 
     def test_create_question_in_existing_thread(self):
-        thread = Thread.objects.create(title="گفتگوی من")
+        thread = Thread.objects.create(title="گفتگوی من", user=self.user)
         with patch("qa.views.schedule_answering"):
             response = self.client.post(
                 "/api/questions/",
@@ -189,17 +198,18 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         question = Question.objects.get(pk=response.data["id"])
         self.assertEqual(question.thread, thread)
+        self.assertEqual(question.user, self.user)
 
     def test_question_list_filters_by_thread(self):
-        thread = Thread.objects.create(title="گفتگو")
-        Question.objects.create(question="در گفتگو", thread=thread)
-        Question.objects.create(question="بیرون گفتگو")
+        thread = Thread.objects.create(title="گفتگو", user=self.user)
+        Question.objects.create(question="در گفتگو", thread=thread, user=self.user)
+        Question.objects.create(question="بیرون گفتگو", user=self.user)
         response = self.client.get(f"/api/questions/?thread={thread.pk}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
 
     def test_question_patch_cannot_rewrite_question_text(self):
-        question = Question.objects.create(question="اصلی")
+        question = Question.objects.create(question="اصلی", user=self.user)
         response = self.client.patch(
             f"/api/questions/{question.pk}/",
             {"question": "تغییر یافته", "feedback": "down"},
@@ -210,6 +220,76 @@ class QuestionAPITests(APITestCase):
         self.assertEqual(question.question, "اصلی")
         self.assertEqual(question.feedback, Question.Feedback.DOWN)
 
+    def test_create_question_assigns_owner(self):
+        with patch("qa.views.schedule_answering"):
+            response = self.client.post(
+                "/api/questions/", {"question": "پرسش مالکانه"}, format="json"
+            )
+        question = Question.objects.get(pk=response.data["id"])
+        self.assertEqual(question.user, self.user)
+        self.assertEqual(question.thread.user, self.user)
+
+    def test_cannot_create_question_in_someone_elses_thread(self):
+        other = User.objects.create_user(username="other", password="pass")
+        thread = Thread.objects.create(title="گفتگوی دیگران", user=other)
+        response = self.client.post(
+            "/api/questions/",
+            {"question": "نفوذ", "thread": str(thread.pk)},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_retrieve_someone_elses_question(self):
+        other = User.objects.create_user(username="other", password="pass")
+        question = Question.objects.create(question="محرمانه", user=other)
+        response = self.client.get(f"/api/questions/{question.pk}/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_cannot_patch_someone_elses_question(self):
+        other = User.objects.create_user(username="other", password="pass")
+        question = Question.objects.create(question="محرمانه", user=other)
+        response = self.client.patch(
+            f"/api/questions/{question.pk}/", {"feedback": "up"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_cannot_delete_someone_elses_question(self):
+        other = User.objects.create_user(username="other", password="pass")
+        question = Question.objects.create(question="محرمانه", user=other)
+        response = self.client.delete(f"/api/questions/{question.pk}/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(Question.objects.filter(pk=question.pk).exists())
+
+    def test_cannot_stream_someone_elses_question(self):
+        other = User.objects.create_user(username="other", password="pass")
+        question = Question.objects.create(
+            question="محرمانه",
+            answer="پاسخ",
+            status=Question.Status.DONE,
+            user=other,
+        )
+        response = self.client.get(f"/api/questions/{question.pk}/stream/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_hides_other_users_and_demo_questions(self):
+        other = User.objects.create_user(username="other", password="pass")
+        Question.objects.create(question="مال من", user=self.user)
+        Question.objects.create(question="مال دیگران", user=other)
+        Question.objects.create(question="دمو")
+        response = self.client.get("/api/questions/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["question"], "مال من")
+
+    def test_export_is_scoped_to_owner(self):
+        other = User.objects.create_user(username="other", password="pass")
+        Question.objects.create(question="مال من", user=self.user)
+        Question.objects.create(question="مال دیگران", user=other)
+        response = self.client.get("/api/questions/export/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("مال من", response.content.decode("utf-8"))
+        self.assertNotIn("مال دیگران", response.content.decode("utf-8"))
+
 
 class ThreadAPITests(APITestCase):
     def setUp(self):
@@ -217,15 +297,15 @@ class ThreadAPITests(APITestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_threads_are_listed(self):
-        Thread.objects.create(title="گفتگوی اول")
-        Thread.objects.create(title="گفتگوی دوم")
+        Thread.objects.create(title="گفتگوی اول", user=self.user)
+        Thread.objects.create(title="گفتگوی دوم", user=self.user)
         response = self.client.get("/api/threads/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 2)
 
     def test_thread_retrieve_includes_questions(self):
-        thread = Thread.objects.create(title="گفتگو")
-        Question.objects.create(question="سوال یک", thread=thread)
+        thread = Thread.objects.create(title="گفتگو", user=self.user)
+        Question.objects.create(question="سوال یک", thread=thread, user=self.user)
         response = self.client.get(f"/api/threads/{thread.pk}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["title"], "گفتگو")
@@ -238,6 +318,21 @@ class ThreadAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.data["id"])
+        thread = Thread.objects.get(pk=response.data["id"])
+        self.assertEqual(thread.user, self.user)
+
+    def test_cannot_list_someone_elses_thread(self):
+        other = User.objects.create_user(username="other", password="pass")
+        Thread.objects.create(title="گفتگوی دیگران", user=other)
+        response = self.client.get("/api/threads/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 0)
+
+    def test_cannot_retrieve_someone_elses_thread(self):
+        other = User.objects.create_user(username="other", password="pass")
+        thread = Thread.objects.create(title="گفتگوی دیگران", user=other)
+        response = self.client.get(f"/api/threads/{thread.pk}/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_stream_endpoint_emits_done_event_for_finished_question(self):
         question = Question.objects.create(
@@ -245,6 +340,7 @@ class ThreadAPITests(APITestCase):
             answer="پاسخ کامل",
             status=Question.Status.DONE,
             stream_data="",
+            user=self.user,
         )
         response = self.client.get(f"/api/questions/{question.pk}/stream/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -254,13 +350,14 @@ class ThreadAPITests(APITestCase):
         self.assertIn('"type": "done"', body)
 
     def test_stream_done_frame_serializes_question_in_thread(self):
-        thread = Thread.objects.create(title="گفتگو")
+        thread = Thread.objects.create(title="گفتگو", user=self.user)
         question = Question.objects.create(
             question="سوال در گفتگو",
             answer="پاسخ",
             status=Question.Status.DONE,
             stream_data="",
             thread=thread,
+            user=self.user,
         )
         response = self.client.get(f"/api/questions/{question.pk}/stream/")
         body = b"".join(response.streaming_content).decode("utf-8")
@@ -274,6 +371,7 @@ class ThreadAPITests(APITestCase):
             answer="پاسخ کامل",
             status=Question.Status.DONE,
             stream_data="بخش اول ",
+            user=self.user,
         )
         response = self.client.get(f"/api/questions/{question.pk}/stream/")
         body = b"".join(response.streaming_content).decode("utf-8")

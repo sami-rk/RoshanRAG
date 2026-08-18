@@ -4,7 +4,7 @@ import time
 import uuid
 
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -66,7 +66,9 @@ class QuestionViewSet(
     serializer_class = QuestionSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # Questions are private to the user who asked them. Demo questions
+        # (created anonymously with ``user=None``) stay out of every list.
+        queryset = super().get_queryset().filter(user=self.request.user)
         status = self.request.query_params.get("status")
         if status:
             queryset = queryset.filter(status=status)
@@ -77,11 +79,17 @@ class QuestionViewSet(
 
     def perform_create(self, serializer):
         validated = serializer.validated_data
-        if validated.get("thread") is None:
-            validated["thread"] = Thread.objects.create(
-                title=validated["question"][:60]
+        thread = validated.get("thread")
+        if thread is not None and thread.user_id != self.request.user.id:
+            raise serializers.ValidationError(
+                {"thread": "گفتگو متعلق به شما نیست."}
             )
-        question = serializer.save()
+        if thread is None:
+            thread = Thread.objects.create(
+                title=validated["question"][:60], user=self.request.user
+            )
+            validated["thread"] = thread
+        question = serializer.save(user=self.request.user)
         schedule_answering(question.pk)
 
     @action(detail=True, methods=["get"])
@@ -134,9 +142,13 @@ class QuestionViewSet(
 
     @action(detail=True, methods=["get"], permission_classes=[AllowAny], url_path="demo")
     def demo_retrieve(self, request, pk=None):
-        question = self.get_object()
+        question = Question.objects.filter(pk=pk).first()
         token = request.query_params.get("token")
-        if question.demo_token is None or token != str(question.demo_token):
+        if (
+            question is None
+            or question.demo_token is None
+            or token != str(question.demo_token)
+        ):
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(
             QuestionSerializer(question, context=self.get_serializer_context()).data
@@ -153,6 +165,12 @@ class ThreadViewSet(
 ):
     queryset = Thread.objects.all()
     serializer_class = ThreadSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     def retrieve(self, request, pk=None):
         thread = self.get_object()
