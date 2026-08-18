@@ -101,7 +101,7 @@ Response (`201 Created` when at least one file passes):
 ```json
 {
   "created": [ { "id": 1, "title": "سوالات متداول", "status": "pending" } ],
-  "errors": [ { "file": "قوانین.pdf", "errors": { "file": ["فرمت فایل باید docx یا txt باشد"] } } ]
+  "errors": [ { "file": "قوانین.pdf", "errors": { "file": ["فرمت فایل باید docx، pdf یا txt باشد"] } } ]
 }
 ```
 
