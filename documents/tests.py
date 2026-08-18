@@ -3,10 +3,11 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -333,3 +334,35 @@ class LoadSampleDataCommandTests(TestCase):
                         title="extra", file=File(path.open("rb"), name="extra.txt")
                     )
                 schedule.assert_called_once()
+
+
+class DocumentAdminActionTests(TestCase):
+    def _admin_request(self):
+        request = RequestFactory().get("/")
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        return request
+
+    def test_retry_indexing_schedules_failed_documents(self):
+        from core.admin_site import roshan_admin_site
+        from documents.admin import DocumentAdmin
+
+        doc = _make_document("broken.txt", b"")
+        Document.objects.filter(pk=doc.pk).update(status=Document.Status.FAILED)
+        with patch("documents.admin.schedule_index") as schedule:
+            DocumentAdmin(Document, roshan_admin_site).retry_indexing(
+                self._admin_request(), Document.objects.filter(pk=doc.pk)
+            )
+        schedule.assert_called_once_with(doc.pk)
+
+    def test_retry_indexing_shows_a_success_message(self):
+        from core.admin_site import roshan_admin_site
+        from documents.admin import DocumentAdmin
+
+        doc = _make_document("broken.txt", b"")
+        request = self._admin_request()
+        with patch("documents.admin.schedule_index"):
+            DocumentAdmin(Document, roshan_admin_site).retry_indexing(
+                request, Document.objects.filter(pk=doc.pk)
+            )
+        self.assertEqual(len(request._messages), 1)
