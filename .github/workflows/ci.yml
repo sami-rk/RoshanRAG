@@ -147,13 +147,41 @@ jobs:
       - uses: actions/checkout@v5
       - name: Build the image
         run: docker build -t roshan:ci .
+      - name: Create the shared network
+        run: docker network create roshan-smoke-net
+      - name: Run Chroma
+        run: |
+          docker run -d --name roshan-chroma --network roshan-smoke-net \
+            -e IS_PERSISTENT=TRUE \
+            -e ANONYMIZED_TELEMETRY=FALSE \
+            -p 8091:8000 \
+            chromadb/chroma:1.5.9
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8091/api/v2/heartbeat > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Chroma did not become healthy in time"
+          docker logs roshan-chroma
+          exit 1
+      - name: Run the mock LLM
+        run: |
+          docker run -d --name roshan-mock-llm --network roshan-smoke-net \
+            -v "$PWD/scripts:/scripts" \
+            python:3.12-slim \
+            python /scripts/mock_llm.py
       - name: Run the container in production mode
         run: |
-          docker run -d --name roshan-smoke -p 8099:8000 \
+          docker run -d --name roshan-smoke --network roshan-smoke-net -p 8099:8000 \
             -e DEBUG=false \
             -e SECRET_KEY=ci-smoke-strong-secret-0123456789abcdef \
             -e ALLOWED_HOSTS=localhost,127.0.0.1 \
-            -e OPENROUTER_API_KEY= \
+            -e OPENROUTER_API_KEY=ci-smoke-dummy-key \
+            -e OPENROUTER_API_BASE=http://roshan-mock-llm:8090/v1 \
+            -e CHROMA_HOST=roshan-chroma \
+            -e CHROMA_PORT=8000 \
+            -e EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2 \
             -e DJANGO_SUPERUSER_USERNAME=admin \
             -e DJANGO_SUPERUSER_PASSWORD=admin123 \
             -e HF_HUB_DISABLE_XET=1 \
@@ -161,9 +189,8 @@ jobs:
       - name: Wait for the app to become healthy
         run: |
           for i in $(seq 1 60); do
-            # Chroma is absent in this job, so /api/health/ answers 503 once
-            # the app is up. Treat any HTTP response as "the server is ready".
-            if curl -s -o /dev/null http://localhost:8099/api/health/; then
+            # Chroma runs in this job, so /api/health/ must report it as ok.
+            if curl -sf http://localhost:8099/api/health/ | grep -q '"chroma": "ok"'; then
               exit 0
             fi
             sleep 2
@@ -193,6 +220,99 @@ jobs:
             exit 1
           fi
           echo "OK: /api/token/ -> $code"
+      - name: Run a real RAG round trip
+        run: |
+          set -euo pipefail
+
+          TOKEN=$(curl -s -X POST http://localhost:8099/api/token/ \
+            -H 'Content-Type: application/json' \
+            -d '{"username":"admin","password":"admin123"}' | jq -r .token)
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "FAILED: could not acquire an API token"
+            exit 1
+          fi
+          echo "Acquired API token"
+
+          DOC_JSON=$(curl -s -X POST http://localhost:8099/api/documents/ \
+            -H "Authorization: Token $TOKEN" \
+            -F "file=@sample_data/گزارش-فروش-سه-ماهه-اول-1403.docx")
+          DOC_ID=$(echo "$DOC_JSON" | jq -r .id)
+          if [ -z "$DOC_ID" ] || [ "$DOC_ID" = "null" ]; then
+            echo "FAILED: document upload did not return an id"
+            echo "$DOC_JSON"
+            exit 1
+          fi
+          echo "Uploaded document id=$DOC_ID"
+
+          STATUS=pending
+          for i in $(seq 1 90); do
+            STATUS=$(curl -s http://localhost:8099/api/documents/$DOC_ID/ \
+              -H "Authorization: Token $TOKEN" | jq -r .status)
+            if [ "$STATUS" = "ready" ]; then
+              break
+            fi
+            if [ "$STATUS" = "failed" ]; then
+              echo "FAILED: document indexing failed"
+              docker logs roshan-smoke
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$STATUS" != "ready" ]; then
+            echo "FAILED: document never reached ready"
+            docker logs roshan-smoke
+            exit 1
+          fi
+          echo "Document indexed (status=$STATUS)"
+
+          ASK_JSON=$(curl -s -X POST http://localhost:8099/api/questions/demo_ask/ \
+            -H 'Content-Type: application/json' \
+            -d '{"question":"میزان فروش در سه ماهه اول چه میزان بود؟"}')
+          QUESTION_ID=$(echo "$ASK_JSON" | jq -r .id)
+          DEMO_TOKEN=$(echo "$ASK_JSON" | jq -r .demo_token)
+          if [ -z "$QUESTION_ID" ] || [ "$QUESTION_ID" = "null" ] \
+             || [ -z "$DEMO_TOKEN" ] || [ "$DEMO_TOKEN" = "null" ]; then
+            echo "FAILED: demo_ask did not return a question id and token"
+            echo "$ASK_JSON"
+            exit 1
+          fi
+          echo "Asked question id=$QUESTION_ID"
+
+          STATUS=pending
+          for i in $(seq 1 60); do
+            ANSWER_JSON=$(curl -s \
+              "http://localhost:8099/api/questions/$QUESTION_ID/demo/?token=$DEMO_TOKEN")
+            STATUS=$(echo "$ANSWER_JSON" | jq -r .status)
+            if [ "$STATUS" = "done" ]; then
+              break
+            fi
+            if [ "$STATUS" = "failed" ]; then
+              echo "FAILED: answering failed"
+              echo "$ANSWER_JSON"
+              docker logs roshan-smoke
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$STATUS" != "done" ]; then
+            echo "FAILED: question never reached done"
+            docker logs roshan-smoke
+            exit 1
+          fi
+
+          ANSWER=$(echo "$ANSWER_JSON" | jq -r .answer)
+          SOURCES=$(echo "$ANSWER_JSON" | jq -r '.sources | length')
+          if [ -z "$ANSWER" ]; then
+            echo "FAILED: answer is empty"
+            exit 1
+          fi
+          if [ -z "$SOURCES" ] || [ "$SOURCES" = "null" ] || [ "$SOURCES" = "0" ]; then
+            echo "FAILED: no grounded sources returned"
+            echo "$ANSWER_JSON"
+            exit 1
+          fi
+          echo "Answer generated with $SOURCES grounded source(s)"
+          echo "OK: RAG round trip complete"
       - name: Assert no tracebacks in the logs
         run: |
           if docker logs roshan-smoke 2>&1 | grep -E "Traceback|Internal Server Error"; then
