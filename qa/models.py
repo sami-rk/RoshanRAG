@@ -8,10 +8,18 @@ class Question(models.Model):
         DONE = "done", "پاسخ داده شده"
         FAILED = "failed", "ناموفق"
 
+    class Feedback(models.TextChoices):
+        NONE = "none", "بدون بازخورد"
+        UP = "up", "پاسخ مفید بود"
+        DOWN = "down", "پاسخ مفید نبود"
+
     question = models.TextField("پرسش")
     answer = models.TextField("پاسخ", blank=True, default="")
     status = models.CharField(
         "وضعیت", max_length=12, choices=Status.choices, default=Status.PENDING
+    )
+    feedback = models.CharField(
+        "بازخورد", max_length=4, choices=Feedback.choices, default=Feedback.NONE
     )
     sources = models.JSONField("منابع", default=list, blank=True)
     error_message = models.TextField("پیام خطا", blank=True, default="")
