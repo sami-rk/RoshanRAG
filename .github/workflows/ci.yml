@@ -61,6 +61,12 @@ jobs:
   checks:
     name: Django system checks
     runs-on: ubuntu-latest
+    env:
+      # Run the checks under production settings so `check --deploy` actually
+      # validates the security configuration instead of being skipped by DEBUG.
+      DEBUG: "false"
+      SECRET_KEY: ci-check-only-strong-secret-0123456789abcdef
+      ALLOWED_HOSTS: example.com
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -75,9 +81,11 @@ jobs:
         run: python manage.py check
       - name: Run manage.py check --deploy
         run: python manage.py check --deploy
+      - name: Check migrations are in sync
+        run: python manage.py makemigrations --check --dry-run
 
   js-check:
-    name: JavaScript syntax check
+    name: JavaScript syntax and i18n check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,6 +94,8 @@ jobs:
           for file in static/landing/js/*.js; do
             node --check "$file"
           done
+      - name: Check fa/en translation keys match
+        run: node scripts/check-i18n-js.mjs
 
   docker-build:
     name: Docker build
