@@ -8,6 +8,25 @@
   var answerBox = document.getElementById("demo-answer");
   var busy = false;
 
+  var T = {
+    fa: {
+      fetchError: "خطا در دریافت پاسخ",
+      timeout: "زمان پاسخ‌دهی به پایان رسید",
+      preparing: "در حال آماده‌سازی پاسخ…",
+      submitError: "خطا در ثبت پرسش",
+      generateError: "خطا در تولید پاسخ",
+      sources: "منابع",
+    },
+    en: {
+      fetchError: "Error fetching the answer",
+      timeout: "Answer time ran out",
+      preparing: "Preparing your answer…",
+      submitError: "Error submitting the question",
+      generateError: "Error generating the answer",
+      sources: "Sources",
+    },
+  }[document.documentElement.lang === "en" ? "en" : "fa"];
+
   function esc(text) {
     var holder = document.createElement("div");
     holder.textContent = text;
@@ -21,7 +40,7 @@
         "/api/questions/" + id + "/demo/?token=" + encodeURIComponent(token)
       )
         .then(function (response) {
-          if (!response.ok) throw new Error("خطا در دریافت پاسخ");
+          if (!response.ok) throw new Error(T.fetchError);
           return response.json();
         })
         .then(function (question) {
@@ -29,7 +48,7 @@
             return question;
           }
           if (Date.now() > deadline) {
-            throw new Error("زمان پاسخ‌دهی به پایان رسید");
+            throw new Error(T.timeout);
           }
           return new Promise(function (resolve) {
             setTimeout(function () {
@@ -50,7 +69,7 @@
     busy = true;
     input.disabled = true;
     answerBox.hidden = false;
-    answerBox.innerHTML = '<p class="demo-pending">در حال آماده‌سازی پاسخ…</p>';
+    answerBox.innerHTML = '<p class="demo-pending">' + T.preparing + "</p>";
 
     fetch("/api/questions/demo_ask/", {
       method: "POST",
@@ -63,14 +82,14 @@
         });
       })
       .then(function (result) {
-        if (!result.ok) throw new Error(result.data.detail || "خطا در ثبت پرسش");
+        if (!result.ok) throw new Error(result.data.detail || T.submitError);
         return poll(result.data.id, result.data.demo_token);
       })
       .then(function (question) {
         if (question.status === "failed") {
           answerBox.innerHTML =
             '<p class="demo-error">' +
-            esc(question.error_message || "خطا در تولید پاسخ") +
+            esc(question.error_message || T.generateError) +
             "</p>";
           return;
         }
@@ -82,7 +101,7 @@
         answerBox.innerHTML =
           "<p>" + esc(question.answer) + "</p>" +
           (sources
-            ? '<div class="demo-sources"><span class="demo-sources-label">منابع:</span>' +
+            ? '<div class="demo-sources"><span class="demo-sources-label">' + T.sources + ":</span>" +
               sources +
               "</div>"
             : "");

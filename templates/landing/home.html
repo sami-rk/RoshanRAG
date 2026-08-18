@@ -19,33 +19,33 @@
     <div class="edb-highlight"></div>
   </div>
   <div class="container hero-inner">
-    <span class="hero-badge" data-hero style="--i:0"><span class="dot" aria-hidden="true"></span>سامانه هوشمند پرسش از اسناد سازمانی</span>
-    <h1 data-hero style="--i:1">از اسناد سازمانی، <span class="grad">پاسخ بگیر</span></h1>
-    <p class="lead" data-hero style="--i:2">روشن RAG اسناد متنی سازمان شما را به یک پایگاه دانش هوشمند تبدیل می‌کند؛ سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید.</p>
+    <span class="hero-badge" data-hero style="--i:0"><span class="dot" aria-hidden="true"></span>{% trans "سامانه هوشمند پرسش از اسناد سازمانی" %}</span>
+    <h1 data-hero style="--i:1">{% trans "از اسناد سازمانی،" %} <span class="grad">{% trans "پاسخ بگیر" %}</span></h1>
+    <p class="lead" data-hero style="--i:2">{% trans "روشن RAG اسناد متنی سازمان شما را به یک پایگاه دانش هوشمند تبدیل می‌کند؛ سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید." %}</p>
     <div class="hero-actions" data-hero style="--i:3">
-      <a class="btn btn-primary btn-lg magnetic" href="{% url 'admin:index' %}">ورود به پنل مدیریت</a>
-      <a class="btn btn-ghost btn-lg" href="{% url 'schema-docs' %}">مستندات API</a>
+      <a class="btn btn-primary btn-lg magnetic" href="{% url 'admin:index' %}">{% trans "ورود به پنل مدیریت" %}</a>
+      <a class="btn btn-ghost btn-lg" href="{% url 'schema-docs' %}">{% trans "مستندات API" %}</a>
     </div>
     <div class="hero-stats" data-hero style="--i:4">
       <div class="stat-chip">
         <span class="stat-num" data-count="{{ stats.documents_ready }}"><em>۰</em></span>
-        <span class="stat-lbl">سند آماده</span>
+        <span class="stat-lbl">{% trans "سند آماده" %}</span>
       </div>
       <div class="stat-chip">
         <span class="stat-num" data-count="{{ stats.questions_done }}"><em>۰</em></span>
-        <span class="stat-lbl">پاسخ ارائه‌شده</span>
+        <span class="stat-lbl">{% trans "پاسخ ارائه‌شده" %}</span>
       </div>
       <div class="stat-chip">
         <span class="stat-num" data-count="{{ stats.documents }}"><em>۰</em></span>
-        <span class="stat-lbl">کل اسناد</span>
+        <span class="stat-lbl">{% trans "کل اسناد" %}</span>
       </div>
     </div>
     <div class="demo-widget" data-hero style="--i:5">
       <form class="demo-form" id="demo-form">
-        <label class="demo-label" for="demo-input">یک پرسش نمونه را همینجا امتحان کنید</label>
+        <label class="demo-label" for="demo-input">{% trans "یک پرسش نمونه را همینجا امتحان کنید" %}</label>
         <div class="demo-row">
-          <input type="text" class="demo-input" id="demo-input" placeholder="مثلاً: مهم‌ترین نکات این سند چیست؟" aria-label="پرسش آزمایشی" maxlength="500" autocomplete="off">
-          <button type="submit" class="btn btn-primary demo-send">بپرس</button>
+          <input type="text" class="demo-input" id="demo-input" placeholder="{% trans 'مثلاً: مهم‌ترین نکات این سند چیست؟' %}" aria-label="{% trans 'پرسش آزمایشی' %}" maxlength="500" autocomplete="off">
+          <button type="submit" class="btn btn-primary demo-send">{% trans "بپرس" %}</button>
         </div>
       </form>
       <div class="demo-answer" id="demo-answer" hidden aria-live="polite"></div>
@@ -77,9 +77,9 @@
 <section class="section" id="features">
   <div class="container">
     <div class="section-head center" data-reveal>
-      <span class="kicker">قابلیت‌ها</span>
-      <h2>هر آنچه برای پرسش از اسناد نیاز دارید</h2>
-      <p>از استخراج خودکار متن تا پاسخ‌های دقیق با ذکر منبع؛ یکپارچه، سریع و با پشتیبانی کامل از زبان فارسی.</p>
+      <span class="kicker">{% trans "قابلیت‌ها" %}</span>
+      <h2>{% trans "هر آنچه برای پرسش از اسناد نیاز دارید" %}</h2>
+      <p>{% trans "از استخراج خودکار متن تا پاسخ‌های دقیق با ذکر منبع؛ یکپارچه، سریع و با پشتیبانی کامل از زبان فارسی." %}</p>
     </div>
     <div class="bento">
       <article class="bento-card large" data-reveal data-tilt>
@@ -88,12 +88,12 @@
             <path d="M12 3l1.9 5.7a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/>
           </svg>
         </span>
-        <h3>جستجوی معنایی چندزبانه</h3>
-        <p>موتور embedding مدل <strong>bge-m3</strong> فارسی و انگلیسی را در یک فضای برداری واحد جست‌وجو می‌کند؛ دیگر نگران کلمه‌به‌کلمه جست‌وجو نیستید — مفهوم سؤال را می‌فهمد و مرتبط‌ترین بخش‌های اسناد را برمی‌گرداند.</p>
+        <h3>{% trans "جستجوی معنایی چندزبانه" %}</h3>
+        <p>{% blocktrans %}موتور embedding مدل <strong>bge-m3</strong> فارسی و انگلیسی را در یک فضای برداری واحد جست‌وجو می‌کند؛ دیگر نگران کلمه‌به‌کلمه جست‌وجو نیستید — مفهوم سؤال را می‌فهمد و مرتبط‌ترین بخش‌های اسناد را برمی‌گرداند.{% endblocktrans %}</p>
         <div class="tags">
           <span>BAAI/bge-m3</span>
-          <span class="blue">چندزبانه</span>
-          <span class="blue">جستجوی برداری</span>
+          <span class="blue">{% trans "چندزبانه" %}</span>
+          <span class="blue">{% trans "جستجوی برداری" %}</span>
         </div>
       </article>
       <article class="bento-card" data-reveal data-tilt>
@@ -104,8 +104,8 @@
             <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
           </svg>
         </span>
-        <h3>پاسخ با ذکر منبع</h3>
-        <p>هر پاسخ به اسناد منبع استناد می‌کند؛ شفافیت کامل در اینکه پاسخ از کجا آمده است.</p>
+        <h3>{% trans "پاسخ با ذکر منبع" %}</h3>
+        <p>{% trans "هر پاسخ به اسناد منبع استناد می‌کند؛ شفافیت کامل در اینکه پاسخ از کجا آمده است." %}</p>
       </article>
       <article class="bento-card" data-reveal data-tilt>
         <span class="icon">
@@ -116,8 +116,8 @@
             <rect x="3" y="16" width="7" height="5" rx="1"/>
           </svg>
         </span>
-        <h3>پنل مدیریت فارسی</h3>
-        <p>مدیریت اسناد و پرسش‌ها، پیگیری وضعیت پردازش، و پاسخ‌دهی دستی — همه در یک پنل راست‌به‌چپ.</p>
+        <h3>{% trans "پنل مدیریت فارسی" %}</h3>
+        <p>{% trans "مدیریت اسناد و پرسش‌ها، پیگیری وضعیت پردازش، و پاسخ‌دهی دستی — همه در یک پنل راست‌به‌چپ." %}</p>
       </article>
       <article class="bento-card" data-reveal data-tilt>
         <span class="icon">
@@ -125,8 +125,8 @@
             <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
           </svg>
         </span>
-        <h3>API REST + OpenAPI</h3>
-        <p>احراز هویت مبتنی بر توکن، مستندات تعاملی Swagger و اتصال آسان به سامانه‌های سازمانی.</p>
+        <h3>{% trans "API REST + OpenAPI" %}</h3>
+        <p>{% trans "احراز هویت مبتنی بر توکن، مستندات تعاملی Swagger و اتصال آسان به سامانه‌های سازمانی." %}</p>
       </article>
       <article class="bento-card" data-reveal data-tilt>
         <span class="icon">
@@ -134,8 +134,8 @@
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
         </span>
-        <h3>پردازش خودکار اسناد</h3>
-        <p>استخراج متن، قطعه‌بندی هوشمند، ساخت بردار و ذخیره در پایگاه برداری — بدون دخالت دستی.</p>
+        <h3>{% trans "پردازش خودکار اسناد" %}</h3>
+        <p>{% trans "استخراج متن، قطعه‌بندی هوشمند، ساخت بردار و ذخیره در پایگاه برداری — بدون دخالت دستی." %}</p>
       </article>
     </div>
   </div>
@@ -144,9 +144,9 @@
 <section class="section" id="how" style="background: var(--card); border-block: 1px solid var(--border);">
   <div class="container">
     <div class="section-head center" data-reveal>
-      <span class="kicker">نحوه کار</span>
-      <h2>از سند تا پاسخ در چهار گام</h2>
-      <p>خط لوله RAG روشن به صورت خودکار اسناد را به پایگاه دانش تبدیل می‌کند.</p>
+      <span class="kicker">{% trans "نحوه کار" %}</span>
+      <h2>{% trans "از سند تا پاسخ در چهار گام" %}</h2>
+      <p>{% trans "خط لوله RAG روشن به صورت خودکار اسناد را به پایگاه دانش تبدیل می‌کند." %}</p>
     </div>
     <div class="steps">
       <div class="step" data-reveal>
@@ -156,8 +156,8 @@
             <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
         </span>
-        <h3>آپلود سند</h3>
-        <p>اسناد متنی سازمان (DOCX، TXT و …) را در پنل بارگذاری کنید.</p>
+        <h3>{% trans "آپلود سند" %}</h3>
+        <p>{% trans "اسناد متنی سازمان (DOCX، TXT و …) را در پنل بارگذاری کنید." %}</p>
       </div>
       <div class="step" data-reveal>
         <span class="icon">
@@ -167,8 +167,8 @@
             <line x1="7" y1="11" x2="17" y2="11"/>
           </svg>
         </span>
-        <h3>استخراج و قطعه‌بندی</h3>
-        <p>متن استخراج و به قطعات معنادار با هم‌پوشانی مناسب تقسیم می‌شود.</p>
+        <h3>{% trans "استخراج و قطعه‌بندی" %}</h3>
+        <p>{% trans "متن استخراج و به قطعات معنادار با هم‌پوشانی مناسب تقسیم می‌شود." %}</p>
       </div>
       <div class="step" data-reveal>
         <span class="icon">
@@ -176,8 +176,8 @@
             <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
           </svg>
         </span>
-        <h3>ساخت بردار و ذخیره</h3>
-        <p>هر قطعه با bge-m3 به بردار تبدیل و در پایگاه برداری ChromaDB ایندکس می‌شود.</p>
+        <h3>{% trans "ساخت بردار و ذخیره" %}</h3>
+        <p>{% trans "هر قطعه با bge-m3 به بردار تبدیل و در پایگاه برداری ChromaDB ایندکس می‌شود." %}</p>
       </div>
       <div class="step" data-reveal>
         <span class="icon">
@@ -185,8 +185,8 @@
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         </span>
-        <h3>پاسخ با منبع</h3>
-        <p>مدل زبانی بر اساس قطعات بازیابی‌شده پاسخ می‌دهد و منابع را ذکر می‌کند.</p>
+        <h3>{% trans "پاسخ با منبع" %}</h3>
+        <p>{% trans "مدل زبانی بر اساس قطعات بازیابی‌شده پاسخ می‌دهد و منابع را ذکر می‌کند." %}</p>
       </div>
     </div>
   </div>
@@ -196,27 +196,27 @@
   <div class="container">
     <div class="sample-grid">
       <div class="section-head" data-reveal>
-        <span class="kicker">نمونه پاسخ</span>
-        <h2>پاسخی شفاف، همراه با منبع</h2>
-        <p>روشن RAG پاسخ را از متن خودِ اسناد شما می‌گیرد؛ نه از خاطرات عمومی مدل. هر پاسخ لیست منابع استنادشده را نشان می‌دهد تا قابل راستی‌آزمایی باشد.</p>
-        <a class="btn btn-ghost" href="{% url 'admin:index' %}">مشاهده در پنل مدیریت</a>
+        <span class="kicker">{% trans "نمونه پاسخ" %}</span>
+        <h2>{% trans "پاسخی شفاف، همراه با منبع" %}</h2>
+        <p>{% trans "روشن RAG پاسخ را از متن خودِ اسناد شما می‌گیرد؛ نه از خاطرات عمومی مدل. هر پاسخ لیست منابع استنادشده را نشان می‌دهد تا قابل راستی‌آزمایی باشد." %}</p>
+        <a class="btn btn-ghost" href="{% url 'admin:index' %}">{% trans "مشاهده در پنل مدیریت" %}</a>
       </div>
       <div class="qa-card" data-reveal>
         <div class="qa-q">
           <span class="avatar" aria-hidden="true">س</span>
-          مراحل استخدام در شرکت چیست؟
+          {% trans "مراحل استخدام در شرکت چیست؟" %}
         </div>
         <div class="qa-a">
-          <p>فرایند استخدام در این شرکت شامل چهار مرحله است: ارسال رزومه از طریق پرتال، مصاحبه تلفنی با واحد منابع انسانی، مصاحبه فنی با تیم مربوطه، و در نهایت ارائه پیشنهاد همکاری پس از بررسی نهایی.</p>
-          <p>متقاضیان معمولاً طی یک تا دو هفته از هر مرحله مطلع می‌شوند.</p>
+          <p>{% trans "فرایند استخدام در این شرکت شامل چهار مرحله است: ارسال رزومه از طریق پرتال، مصاحبه تلفنی با واحد منابع انسانی، مصاحبه فنی با تیم مربوطه، و در نهایت ارائه پیشنهاد همکاری پس از بررسی نهایی." %}</p>
+          <p>{% trans "متقاضیان معمولاً طی یک تا دو هفته از هر مرحله مطلع می‌شوند." %}</p>
         </div>
         <div class="qa-sources">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
           </svg>
-          <span class="src">سوالات متداول</span>
-          <span class="src">گزارش استخدام ۱۴۰۳</span>
+          <span class="src">{% trans "سوالات متداول" %}</span>
+          <span class="src">{% trans "گزارش استخدام ۱۴۰۳" %}</span>
         </div>
       </div>
     </div>
@@ -226,33 +226,33 @@
 <section class="section" id="faq" style="background: var(--card); border-block: 1px solid var(--border);">
   <div class="container">
     <div class="section-head center" data-reveal>
-      <span class="kicker">سوالات متداول</span>
-      <h2>هر آنچه باید بدانید</h2>
+      <span class="kicker">{% trans "سوالات متداول" %}</span>
+      <h2>{% trans "هر آنچه باید بدانید" %}</h2>
     </div>
     <div class="faq">
       <details data-reveal>
-        <summary>روشن RAG چیست؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="faq-a"><p>روشن RAG یک سامانه پرسش از اسناد است که با ترکیب بازیابی اطلاعات و مدل‌های زبانی (RAG)، به پرسش‌های شما بر اساس محتوای اسناد سازمان‌تان پاسخ می‌دهد.</p></div>
+        <summary>{% trans "روشن RAG چیست؟" %}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-a"><p>{% trans "روشن RAG یک سامانه پرسش از اسناد است که با ترکیب بازیابی اطلاعات و مدل‌های زبانی (RAG)، به پرسش‌های شما بر اساس محتوای اسناد سازمان‌تان پاسخ می‌دهد." %}</p></div>
       </details>
       <details data-reveal>
-        <summary>چه فرمت‌هایی پشتیبانی می‌شود؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="faq-a"><p>اسناد متنی مانند DOCX و TXT پشتیبانی می‌شوند و هر سند به صورت خودکار پردازش و ایندکس می‌شود.</p></div>
+        <summary>{% trans "چه فرمت‌هایی پشتیبانی می‌شود؟" %}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-a"><p>{% trans "اسناد متنی مانند DOCX و TXT پشتیبانی می‌شوند و هر سند به صورت خودکار پردازش و ایندکس می‌شود." %}</p></div>
       </details>
       <details data-reveal>
-        <summary>جستجو چه زبانی را پشتیبانی می‌کند؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="faq-a"><p>مدل bge-m3 فارسی و انگلیسی را در یک فضای برداری واحد پشتیبانی می‌کند؛ سؤال به هر زبان مطرح شود، پاسخ بر اساس محتوای اسناد داده می‌شود.</p></div>
+        <summary>{% trans "جستجو چه زبانی را پشتیبانی می‌کند؟" %}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-a"><p>{% trans "مدل bge-m3 فارسی و انگلیسی را در یک فضای برداری واحد پشتیبانی می‌کند؛ سؤال به هر زبان مطرح شود، پاسخ بر اساس محتوای اسناد داده می‌شود." %}</p></div>
       </details>
       <details data-reveal>
-        <summary>چرا می‌توان به پاسخ‌ها اعتماد کرد؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="faq-a"><p>چون هر پاسخ فقط از محتوای اسناد خودِ شما ساخته می‌شود و منابع استنادشده به صورت کامل نمایش داده می‌شود تا قابل راستی‌آزمایی باشد.</p></div>
+        <summary>{% trans "چرا می‌توان به پاسخ‌ها اعتماد کرد؟" %}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-a"><p>{% trans "چون هر پاسخ فقط از محتوای اسناد خودِ شما ساخته می‌شود و منابع استنادشده به صورت کامل نمایش داده می‌شود تا قابل راستی‌آزمایی باشد." %}</p></div>
       </details>
       <details data-reveal>
-        <summary>حریم خصوصی داده‌ها چگونه حفظ می‌شود؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="faq-a"><p>سامانه به صورت خودمیزبان (self-hosted) اجرا می‌شود؛ اسناد و پایگاه برداری داخل زیرساخت خود شما باقی می‌ماند.</p></div>
+        <summary>{% trans "حریم خصوصی داده‌ها چگونه حفظ می‌شود؟" %}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-a"><p>{% trans "سامانه به صورت خودمیزبان (self-hosted) اجرا می‌شود؛ اسناد و پایگاه برداری داخل زیرساخت خود شما باقی می‌ماند." %}</p></div>
       </details>
       <details data-reveal>
-        <summary>آیا API در دسترس است؟<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="faq-a"><p>بله؛ یک REST API کامل با مستندات تعاملی OpenAPI و احراز هویت مبتنی بر توکن برای اتصال به سامانه‌های سازمانی فراهم است.</p></div>
+        <summary>{% trans "آیا API در دسترس است؟" %}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="faq-a"><p>{% trans "بله؛ یک REST API کامل با مستندات تعاملی OpenAPI و احراز هویت مبتنی بر توکن برای اتصال به سامانه‌های سازمانی فراهم است." %}</p></div>
       </details>
     </div>
   </div>
@@ -261,11 +261,11 @@
 <section class="section cta">
   <div class="container">
     <div class="cta-card" data-reveal>
-      <h2>همین حالا اسناد خود را هوشمند کنید</h2>
-      <p>سندها را بارگذاری کنید، سؤال بپرسید و پاسخ را با منبع دریافت کنید. یک دقیقه تا راه‌اندازی.</p>
+      <h2>{% trans "همین حالا اسناد خود را هوشمند کنید" %}</h2>
+      <p>{% trans "سندها را بارگذاری کنید، سؤال بپرسید و پاسخ را با منبع دریافت کنید. یک دقیقه تا راه‌اندازی." %}</p>
       <div class="hero-actions">
-        <a class="btn btn-primary btn-lg magnetic" href="{% url 'admin:index' %}">ورود به پنل مدیریت</a>
-        <a class="btn btn-ghost btn-lg" href="{% url 'schema-docs' %}">مستندات API</a>
+        <a class="btn btn-primary btn-lg magnetic" href="{% url 'admin:index' %}">{% trans "ورود به پنل مدیریت" %}</a>
+        <a class="btn btn-ghost btn-lg" href="{% url 'schema-docs' %}">{% trans "مستندات API" %}</a>
       </div>
     </div>
   </div>

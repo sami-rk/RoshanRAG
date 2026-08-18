@@ -99,3 +99,186 @@ msgstr "Ask"
 
 msgid "پاسخ فقط بر اساس محتوای اسناد بارگذاری‌شده تولید می‌شود."
 msgstr "Answers are generated only from the content of uploaded documents."
+
+msgid "سامانه هوشمند پرسش از اسناد سازمانی"
+msgstr "Smart Q&A over your organization's documents"
+
+msgid "از اسناد سازمانی،"
+msgstr "From your organizational documents,"
+
+msgid "پاسخ بگیر"
+msgstr "get answers"
+
+msgid "روشن RAG اسناد متنی سازمان شما را به یک پایگاه دانش هوشمند تبدیل می‌کند؛ سؤال بپرسید و پاسخ دقیق را همراه با ذکر منبع دریافت کنید."
+msgstr "Roshan RAG turns your organization's text documents into an intelligent knowledge base; ask a question and receive an accurate answer with cited sources."
+
+msgid "سند آماده"
+msgstr "documents ready"
+
+msgid "پاسخ ارائه‌شده"
+msgstr "answers delivered"
+
+msgid "کل اسناد"
+msgstr "total documents"
+
+msgid "یک پرسش نمونه را همینجا امتحان کنید"
+msgstr "Try a sample question right here"
+
+msgid "مثلاً: مهم‌ترین نکات این سند چیست؟"
+msgstr "e.g. What are the key points of this document?"
+
+msgid "پرسش آزمایشی"
+msgstr "Sample question"
+
+msgid "بپرس"
+msgstr "Ask"
+
+msgid "قابلیت‌ها"
+msgstr "Features"
+
+msgid "هر آنچه برای پرسش از اسناد نیاز دارید"
+msgstr "Everything you need to ask your documents"
+
+msgid "از استخراج خودکار متن تا پاسخ‌های دقیق با ذکر منبع؛ یکپارچه، سریع و با پشتیبانی کامل از زبان فارسی."
+msgstr "From automatic text extraction to accurate answers with cited sources — unified, fast and with full Persian support."
+
+msgid "جستجوی معنایی چندزبانه"
+msgstr "Multilingual semantic search"
+
+msgid "موتور embedding مدل <strong>bge-m3</strong> فارسی و انگلیسی را در یک فضای برداری واحد جست‌وجو می‌کند؛ دیگر نگران کلمه‌به‌کلمه جست‌وجو نیستید — مفهوم سؤال را می‌فهمد و مرتبط‌ترین بخش‌های اسناد را برمی‌گرداند."
+msgstr "The <strong>bge-m3</strong> embedding engine searches Persian and English in a single vector space; no more word-by-word matching — it understands the meaning of your question and returns the most relevant parts of your documents."
+
+msgid "چندزبانه"
+msgstr "Multilingual"
+
+msgid "جستجوی برداری"
+msgstr "Vector search"
+
+msgid "پاسخ با ذکر منبع"
+msgstr "Answers with cited sources"
+
+msgid "هر پاسخ به اسناد منبع استناد می‌کند؛ شفافیت کامل در اینکه پاسخ از کجا آمده است."
+msgstr "Every answer cites its source documents, giving you full transparency about where the answer came from."
+
+msgid "پنل مدیریت فارسی"
+msgstr "Persian admin panel"
+
+msgid "مدیریت اسناد و پرسش‌ها، پیگیری وضعیت پردازش، و پاسخ‌دهی دستی — همه در یک پنل راست‌به‌چپ."
+msgstr "Manage documents and questions, track processing status, and answer manually — all in one right-to-left panel."
+
+msgid "API REST + OpenAPI"
+msgstr "REST API + OpenAPI"
+
+msgid "احراز هویت مبتنی بر توکن، مستندات تعاملی Swagger و اتصال آسان به سامانه‌های سازمانی."
+msgstr "Token-based authentication, interactive Swagger documentation and easy integration with enterprise systems."
+
+msgid "پردازش خودکار اسناد"
+msgstr "Automatic document processing"
+
+msgid "استخراج متن، قطعه‌بندی هوشمند، ساخت بردار و ذخیره در پایگاه برداری — بدون دخالت دستی."
+msgstr "Text extraction, smart chunking, embedding and storage in a vector database — with no manual steps."
+
+msgid "نحوه کار"
+msgstr "How it works"
+
+msgid "از سند تا پاسخ در چهار گام"
+msgstr "From document to answer in four steps"
+
+msgid "خط لوله RAG روشن به صورت خودکار اسناد را به پایگاه دانش تبدیل می‌کند."
+msgstr "The Roshan RAG pipeline automatically turns documents into a knowledge base."
+
+msgid "آپلود سند"
+msgstr "Upload document"
+
+msgid "اسناد متنی سازمان (DOCX، TXT و …) را در پنل بارگذاری کنید."
+msgstr "Upload your organization's text documents (DOCX, TXT and more) in the panel."
+
+msgid "استخراج و قطعه‌بندی"
+msgstr "Extraction and chunking"
+
+msgid "متن استخراج و به قطعات معنادار با هم‌پوشانی مناسب تقسیم می‌شود."
+msgstr "The text is extracted and split into meaningful chunks with appropriate overlap."
+
+msgid "ساخت بردار و ذخیره"
+msgstr "Embedding and storage"
+
+msgid "هر قطعه با bge-m3 به بردار تبدیل و در پایگاه برداری ChromaDB ایندکس می‌شود."
+msgstr "Each chunk is embedded with bge-m3 and indexed in the ChromaDB vector database."
+
+msgid "پاسخ با منبع"
+msgstr "Answers with sources"
+
+msgid "مدل زبانی بر اساس قطعات بازیابی‌شده پاسخ می‌دهد و منابع را ذکر می‌کند."
+msgstr "The language model answers based on retrieved chunks and cites its sources."
+
+msgid "نمونه پاسخ"
+msgstr "Sample answer"
+
+msgid "پاسخی شفاف، همراه با منبع"
+msgstr "A clear answer, complete with its source"
+
+msgid "روشن RAG پاسخ را از متن خودِ اسناد شما می‌گیرد؛ نه از خاطرات عمومی مدل. هر پاسخ لیست منابع استنادشده را نشان می‌دهد تا قابل راستی‌آزمایی باشد."
+msgstr "Roshan RAG answers from the text of your own documents, not from the model's general memory. Every answer shows its list of cited sources so it can be verified."
+
+msgid "مشاهده در پنل مدیریت"
+msgstr "View in the admin panel"
+
+msgid "مراحل استخدام در شرکت چیست؟"
+msgstr "What are the recruitment steps at the company?"
+
+msgid "فرایند استخدام در این شرکت شامل چهار مرحله است: ارسال رزومه از طریق پرتال، مصاحبه تلفنی با واحد منابع انسانی، مصاحبه فنی با تیم مربوطه، و در نهایت ارائه پیشنهاد همکاری پس از بررسی نهایی."
+msgstr "The recruitment process at this company has four stages: submitting your résumé through the portal, a phone interview with Human Resources, a technical interview with the relevant team, and finally a job offer after the final review."
+
+msgid "متقاضیان معمولاً طی یک تا دو هفته از هر مرحله مطلع می‌شوند."
+msgstr "Candidates are usually informed of each stage within one to two weeks."
+
+msgid "سوالات متداول"
+msgstr "Frequently asked questions"
+
+msgid "گزارش استخدام ۱۴۰۳"
+msgstr "Recruitment report 2025"
+
+msgid "هر آنچه باید بدانید"
+msgstr "Everything you need to know"
+
+msgid "روشن RAG چیست؟"
+msgstr "What is Roshan RAG?"
+
+msgid "روشن RAG یک سامانه پرسش از اسناد است که با ترکیب بازیابی اطلاعات و مدل‌های زبانی (RAG)، به پرسش‌های شما بر اساس محتوای اسناد سازمان‌تان پاسخ می‌دهد."
+msgstr "Roshan RAG is a document Q&A system that combines information retrieval and language models (RAG) to answer your questions based on your organization's documents."
+
+msgid "چه فرمت‌هایی پشتیبانی می‌شود؟"
+msgstr "Which formats are supported?"
+
+msgid "اسناد متنی مانند DOCX و TXT پشتیبانی می‌شوند و هر سند به صورت خودکار پردازش و ایندکس می‌شود."
+msgstr "Text documents such as DOCX and TXT are supported, and each document is automatically processed and indexed."
+
+msgid "جستجو چه زبانی را پشتیبانی می‌کند؟"
+msgstr "Which languages does search support?"
+
+msgid "مدل bge-m3 فارسی و انگلیسی را در یک فضای برداری واحد پشتیبانی می‌کند؛ سؤال به هر زبان مطرح شود، پاسخ بر اساس محتوای اسناد داده می‌شود."
+msgstr "The bge-m3 model supports Persian and English in a single vector space; no matter which language you ask in, the answer is based on the content of your documents."
+
+msgid "چرا می‌توان به پاسخ‌ها اعتماد کرد؟"
+msgstr "Why can the answers be trusted?"
+
+msgid "چون هر پاسخ فقط از محتوای اسناد خودِ شما ساخته می‌شود و منابع استنادشده به صورت کامل نمایش داده می‌شود تا قابل راستی‌آزمایی باشد."
+msgstr "Because every answer is built only from the content of your own documents, and the cited sources are shown in full so they can be verified."
+
+msgid "حریم خصوصی داده‌ها چگونه حفظ می‌شود؟"
+msgstr "How is data privacy preserved?"
+
+msgid "سامانه به صورت خودمیزبان (self-hosted) اجرا می‌شود؛ اسناد و پایگاه برداری داخل زیرساخت خود شما باقی می‌ماند."
+msgstr "The system runs self-hosted; your documents and vector database stay inside your own infrastructure."
+
+msgid "آیا API در دسترس است؟"
+msgstr "Is an API available?"
+
+msgid "بله؛ یک REST API کامل با مستندات تعاملی OpenAPI و احراز هویت مبتنی بر توکن برای اتصال به سامانه‌های سازمانی فراهم است."
+msgstr "Yes; a full REST API with interactive OpenAPI documentation and token-based authentication is available for integrating with enterprise systems."
+
+msgid "همین حالا اسناد خود را هوشمند کنید"
+msgstr "Make your documents smart right now"
+
+msgid "سندها را بارگذاری کنید، سؤال بپرسید و پاسخ را با منبع دریافت کنید. یک دقیقه تا راه‌اندازی."
+msgstr "Upload documents, ask questions and get answers with sources. You are one minute from setup."
