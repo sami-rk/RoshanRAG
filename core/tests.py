@@ -14,6 +14,15 @@ from documents.models import Document
 from qa.models import Question
 
 
+class SqlitePragmaTests(TestCase):
+    def test_connection_created_applies_busy_timeout(self):
+        from django.db import connection
+
+        with connection.cursor() as cursor:
+            cursor.execute("PRAGMA busy_timeout")
+            self.assertEqual(cursor.fetchone()[0], 5000)
+
+
 class HealthCheckTests(TestCase):
     def test_health_ok_when_dependencies_available(self):
         with patch("core.chroma_client._get_client") as client:
