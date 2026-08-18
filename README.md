@@ -108,6 +108,28 @@ docker compose exec web python manage.py shell -c \
 docker compose exec web python manage.py shell
 ```
 
+### Languages
+
+The UI is Persian by default (RTL) with a cookie-based English toggle in the navbar (`/set-language/?lang=en`). The compiled catalog `locale/en/LC_MESSAGES/django.mo` is committed so fresh checkouts, CI and the Docker image all serve English without needing GNU gettext installed. To regenerate it after editing `django.po`:
+
+```bash
+python scripts/msgfmt.py -o locale/en/LC_MESSAGES/django.mo locale/en/LC_MESSAGES/django.po
+```
+
+CI enforces that every `{% trans %}` string has a translation and that the committed `.mo` is in sync with `.po` (`core.tests.TranslationCatalogTests`), and that the client-side `fa`/`en` string dictionaries match (`scripts/check-i18n-js.mjs`).
+
+### Production
+
+Set `DEBUG=false`, a long random `SECRET_KEY`, and `ALLOWED_HOSTS` in `.env`. The startup guard refuses to boot with a placeholder secret when `DEBUG=false`. Validate the setup before deploying:
+
+```bash
+DEBUG=false SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(64))')" ALLOWED_HOSTS=your-domain.com \
+  python manage.py check --deploy
+python manage.py makemigrations --check --dry-run
+```
+
+`check --deploy` reports HTTPS-related warnings (`SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`, secure session/CSRF cookies) that should be handled at the reverse proxy / load balancer in front of gunicorn; nothing in the app needs to change.
+
 ## API Overview
 
 All endpoints require `Authorization: Token <token>`. Get a token with:
