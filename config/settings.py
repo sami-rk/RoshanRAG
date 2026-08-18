@@ -73,9 +73,10 @@ except ImportError:
 else:
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
+MIDDLEWARE.insert(3, "core.middleware.ForceDefaultLanguageMiddleware")
 # LocaleMiddleware reads the session language and translates template strings;
 # it must sit after SessionMiddleware and before CommonMiddleware.
-MIDDLEWARE.insert(3, "django.middleware.locale.LocaleMiddleware")
+MIDDLEWARE.insert(4, "django.middleware.locale.LocaleMiddleware")
 
 ROOT_URLCONF = "config.urls"
 

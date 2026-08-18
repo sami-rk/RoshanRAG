@@ -146,6 +146,19 @@ class LanguageToggleTests(TestCase):
         self.assertEqual(response.url, "/")
 
 
+class DefaultLanguageTests(TestCase):
+    def test_defaults_to_persian_for_a_fresh_visitor(self):
+        response = self.client.get("/")
+        self.assertContains(response, "سامانه هوشمند پرسش از اسناد سازمانی")
+        self.assertContains(response, 'lang="fa"')
+        self.assertContains(response, 'dir="rtl"')
+
+    def test_defaults_to_persian_even_with_an_english_accept_language(self):
+        response = self.client.get("/", HTTP_ACCEPT_LANGUAGE="en-US,en;q=0.9")
+        self.assertContains(response, 'lang="fa"')
+        self.assertContains(response, 'dir="rtl"')
+
+
 class ErrorPageTests(TestCase):
     def test_server_error_renders_styled_page(self):
         from django.test import RequestFactory
