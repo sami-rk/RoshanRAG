@@ -136,6 +136,11 @@ def answer_question(question_id: int) -> None:
     question = Question.objects.filter(pk=question_id).first()
     if question is None:
         return
+    if question.status == Question.Status.GENERATING:
+        # A worker is already producing an answer for this question. Skipping
+        # here makes the admin re-answer action safe to click repeatedly
+        # without double-invoking the LLM.
+        return
     try:
         question.status = Question.Status.GENERATING
         question.save(update_fields=["status"])

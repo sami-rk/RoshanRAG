@@ -2,8 +2,10 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from uuid import uuid4
 
+from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.test import RequestFactory, TestCase
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -802,6 +804,49 @@ class AnsweringServiceTests(APITestCase):
         self.assertEqual(question.status, Question.Status.DONE)
         self.assertEqual(question.answer, "پاسخ از invoke")
         self.assertEqual(question.stream_data, "پاسخ از invoke")
+
+    def test_answer_skips_question_already_generating(self):
+        question = Question.objects.create(
+            question="سوال", status=Question.Status.GENERATING
+        )
+        with (
+            patch("qa.services.answering.get_chroma_vectorstore") as vectorstore,
+            patch("qa.services.answering.get_llm") as llm,
+        ):
+            answer_question(question.pk)
+
+        vectorstore.assert_not_called()
+        llm.assert_not_called()
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.GENERATING)
+        self.assertEqual(question.answer, "")
+
+
+class QuestionAdminActionTests(TestCase):
+    def _admin_request(self):
+        request = RequestFactory().get("/")
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        return request
+
+    def test_retry_answering_skips_generating_questions(self):
+        from core.admin_site import roshan_admin_site
+        from qa.admin import QuestionAdmin
+
+        generating = Question.objects.create(
+            question="در حال تولید", status=Question.Status.GENERATING
+        )
+        failed = Question.objects.create(
+            question="ناموفق", status=Question.Status.FAILED
+        )
+        request = self._admin_request()
+        with patch("qa.admin.schedule_answering") as schedule:
+            QuestionAdmin(Question, roshan_admin_site).retry_answering(
+                request, Question.objects.filter(pk__in=[generating.pk, failed.pk])
+            )
+        schedule.assert_called_once_with(failed.pk)
+        levels = [msg.level for msg in request._messages]
+        self.assertIn(messages.WARNING, levels)
 
 
 class NoCorpusAnswerTests(TestCase):

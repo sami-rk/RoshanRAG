@@ -53,11 +53,20 @@ class QuestionAdmin(admin.ModelAdmin):
     delete_selected.allowed_permissions = ("delete",)
 
     def retry_answering(self, request, queryset):
+        generating = queryset.filter(status=Question.Status.GENERATING)
+        if generating.exists():
+            self.message_user(
+                request,
+                f"{generating.count()} پرسش در حال تولید پاسخ است؛ برای آن‌ها پاسخ‌دهی مجدد آغاز نشد",
+                level="warning",
+            )
+        queryset = queryset.exclude(status=Question.Status.GENERATING)
         count = 0
         for question in queryset:
             schedule_answering(question.pk)
             count += 1
-        self.message_user(request, f"پاسخ‌دهی مجدد {count} پرسش در پس‌زمینه آغاز شد")
+        if count:
+            self.message_user(request, f"پاسخ‌دهی مجدد {count} پرسش در پس‌زمینه آغاز شد")
 
     retry_answering.short_description = "پاسخ‌دهی مجدد پرسش‌های انتخاب‌شده"
     retry_answering.allowed_permissions = ("change",)
