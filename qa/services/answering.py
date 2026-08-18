@@ -89,6 +89,35 @@ def _coerce_answer_content(content) -> str:
     return str(content)
 
 
+def _stream_answer(llm, messages, question):
+    """Invoke the model, streaming tokens into ``question.stream_data``.
+
+    Returns the full answer text. If the provider does not support streaming,
+    falls back to a single ``invoke`` call whose whole answer is flushed at once.
+    """
+    answer_parts = []
+    last_flush = 0
+    try:
+        for chunk in llm.stream(messages):
+            text = _coerce_answer_content(getattr(chunk, "content", chunk))
+            if not text:
+                continue
+            answer_parts.append(text)
+            question.stream_data += text
+            if len(question.stream_data) - last_flush >= 150:
+                last_flush = len(question.stream_data)
+                Question.objects.filter(pk=question.pk).update(
+                    stream_data=question.stream_data
+                )
+        return "".join(answer_parts)
+    except Exception:
+        response = llm.invoke(messages)
+        answer = _coerce_answer_content(response.content)
+        question.stream_data = answer
+        Question.objects.filter(pk=question.pk).update(stream_data=answer)
+        return answer
+
+
 def _build_sources(retrieved):
     sources = []
     for index, document in enumerate(retrieved, start=1):
@@ -146,9 +175,11 @@ def answer_question(question_id: int) -> None:
                     SystemMessage(content=_SYSTEM_PROMPT),
                     HumanMessage(content=f"پرسش:\n{question.question}\n\nاسناد:\n{context}"),
                 ]
-                response = get_llm().invoke(messages)
+                response = get_llm()
 
-                question.answer = _coerce_answer_content(response.content)
+                answer = _stream_answer(response, messages, question)
+
+                question.answer = answer
                 question.sources = _build_sources(retrieved)
                 question.status = Question.Status.DONE
                 question.answered_at = timezone.now()
@@ -161,7 +192,14 @@ def answer_question(question_id: int) -> None:
     # The question may have been deleted while the LLM call was in flight.
     if Question.objects.filter(pk=question.pk).exists():
         question.save(
-            update_fields=["answer", "sources", "status", "answered_at", "error_message"]
+            update_fields=[
+                "answer",
+                "sources",
+                "status",
+                "answered_at",
+                "error_message",
+                "stream_data",
+            ]
         )
 
 

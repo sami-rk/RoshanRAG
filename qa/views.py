@@ -1,15 +1,16 @@
 import csv
 import json
+import time
 import uuid
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .models import Question
-from .serializers import QuestionSerializer
+from .models import Question, Thread
+from .serializers import QuestionSerializer, ThreadSerializer
 from .services.answering import schedule_answering
 
 EXPORT_COLUMNS = [
@@ -23,6 +24,34 @@ EXPORT_COLUMNS = [
     "created_at",
     "answered_at",
 ]
+
+
+def _sse_events(pk, poll_interval=0.3):
+    """Yield Server-Sent Events for a question's answer stream."""
+    sent = 0
+    deadline = time.time() + 300
+    while True:
+        try:
+            question = Question.objects.get(pk=pk)
+        except Question.DoesNotExist:
+            yield f"data: {json.dumps({'type': 'error', 'detail': 'پرسش یافت نشد'}, ensure_ascii=False)}\n\n"
+            return
+        data = question.stream_data
+        if len(data) > sent:
+            yield (
+                f"data: {json.dumps({'type': 'token', 'text': data[sent:]}, ensure_ascii=False)}\n\n"
+            )
+            sent = len(data)
+        if question.status in (Question.Status.DONE, Question.Status.FAILED):
+            payload = QuestionSerializer(question).data
+            yield (
+                f"data: {json.dumps({'type': 'done', 'question': payload}, ensure_ascii=False)}\n\n"
+            )
+            return
+        if time.time() > deadline:
+            yield f"data: {json.dumps({'type': 'timeout'})}\n\n"
+            return
+        time.sleep(poll_interval)
 
 
 class QuestionViewSet(
@@ -41,11 +70,29 @@ class QuestionViewSet(
         status = self.request.query_params.get("status")
         if status:
             queryset = queryset.filter(status=status)
+        thread = self.request.query_params.get("thread")
+        if thread:
+            queryset = queryset.filter(thread_id=thread)
         return queryset
 
     def perform_create(self, serializer):
+        validated = serializer.validated_data
+        if validated.get("thread") is None:
+            validated["thread"] = Thread.objects.create(
+                title=validated["question"][:60]
+            )
         question = serializer.save()
         schedule_answering(question.pk)
+
+    @action(detail=True, methods=["get"])
+    def stream(self, request, pk=None):
+        self.get_object()
+        response = StreamingHttpResponse(
+            _sse_events(pk), content_type="text/event-stream"
+        )
+        response["Cache-Control"] = "no-cache"
+        response["X-Accel-Buffering"] = "no"
+        return response
 
     @action(detail=False, methods=["get"])
     def export(self, request):
@@ -94,3 +141,23 @@ class QuestionViewSet(
         return Response(
             QuestionSerializer(question, context=self.get_serializer_context()).data
         )
+
+
+class ThreadViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Thread.objects.all()
+    serializer_class = ThreadSerializer
+
+    def retrieve(self, request, pk=None):
+        thread = self.get_object()
+        payload = ThreadSerializer(thread, context=self.get_serializer_context()).data
+        payload["questions"] = QuestionSerializer(
+            thread.questions.all(), many=True, context=self.get_serializer_context()
+        ).data
+        return Response(payload)

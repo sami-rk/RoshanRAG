@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from documents.models import Document
-from qa.models import Question
+from qa.models import Question, Thread
 from qa.services.answering import _dedupe_by_document, answer_question, friendly_llm_error
 
 User = get_user_model()
@@ -168,6 +168,109 @@ class QuestionAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_create_question_without_thread_creates_one(self):
+        with patch("qa.views.schedule_answering"):
+            response = self.client.post(
+                "/api/questions/", {"question": "پرسش بدون گفتگو"}, format="json"
+            )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        question = Question.objects.get(pk=response.data["id"])
+        self.assertIsNotNone(question.thread)
+        self.assertEqual(question.thread.title, "پرسش بدون گفتگو")
+
+    def test_create_question_in_existing_thread(self):
+        thread = Thread.objects.create(title="گفتگوی من")
+        with patch("qa.views.schedule_answering"):
+            response = self.client.post(
+                "/api/questions/",
+                {"question": "سوال در گفتگو", "thread": str(thread.pk)},
+                format="json",
+            )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        question = Question.objects.get(pk=response.data["id"])
+        self.assertEqual(question.thread, thread)
+
+    def test_question_list_filters_by_thread(self):
+        thread = Thread.objects.create(title="گفتگو")
+        Question.objects.create(question="در گفتگو", thread=thread)
+        Question.objects.create(question="بیرون گفتگو")
+        response = self.client.get(f"/api/questions/?thread={thread.pk}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+
+    def test_question_patch_cannot_rewrite_question_text(self):
+        question = Question.objects.create(question="اصلی")
+        response = self.client.patch(
+            f"/api/questions/{question.pk}/",
+            {"question": "تغییر یافته", "feedback": "down"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        question.refresh_from_db()
+        self.assertEqual(question.question, "اصلی")
+        self.assertEqual(question.feedback, Question.Feedback.DOWN)
+
+
+class ThreadAPITests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="tester", password="pass")
+        self.client.force_authenticate(user=self.user)
+
+    def test_threads_are_listed(self):
+        Thread.objects.create(title="گفتگوی اول")
+        Thread.objects.create(title="گفتگوی دوم")
+        response = self.client.get("/api/threads/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 2)
+
+    def test_thread_retrieve_includes_questions(self):
+        thread = Thread.objects.create(title="گفتگو")
+        Question.objects.create(question="سوال یک", thread=thread)
+        response = self.client.get(f"/api/threads/{thread.pk}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "گفتگو")
+        self.assertEqual(len(response.data["questions"]), 1)
+        self.assertEqual(response.data["question_count"], 1)
+
+    def test_thread_can_be_created(self):
+        response = self.client.post(
+            "/api/threads/", {"title": "گفتگوی جدید"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data["id"])
+
+    def test_stream_endpoint_emits_done_event_for_finished_question(self):
+        question = Question.objects.create(
+            question="سوال",
+            answer="پاسخ کامل",
+            status=Question.Status.DONE,
+            stream_data="",
+        )
+        response = self.client.get(f"/api/questions/{question.pk}/stream/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        body = b"".join(response.streaming_content).decode("utf-8")
+        self.assertIn("text/event-stream", response["Content-Type"])
+        self.assertIn("پاسخ کامل", body)
+        self.assertIn('"type": "done"', body)
+
+    def test_stream_endpoint_emits_buffered_tokens_then_done(self):
+        question = Question.objects.create(
+            question="سوال",
+            answer="پاسخ کامل",
+            status=Question.Status.DONE,
+            stream_data="بخش اول ",
+        )
+        response = self.client.get(f"/api/questions/{question.pk}/stream/")
+        body = b"".join(response.streaming_content).decode("utf-8")
+        self.assertIn("بخش اول", body)
+        self.assertIn("پاسخ کامل", body)
+
+    def test_stream_requires_authentication(self):
+        question = Question.objects.create(question="سوال")
+        anonymous = self.client_class()
+        response = anonymous.get(f"/api/questions/{question.pk}/stream/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class FriendlyErrorTests(APITestCase):
     def test_json_string_body_is_unwrapped(self):
@@ -238,6 +341,14 @@ class AnsweringServiceTests(APITestCase):
         def __init__(self, content="پاسخ تولیدشده"):
             self.content = content
             self.messages = None
+
+        def stream(self, messages):
+            self.messages = messages
+            if isinstance(self.content, list):
+                for item in self.content:
+                    yield SimpleNamespace(content=item)
+            else:
+                yield SimpleNamespace(content=self.content)
 
         def invoke(self, messages):
             self.messages = messages
@@ -492,12 +603,13 @@ class AnsweringServiceTests(APITestCase):
     def test_deleted_question_mid_task_does_not_crash(self):
         question = Question.objects.create(question="سوال")
 
-        def delete_then_return(messages):
+        def delete_then_stream(messages):
             Question.objects.filter(pk=question.pk).delete()
-            return SimpleNamespace(content="پاسخ")
+            yield SimpleNamespace(content="پاسخ")
+            yield SimpleNamespace(content=" تکمیل")
 
         llm = self.FakeLLM()
-        llm.invoke = delete_then_return
+        llm.stream = delete_then_stream
         with (
             patch(
                 "qa.services.answering.get_chroma_vectorstore",
@@ -508,6 +620,51 @@ class AnsweringServiceTests(APITestCase):
             # Must not raise even though the row vanished mid-task
             answer_question(question.pk)
         self.assertFalse(Question.objects.filter(pk=question.pk).exists())
+
+    def test_answer_streams_tokens_into_stream_data(self):
+        question = Question.objects.create(question="سوال")
+
+        class ChunkingLLM:
+            def stream(self, messages):
+                for word in ["قسمت ", "اول، ", "قسمت ", "دوم. ", "پایان."]:
+                    yield SimpleNamespace(content=word)
+
+        with (
+            patch(
+                "qa.services.answering.get_chroma_vectorstore",
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
+            ),
+            patch("qa.services.answering.get_llm", return_value=ChunkingLLM()),
+        ):
+            answer_question(question.pk)
+
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)
+        self.assertEqual(question.answer, "قسمت اول، قسمت دوم. پایان.")
+        self.assertEqual(question.stream_data, "قسمت اول، قسمت دوم. پایان.")
+
+    def test_answer_falls_back_to_invoke_when_stream_fails(self):
+        question = Question.objects.create(question="سوال")
+
+        class BrokenStreamLLM(self.FakeLLM):
+            def stream(self, messages):
+                raise RuntimeError("streaming not supported")
+                yield
+
+        llm = BrokenStreamLLM("پاسخ از invoke")
+        with (
+            patch(
+                "qa.services.answering.get_chroma_vectorstore",
+                return_value=self.FakeVectorStore([self._fake_doc(1, "سند", "متن")]),
+            ),
+            patch("qa.services.answering.get_llm", return_value=llm),
+        ):
+            answer_question(question.pk)
+
+        question.refresh_from_db()
+        self.assertEqual(question.status, Question.Status.DONE)
+        self.assertEqual(question.answer, "پاسخ از invoke")
+        self.assertEqual(question.stream_data, "پاسخ از invoke")
 
 
 class NoCorpusAnswerTests(TestCase):
