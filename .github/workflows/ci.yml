@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-core:
+    name: Test core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
+          pip install -r requirements.txt
+      - name: Run core tests
+        run: python manage.py test core
+
+  test-documents:
+    name: Test documents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
+          pip install -r requirements.txt
+      - name: Run documents tests
+        run: python manage.py test documents
+
+  test-qa:
+    name: Test qa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
+          pip install -r requirements.txt
+      - name: Run qa tests
+        run: python manage.py test qa
+
+  checks:
+    name: Django system checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
+          pip install -r requirements.txt
+      - name: Run manage.py check
+        run: python manage.py check
+      - name: Run manage.py check --deploy
+        run: python manage.py check --deploy
+
+  js-check:
+    name: JavaScript syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JS syntax
+        run: |
+          for file in static/landing/js/*.js; do
+            node --check "$file"
+          done
+
+  docker-build:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t roshan:ci .
