@@ -1,13 +1,13 @@
 {% extends "landing/base.html" %}
 {% load i18n static %}
 
-{% block title %}پرسش از اسناد | روشن RAG{% endblock %}
+{% block title %}{% trans "پرسش از اسناد" %} | روشن RAG{% endblock %}
 
 {% block content %}
 <section class="page-hero">
   <div class="container" data-hero style="--i:0">
-    <h1>پرسش از اسناد</h1>
-    <p>با موتور RAG از اسناد سازمان‌تان پاسخ بگیرید؛ پاسخ همیشه همراه با ذکر منبع.</p>
+    <h1>{% trans "پرسش از اسناد" %}</h1>
+    <p>{% trans "با موتور RAG از اسناد سازمان‌تان پاسخ بگیرید؛ پاسخ همیشه همراه با ذکر منبع." %}</p>
   </div>
 </section>
 
@@ -29,27 +29,27 @@
         <svg class="chat-auth-icon" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
-        <h3>برای پرسیدن از اسناد، ابتدا وارد شوید</h3>
-        <p>پرسش‌ها از طریق همان حساب امن پنل مدیریت ثبت می‌شوند. پس از ورود، می‌توانید از همه اسناد ایندکس‌شده سؤال بپرسید و پاسخ را همراه با منابع ببینید.</p>
-        <a class="btn btn-primary btn-lg magnetic" href="{% url 'admin:index' %}">ورود به پنل مدیریت</a>
+        <h3>{% trans "برای پرسیدن از اسناد، ابتدا وارد شوید" %}</h3>
+        <p>{% trans "پرسش‌ها از طریق همان حساب امن پنل مدیریت ثبت می‌شوند. پس از ورود، می‌توانید از همه اسناد ایندکس‌شده سؤال بپرسید و پاسخ را همراه با منابع ببینید." %}</p>
+        <a class="btn btn-primary btn-lg magnetic" href="{% url 'admin:index' %}">{% trans "ورود به پنل مدیریت" %}</a>
       </div>
     {% else %}
       <div class="chat-layout reveal in-view" data-reveal>
         <aside class="chat-threads">
           <div class="chat-threads-head">
-            <h3>گفتگوها</h3>
-            <button type="button" id="chat-new-thread" class="chat-new-thread">گفتگوی جدید</button>
+            <h3>{% trans "گفتگوها" %}</h3>
+            <button type="button" id="chat-new-thread" class="chat-new-thread">{% trans "گفتگوی جدید" %}</button>
           </div>
           <ul id="chat-threads-list"></ul>
         </aside>
         <div class="chat-card">
           <form id="ask-form" autocomplete="off">
             {% csrf_token %}
-            <label for="ask-input" class="visually-hidden">پرسش شما</label>
-            <textarea id="ask-input" name="question" rows="3" placeholder="پرسش خود را بنویسید؛ مثلاً «میزان فروش در سه ماهه اول چقدر بود؟»" required></textarea>
+            <label for="ask-input" class="visually-hidden">{% trans "پرسش شما" %}</label>
+            <textarea id="ask-input" name="question" rows="3" placeholder="{% trans 'پرسش خود را بنویسید؛ مثلاً «میزان فروش در سه ماهه اول چقدر بود؟»' %}" required></textarea>
             <div class="chat-actions">
-              <button class="btn btn-primary" type="submit" id="ask-submit">پرسیدن</button>
-              <span class="chat-hint">پاسخ فقط بر اساس محتوای اسناد بارگذاری‌شده تولید می‌شود.</span>
+              <button class="btn btn-primary" type="submit" id="ask-submit">{% trans "پرسیدن" %}</button>
+              <span class="chat-hint">{% trans "پاسخ فقط بر اساس محتوای اسناد بارگذاری‌شده تولید می‌شود." %}</span>
             </div>
           </form>
           <div id="chat-stream" class="chat-stream" aria-live="polite"></div>

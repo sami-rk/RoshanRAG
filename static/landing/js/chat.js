@@ -13,6 +13,49 @@
   var newThreadBtn = document.getElementById("chat-new-thread");
   var currentThread = null;
 
+  var T = {
+    fa: {
+      busy: "در حال تولید…",
+      ask: "پرسیدن",
+      streaming: "در حال تولید پاسخ…",
+      generateFailed: "پاسخی تولید نشد: ",
+      unknownError: "خطای ناشناخته",
+      fetchFailed: "دریافت پاسخ ناموفق بود؛ دوباره تلاش کنید.",
+      submitFailed: "ثبت پرسش ناموفق بود؛ دوباره تلاش کنید.",
+      openFailed: "باز کردن گفتگو ناموفق بود.",
+      noAnswer: "پاسخی دریافت نشد؛ دوباره تلاش کنید.",
+      noThreads: "هنوز گفتگویی نیست.",
+      count: " پرسش",
+      feedbackLabel: "این پاسخ چطور بود؟",
+      helpful: "پاسخ مفید بود",
+      notHelpful: "پاسخ مفید نبود",
+      sourcesTitle: "منابع:",
+      showSource: "نمایش منبع ",
+      unnamedDoc: "سند بدون نام",
+      status: { pending: "در انتظار", generating: "در حال تولید", done: "پاسخ داده شده", failed: "ناموفق" },
+    },
+    en: {
+      busy: "Generating…",
+      ask: "Ask",
+      streaming: "Generating answer…",
+      generateFailed: "No answer was produced: ",
+      unknownError: "unknown error",
+      fetchFailed: "Could not fetch the answer; please try again.",
+      submitFailed: "Could not submit the question; please try again.",
+      openFailed: "Could not open the conversation.",
+      noAnswer: "No answer was received; please try again.",
+      noThreads: "No conversations yet.",
+      count: " questions",
+      feedbackLabel: "How was this answer?",
+      helpful: "This answer was helpful",
+      notHelpful: "This answer was not helpful",
+      sourcesTitle: "Sources:",
+      showSource: "Show source ",
+      unnamedDoc: "Untitled document",
+      status: { pending: "Pending", generating: "Generating", done: "Answered", failed: "Failed" },
+    },
+  }[document.documentElement.lang === "en" ? "en" : "fa"];
+
   function esc(value) {
     if (value == null) return "";
     var div = document.createElement("div");
@@ -34,7 +77,7 @@
       .map(function (source) {
         var id = source.document_id != null ? source.document_id : "";
         var citation = source.citation != null ? source.citation : "";
-        var title = esc(source.title || "سند بدون نام");
+        var title = esc(source.title || T.unnamedDoc);
         var excerpt = esc((source.excerpt || "").slice(0, 220));
         var link = id
           ? '<a href="/admin/documents/document/' + id + '/change/">' + title + "</a>"
@@ -55,7 +98,7 @@
         );
       })
       .join("");
-    return '<div class="chat-sources-title">منابع:</div><ul class="chat-sources">' + items + "</ul>";
+    return '<div class="chat-sources-title">' + T.sourcesTitle + '</div><ul class="chat-sources">' + items + "</ul>";
   }
 
   function withCitations(html, sources) {
@@ -69,7 +112,8 @@
       return (
         '<button type="button" class="citation" data-source="' +
         number +
-        '" aria-label="نمایش منبع ' +
+        '" aria-label="' +
+        T.showSource +
         number +
         '">[' +
         number +
@@ -82,7 +126,7 @@
     var qid = question.id;
     function thumb(kind) {
       var cls = "chat-fb-" + kind + (question.feedback === kind ? " active" : "");
-      var title = kind === "up" ? "پاسخ مفید بود" : "پاسخ مفید نبود";
+      var title = kind === "up" ? T.helpful : T.notHelpful;
       var icon =
         kind === "up"
           ? '<path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>'
@@ -104,7 +148,7 @@
       );
     }
     return (
-      '<div class="chat-feedback"><span class="chat-feedback-label">این پاسخ چطور بود؟</span>' +
+      '<div class="chat-feedback"><span class="chat-feedback-label">' + T.feedbackLabel + "</span>" +
       thumb("up") +
       thumb("down") +
       "</div>"
@@ -113,7 +157,7 @@
 
   function renderAnswerHtml(question) {
     if (question.status === "failed") {
-      return "<p>پاسخی تولید نشد: " + esc(question.error_message || "خطای ناشناخته") + "</p>";
+      return "<p>" + T.generateFailed + esc(question.error_message || T.unknownError) + "</p>";
     }
     return (
       "<p>" +
@@ -134,7 +178,7 @@
   function setBusy(busy) {
     input.disabled = busy;
     submit.disabled = busy;
-    submit.textContent = busy ? "در حال تولید…" : "پرسیدن";
+    submit.textContent = busy ? T.busy : T.ask;
   }
 
   function api(path, options) {
@@ -155,7 +199,7 @@
   function openStream(questionId, container) {
     var pending = document.createElement("p");
     pending.className = "chat-streaming";
-    pending.textContent = "در حال تولید پاسخ…";
+    pending.textContent = T.streaming;
     container.appendChild(pending);
 
     fetch("/api/questions/" + questionId + "/stream/", {
@@ -186,7 +230,7 @@
           container.innerHTML = renderAnswerHtml(data.question);
         } else if (data.type === "error" || data.type === "timeout") {
           setBusy(false);
-          container.innerHTML = "<p>پاسخی دریافت نشد؛ دوباره تلاش کنید.</p>";
+          container.innerHTML = "<p>" + T.noAnswer + "</p>";
         }
       }
 
@@ -208,7 +252,7 @@
     }).catch(function () {
       setBusy(false);
       if (pending.isConnected) {
-        container.innerHTML = "<p>دریافت پاسخ ناموفق بود؛ دوباره تلاش کنید.</p>";
+        container.innerHTML = "<p>" + T.fetchFailed + "</p>";
       }
     });
   }
@@ -220,7 +264,7 @@
       (data.questions || []).forEach(function (question) {
         addMessage("question", "<p>" + esc(question.question) + "</p>");
         if (question.status === "pending" || question.status === "generating") {
-          addMessage("answer", '<p class="chat-streaming">در حال تولید پاسخ…</p>');
+          addMessage("answer", '<p class="chat-streaming">' + T.streaming + "</p>");
         } else {
           renderAnswer(question);
         }
@@ -229,7 +273,7 @@
       if (btn) btn.classList.add("active");
       input.focus();
     }).catch(function () {
-      addMessage("error", "<p>باز کردن گفتگو ناموفق بود.</p>");
+      addMessage("error", "<p>" + T.openFailed + "</p>");
     });
   }
 
@@ -238,7 +282,7 @@
     api("/api/threads/").then(function (data) {
       var items = data.results || [];
       if (!items.length) {
-        threadsList.innerHTML = '<li class="chat-empty">هنوز گفتگویی نیست.</li>';
+        threadsList.innerHTML = '<li class="chat-empty">' + T.noThreads + "</li>";
         return;
       }
       threadsList.innerHTML = items
@@ -253,7 +297,8 @@
             esc(thread.title) +
             '</span><span class="chat-thread-meta">' +
             thread.question_count +
-            " پرسش</span></button></li>"
+            T.count +
+            "</span></button></li>"
           );
         })
         .join("");
@@ -344,7 +389,7 @@
       openStream(question.id, container);
     }).catch(function () {
       setBusy(false);
-      addMessage("error", "<p>ثبت پرسش ناموفق بود؛ دوباره تلاش کنید.</p>");
+      addMessage("error", "<p>" + T.submitFailed + "</p>");
     });
   });
 

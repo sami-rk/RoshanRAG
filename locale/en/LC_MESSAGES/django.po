@@ -72,3 +72,30 @@ msgstr "Contact page"
 
 msgid "ساخته‌شده با Django و مدل BAAI/bge-m3"
 msgstr "Built with Django and the BAAI/bge-m3 model"
+
+msgid "با موتور RAG از اسناد سازمان‌تان پاسخ بگیرید؛ پاسخ همیشه همراه با ذکر منبع."
+msgstr "Ask your organization's documents with the RAG engine; every answer always cites its sources."
+
+msgid "برای پرسیدن از اسناد، ابتدا وارد شوید"
+msgstr "Sign in to ask your documents"
+
+msgid "پرسش‌ها از طریق همان حساب امن پنل مدیریت ثبت می‌شوند. پس از ورود، می‌توانید از همه اسناد ایندکس‌شده سؤال بپرسید و پاسخ را همراه با منابع ببینید."
+msgstr "Questions are recorded through the same secure admin account. Once signed in you can ask any indexed document and see each answer together with its sources."
+
+msgid "گفتگوها"
+msgstr "Conversations"
+
+msgid "گفتگوی جدید"
+msgstr "New conversation"
+
+msgid "پرسش شما"
+msgstr "Your question"
+
+msgid "پرسش خود را بنویسید؛ مثلاً «میزان فروش در سه ماهه اول چقدر بود؟»"
+msgstr "Write your question, e.g. “What was the sales figure for the first quarter?”"
+
+msgid "پرسیدن"
+msgstr "Ask"
+
+msgid "پاسخ فقط بر اساس محتوای اسناد بارگذاری‌شده تولید می‌شود."
+msgstr "Answers are generated only from the content of uploaded documents."
