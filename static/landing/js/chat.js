@@ -108,6 +108,9 @@
           poll(questionId);
         }, 1500);
       }
+    }).catch(function () {
+      setBusy(false);
+      addMessage("error", "<p>دریافت پاسخ ناموفق بود؛ دوباره تلاش کنید.</p>");
     });
   }
 
