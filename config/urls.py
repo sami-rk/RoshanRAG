@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.templatetags.static import static
 from django.urls import include, path
 from django.views.generic.base import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -21,7 +20,7 @@ handler500 = "core.views.server_error"
 
 urlpatterns = [
     path("", LandingView.as_view(), name="home"),
-    path("favicon.ico", RedirectView.as_view(url=static("admin/img/roshan-favicon.svg"), permanent=True), name="favicon"),
+    path("favicon.ico", RedirectView.as_view(url="/static/admin/img/roshan-favicon.svg", permanent=True), name="favicon"),
     path("about/", AboutView.as_view(), name="about"),
     path("pricing/", PricingView.as_view(), name="pricing"),
     path("contact/", ContactView.as_view(), name="contact"),
