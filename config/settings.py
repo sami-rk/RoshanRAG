@@ -170,6 +170,9 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "user": env("THROTTLE_USER_RATE", "300/minute"),
         "anon": env("THROTTLE_ANON_RATE", "30/minute"),
+        # The anonymous demo widget consumes LLM credits per request, so it
+        # gets a stricter dedicated limit than the shared anonymous scope.
+        "demo": env("THROTTLE_DEMO_RATE", "10/minute"),
     },
 }
 

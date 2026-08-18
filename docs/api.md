@@ -194,7 +194,7 @@ CSV includes a UTF-8 BOM so Excel opens Persian text correctly. The admin also o
 
 ## Demo widget (no authentication)
 
-The landing page's demo box uses two anonymous endpoints. They are rate-limited by `THROTTLE_ANON_RATE` and the poll endpoint is gated by a per-question token, so answers cannot be enumerated:
+The landing page's demo box uses two anonymous endpoints. They are rate-limited by `THROTTLE_DEMO_RATE` (default `10/minute`) and the poll endpoint is gated by a per-question token, so answers cannot be enumerated:
 
 ```bash
 curl -X POST http://localhost:8000/api/questions/demo_ask/ \
@@ -228,5 +228,6 @@ Question status: `pending` (queued), `generating` (LLM answering), `done` (answe
 
 - `THROTTLE_USER_RATE` (default `300/minute`) — authenticated requests.
 - `THROTTLE_ANON_RATE` (default `30/minute`) — anonymous requests.
+- `THROTTLE_DEMO_RATE` (default `10/minute`) — the anonymous demo widget (`demo_ask` / `demo`), which consumes LLM credits per question and so gets its own stricter limit.
 
 Exceeding a limit returns `429 Too Many Requests`.

@@ -8,6 +8,7 @@ from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 
 from .models import Question, Thread
 from .serializers import QuestionSerializer, ThreadSerializer
@@ -64,6 +65,9 @@ class QuestionViewSet(
 ):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+    # Used by ScopedRateThrottle on the anonymous demo endpoints; the other
+    # actions keep the global user/anon throttles.
+    throttle_scope = "demo"
 
     def get_queryset(self):
         # Questions are private to the user who asked them. Demo questions
@@ -125,7 +129,7 @@ class QuestionViewSet(
             writer.writerow([row[column] for column in EXPORT_COLUMNS])
         return response
 
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny], throttle_classes=[ScopedRateThrottle])
     def demo_ask(self, request):
         question_text = (request.data.get("question") or "").strip()
         if not question_text:
@@ -140,7 +144,7 @@ class QuestionViewSet(
         data["demo_token"] = str(question.demo_token)
         return Response(data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["get"], permission_classes=[AllowAny], url_path="demo")
+    @action(detail=True, methods=["get"], permission_classes=[AllowAny], throttle_classes=[ScopedRateThrottle], url_path="demo")
     def demo_retrieve(self, request, pk=None):
         question = Question.objects.filter(pk=pk).first()
         token = request.query_params.get("token")

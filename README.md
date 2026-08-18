@@ -90,7 +90,7 @@ Everything is driven by environment variables (see `.env.example`):
 | `CHROMA_COLLECTION` | `roshan_documents` | Chroma collection name |
 | `CHUNK_SIZE` / `CHUNK_OVERLAP` | `800` / `200` | RecursiveCharacterTextSplitter settings |
 | `RETRIEVAL_TOP_K` / `RETRIEVAL_FETCH_K` / `RETRIEVAL_MAX_DOCS` | `4` / `20` / `3` | MMR: fetch top-20 chunks, return 4 diverse ones, dedupe to max 3 documents |
-| `THROTTLE_USER_RATE` / `THROTTLE_ANON_RATE` | `300/minute` / `30/minute` | DRF API rate limits |
+| `THROTTLE_USER_RATE` / `THROTTLE_ANON_RATE` / `THROTTLE_DEMO_RATE` | `300/minute` / `30/minute` / `10/minute` | DRF API rate limits (authenticated / anonymous / demo widget) |
 | `MAX_UPLOAD_SIZE_MB` | `25` | Max document upload size |
 | `DJANGO_SUPERUSER_*` | `admin` / `admin` | Auto-created superuser in Docker |
 | `SQLITE_PATH` / `MEDIA_ROOT` | — | Set by docker-compose (persistent volumes) |

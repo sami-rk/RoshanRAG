@@ -179,6 +179,30 @@ class QuestionAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_demo_endpoints_are_rate_limited_separately(self):
+        from django.core.cache import cache
+        from rest_framework.throttling import SimpleRateThrottle
+
+        cache.clear()
+        self.addCleanup(cache.clear)
+        rates = {
+            "user": "300/minute",
+            "anon": "30/minute",
+            "demo": "1/minute",
+        }
+        with (
+            patch("qa.views.schedule_answering"),
+            patch.object(SimpleRateThrottle, "THROTTLE_RATES", rates),
+        ):
+            first = self.client.post(
+                "/api/questions/demo_ask/", {"question": "اول"}, format="json"
+            )
+            self.assertEqual(first.status_code, status.HTTP_201_CREATED)
+            second = self.client.post(
+                "/api/questions/demo_ask/", {"question": "دوم"}, format="json"
+            )
+            self.assertEqual(second.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
     def test_create_question_without_thread_creates_one(self):
         with patch("qa.views.schedule_answering"):
             response = self.client.post(
