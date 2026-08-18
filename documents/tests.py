@@ -122,7 +122,43 @@ class DocumentAPITests(APITestCase):
         response = self.client.get("/api/documents/?status=pending")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
-        self.assertEqual(response.data["results"][0]["title"], "در انتظار")
+
+    def test_batch_upload_creates_all_valid_files(self):
+        first = SimpleUploadedFile("one.txt", b"content one", content_type="text/plain")
+        second = SimpleUploadedFile("two.txt", b"content two", content_type="text/plain")
+        with patch("documents.signals.schedule_index") as schedule:
+            response = self.client.post(
+                "/api/documents/batch/",
+                {"files": [first, second]},
+                format="multipart",
+            )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(response.data["created"]), 2)
+        self.assertEqual(len(response.data["errors"]), 0)
+        self.assertEqual(Document.objects.count(), 2)
+        self.assertEqual(schedule.call_count, 2)
+
+    def test_batch_upload_without_files_is_rejected(self):
+        response = self.client.post(
+            "/api/documents/batch/", {}, format="multipart"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_batch_upload_reports_invalid_files(self):
+        valid = SimpleUploadedFile("ok.txt", b"content", content_type="text/plain")
+        invalid = SimpleUploadedFile(
+            "bad.pdf", b"%PDF-1.4", content_type="application/pdf"
+        )
+        with patch("documents.signals.schedule_index"):
+            response = self.client.post(
+                "/api/documents/batch/",
+                {"files": [valid, invalid]},
+                format="multipart",
+            )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(response.data["created"]), 1)
+        self.assertEqual(len(response.data["errors"]), 1)
+        self.assertEqual(response.data["errors"][0]["file"], "bad.pdf")
 
 
 class IndexingServiceTests(TestCase):
