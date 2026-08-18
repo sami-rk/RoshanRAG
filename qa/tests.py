@@ -43,11 +43,12 @@ class QuestionAPITests(APITestCase):
 
     def test_write_fields_are_read_only(self):
         Question.objects.create(question="q", answer="existing", user=self.user)
-        response = self.client.post(
-            "/api/questions/",
-            {"question": "q", "answer": "forged", "status": Question.Status.DONE},
-            format="json",
-        )
+        with patch("qa.views.schedule_answering"):
+            response = self.client.post(
+                "/api/questions/",
+                {"question": "q", "answer": "forged", "status": Question.Status.DONE},
+                format="json",
+            )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         created = Question.objects.get(pk=response.data["id"])
         self.assertEqual(created.answer, "")
