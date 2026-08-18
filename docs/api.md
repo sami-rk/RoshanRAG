@@ -65,6 +65,7 @@ curl -X POST http://localhost:8000/api/documents/ \
 ```
 
 - Supported formats: `docx`, `pdf`, `txt` (max `MAX_UPLOAD_SIZE_MB`, default 25 MB).
+- The content is sniffed against the extension: a file whose magic bytes do not match its name (e.g. a binary renamed to `.txt`, or plain text named `.pdf`) is rejected with a `400`.
 - `title` defaults to the file name if omitted.
 - The document is created with status `pending`; text extraction, chunking and vector indexing run in the background. Poll the detail endpoint until `status` becomes `ready` or `failed`.
 

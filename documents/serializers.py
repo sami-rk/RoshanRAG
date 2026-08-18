@@ -4,6 +4,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 from .models import Document
+from .validation import validate_upload_file
 
 SUPPORTED_EXTENSIONS = {"docx", "pdf", "txt"}
 
@@ -33,6 +34,9 @@ class DocumentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"حجم فایل نباید بیشتر از {settings.MAX_UPLOAD_SIZE_MB} مگابایت باشد"
             )
+        error = validate_upload_file(value)
+        if error:
+            raise serializers.ValidationError(error)
         return value
 
     def create(self, validated_data):

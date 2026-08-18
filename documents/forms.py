@@ -3,6 +3,7 @@ from django.conf import settings
 
 from .models import Document
 from .serializers import SUPPORTED_EXTENSIONS
+from .validation import validate_upload_file
 
 
 class DocumentAdminForm(forms.ModelForm):
@@ -21,4 +22,7 @@ class DocumentAdminForm(forms.ModelForm):
             raise forms.ValidationError(
                 f"حجم فایل نباید بیشتر از {settings.MAX_UPLOAD_SIZE_MB} مگابایت باشد"
             )
+        error = validate_upload_file(file)
+        if error:
+            raise forms.ValidationError(error)
         return file

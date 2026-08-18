@@ -1,4 +1,6 @@
 import tempfile
+import zipfile
+from io import BytesIO
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -48,6 +50,14 @@ trailer<</Root 1 0 R>>
 """
 
 
+def _minimal_docx_bytes() -> bytes:
+    """Return the bytes of a structurally plausible DOCX (a ZIP container)."""
+    buffer = BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("word/document.xml", "<w:document/>")
+    return buffer.getvalue()
+
+
 class DocumentSerializerTests(APITestCase):
     def test_supported_extensions_accepted(self):
         file = SimpleUploadedFile("readme.txt", b"content", content_type="text/plain")
@@ -77,7 +87,7 @@ class DocumentSerializerTests(APITestCase):
     def test_title_defaults_to_filename_stem(self):
         file = SimpleUploadedFile(
             "my-doc.docx",
-            b"x",
+            _minimal_docx_bytes(),
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
         serializer = DocumentSerializer(data={"file": file})
@@ -85,6 +95,25 @@ class DocumentSerializerTests(APITestCase):
         with patch("documents.signals.schedule_index"):
             document = serializer.save()
         self.assertEqual(document.title, "my-doc")
+
+    def test_file_content_must_match_the_extension(self):
+        cases = [
+            ("renamed.pdf", b"this is actually plain text"),
+            ("renamed.docx", b"not a zip container"),
+            ("renamed.txt", b"binary\x00\x01\x02content"),
+        ]
+        for name, content in cases:
+            with self.subTest(name=name):
+                file = SimpleUploadedFile(name, content)
+                serializer = DocumentSerializer(data={"file": file})
+                self.assertFalse(serializer.is_valid())
+                self.assertIn("file", serializer.errors)
+
+    def test_content_matching_the_extension_is_accepted(self):
+        pdf = SimpleUploadedFile("ok.pdf", MINIMAL_PDF)
+        self.assertTrue(DocumentSerializer(data={"file": pdf}).is_valid())
+        docx = SimpleUploadedFile("ok.docx", _minimal_docx_bytes())
+        self.assertTrue(DocumentSerializer(data={"file": docx}).is_valid())
 
 
 class DocumentAPITests(APITestCase):
@@ -324,6 +353,16 @@ class DocumentAdminFormTests(TestCase):
             data={"title": "سند", "status": Document.Status.PENDING}, files={"file": file}
         )
         self.assertTrue(form.is_valid(), form.errors)
+
+    def test_admin_form_rejects_mismatched_content(self):
+        from documents.forms import DocumentAdminForm
+
+        file = SimpleUploadedFile("note.pdf", b"not a pdf", content_type="application/pdf")
+        form = DocumentAdminForm(
+            data={"title": "سند", "status": Document.Status.PENDING}, files={"file": file}
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("file", form.errors)
 
 
 class DocumentSignalsTests(TestCase):
