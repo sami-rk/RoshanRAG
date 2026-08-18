@@ -114,6 +114,8 @@ All endpoints require `Authorization: Token <token>`. Get a token with:
 curl -X POST http://localhost:8000/api/token/ -d 'username=admin&password=admin'
 ```
 
+Full reference (auth, examples, status flows, rate limits): [docs/api.md](docs/api.md)
+
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/api/documents/` | Upload a document (multipart: `file` required, `title` optional) |
