@@ -243,6 +243,12 @@ class DocumentAdminFormTests(TestCase):
 
 
 class DocumentSignalsTests(TestCase):
+    def test_creating_document_does_not_leak_none_key(self):
+        from documents import signals as signals_module
+
+        _make_document("note.txt", "متن".encode("utf-8"))
+        self.assertNotIn(None, signals_module._old_files)
+
     def test_replacing_file_deletes_old_file_and_reindexes(self):
         doc = _make_document("first.txt", "نسخه اول".encode("utf-8"))
         old_path = doc.file.path

@@ -13,12 +13,11 @@ _old_files = {}
 
 @receiver(pre_save, sender=Document)
 def remember_old_file(sender, instance, **kwargs):
-    if instance.pk:
-        try:
-            _old_files[instance.pk] = Document.objects.get(pk=instance.pk).file.name
-        except Document.DoesNotExist:
-            _old_files[instance.pk] = None
-    else:
+    if not instance.pk:
+        return
+    try:
+        _old_files[instance.pk] = Document.objects.get(pk=instance.pk).file.name
+    except Document.DoesNotExist:
         _old_files[instance.pk] = None
 
 
