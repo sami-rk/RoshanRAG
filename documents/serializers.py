@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from .models import Document
 
-SUPPORTED_EXTENSIONS = {"docx", "txt"}
+SUPPORTED_EXTENSIONS = {"docx", "pdf", "txt"}
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -28,7 +28,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     def validate_file(self, value):
         extension = value.name.rsplit(".", 1)[-1].lower() if "." in value.name else ""
         if extension not in SUPPORTED_EXTENSIONS:
-            raise serializers.ValidationError("فرمت فایل باید docx یا txt باشد")
+            raise serializers.ValidationError("فرمت فایل باید docx، pdf یا txt باشد")
         if value.size > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
             raise serializers.ValidationError(
                 f"حجم فایل نباید بیشتر از {settings.MAX_UPLOAD_SIZE_MB} مگابایت باشد"

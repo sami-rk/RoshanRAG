@@ -48,7 +48,7 @@
     for (var i = 0; i < selected.length; i++) {
       var file = selected[i];
       var name = file.name.toLowerCase();
-      if (name.endsWith(".docx") || name.endsWith(".txt")) {
+      if (name.endsWith(".docx") || name.endsWith(".pdf") || name.endsWith(".txt")) {
         files.push(file);
       }
     }

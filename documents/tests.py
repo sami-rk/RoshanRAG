@@ -34,14 +34,35 @@ def _make_document(name: str, content: bytes) -> Document:
             )
 
 
+MINIMAL_PDF = b"""%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj
+4 0 obj<</Length 44>>stream
+BT /F1 12 Tf 72 720 Td (Hello PDF world) Tj ET
+endstream
+endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
+trailer<</Root 1 0 R>>
+%%EOF
+"""
+
+
 class DocumentSerializerTests(APITestCase):
     def test_supported_extensions_accepted(self):
         file = SimpleUploadedFile("readme.txt", b"content", content_type="text/plain")
         serializer = DocumentSerializer(data={"file": file})
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
+    def test_pdf_extension_accepted(self):
+        file = SimpleUploadedFile(
+            "readme.pdf", MINIMAL_PDF, content_type="application/pdf"
+        )
+        serializer = DocumentSerializer(data={"file": file})
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
     def test_unsupported_extension_rejected(self):
-        file = SimpleUploadedFile("readme.pdf", b"%PDF-1.4", content_type="application/pdf")
+        file = SimpleUploadedFile("readme.csv", b"a,b", content_type="text/csv")
         serializer = DocumentSerializer(data={"file": file})
         self.assertFalse(serializer.is_valid())
         self.assertIn("file", serializer.errors)
@@ -147,7 +168,7 @@ class DocumentAPITests(APITestCase):
     def test_batch_upload_reports_invalid_files(self):
         valid = SimpleUploadedFile("ok.txt", b"content", content_type="text/plain")
         invalid = SimpleUploadedFile(
-            "bad.pdf", b"%PDF-1.4", content_type="application/pdf"
+            "bad.csv", b"a,b", content_type="text/csv"
         )
         with patch("documents.signals.schedule_index"):
             response = self.client.post(
@@ -158,7 +179,7 @@ class DocumentAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(response.data["created"]), 1)
         self.assertEqual(len(response.data["errors"]), 1)
-        self.assertEqual(response.data["errors"][0]["file"], "bad.pdf")
+        self.assertEqual(response.data["errors"][0]["file"], "bad.csv")
 
 
 class IndexingServiceTests(TestCase):
@@ -197,7 +218,7 @@ class IndexingServiceTests(TestCase):
             self.assertEqual(metadata["document_id"], doc.pk)
 
     def test_index_unsupported_extension_sets_failed(self):
-        doc = _make_document("file.pdf", b"%PDF-1.4 fake content")
+        doc = _make_document("file.csv", b"a,b")
         with (
             patch("documents.services.indexing.get_chroma_vectorstore"),
             patch("documents.services.indexing.delete_document_chunks"),
@@ -208,6 +229,20 @@ class IndexingServiceTests(TestCase):
         self.assertEqual(doc.status, Document.Status.FAILED)
         self.assertIn("پشتیبانی", doc.error_message)
         self.assertEqual(doc.full_text, "")
+
+    def test_index_pdf_document_success(self):
+        doc = _make_document("report.pdf", MINIMAL_PDF)
+        vectorstore = MagicMock()
+        with (
+            patch("documents.services.indexing.get_chroma_vectorstore", return_value=vectorstore),
+            patch("documents.services.indexing.delete_document_chunks"),
+        ):
+            index_document(doc.pk)
+
+        doc.refresh_from_db()
+        self.assertEqual(doc.status, Document.Status.READY)
+        self.assertIn("Hello PDF world", doc.full_text)
+        self.assertEqual(doc.error_message, "")
 
     def test_index_empty_text_sets_failed(self):
         doc = _make_document("empty.txt", b"")
@@ -256,10 +291,21 @@ class DocumentAdminFormTests(TestCase):
     def test_admin_form_rejects_unsupported_extension(self):
         from documents.forms import DocumentAdminForm
 
-        file = SimpleUploadedFile("readme.pdf", b"%PDF-1.4", content_type="application/pdf")
+        file = SimpleUploadedFile("readme.csv", b"a,b", content_type="text/csv")
         form = DocumentAdminForm(data={"title": "سند"}, files={"file": file})
         self.assertFalse(form.is_valid())
         self.assertIn("file", form.errors)
+
+    def test_admin_form_accepts_pdf(self):
+        from documents.forms import DocumentAdminForm
+
+        file = SimpleUploadedFile(
+            "readme.pdf", MINIMAL_PDF, content_type="application/pdf"
+        )
+        form = DocumentAdminForm(
+            data={"title": "سند", "status": Document.Status.PENDING}, files={"file": file}
+        )
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_admin_form_rejects_oversized_file(self):
         from documents.forms import DocumentAdminForm
