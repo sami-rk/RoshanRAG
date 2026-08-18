@@ -446,7 +446,10 @@ class LoadSampleDataCommandTests(TestCase):
 
     def test_post_save_signal_is_reconnected(self):
         with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
-            call_command("load_sample_data")
+            # The command indexes each sample document synchronously; patch the
+            # indexer so the setup does not touch a real Chroma server.
+            with patch("documents.management.commands.load_sample_data.index_document"):
+                call_command("load_sample_data")
             with patch("documents.signals.schedule_index") as schedule:
                 with tempfile.TemporaryDirectory() as tmp:
                     path = Path(tmp) / "extra.txt"
@@ -539,6 +542,9 @@ class ScheduleIndexTests(TestCase):
             )
         with patch("documents.services.indexing.run_in_background") as run:
             schedule_index(document.pk)
-        document.delete()
+        # Deleting fires the post_delete signal whose chroma cleanup would hit a
+        # real server; patch it so the test stays hermetic.
+        with patch("core.chroma_client.delete_document_chunks"):
+            document.delete()
         run.call_args.kwargs["on_error"](RuntimeError("kaboom"))
         self.assertFalse(Document.objects.filter(pk=document.pk).exists())
