@@ -203,3 +203,53 @@ class MediaAccessTests(TestCase):
                 "/media/secret.txt", HTTP_AUTHORIZATION="Token not-a-real-key"
             )
         self.assertEqual(response.status_code, 403)
+
+
+class AnalyticsTests(TestCase):
+    def test_questions_per_day_reports_all_days(self):
+        from core.stats import get_questions_per_day
+
+        Question.objects.create(question="امروز", status=Question.Status.DONE)
+        series = get_questions_per_day(days=30)
+        self.assertEqual(len(series), 30)
+        self.assertEqual(series[-1]["count"], 1)
+        self.assertEqual(series[0]["count"], 0)
+
+    def test_feedback_counts_grouped(self):
+        from core.stats import get_feedback_counts
+
+        Question.objects.create(question="یک", feedback=Question.Feedback.UP)
+        Question.objects.create(question="دو", feedback=Question.Feedback.UP)
+        Question.objects.create(question="سه", feedback=Question.Feedback.DOWN)
+        counts = get_feedback_counts()
+        self.assertEqual(counts["up"], 2)
+        self.assertEqual(counts["down"], 1)
+
+    def test_top_documents_by_usage(self):
+        from core.stats import get_top_documents
+
+        document = Document.objects.create(
+            title="سند پرکاربرد", file="documents/x.txt", status=Document.Status.READY
+        )
+        Question.objects.create(
+            question="پرسش",
+            sources=[{"document_id": document.pk, "title": document.title}],
+        )
+        top = get_top_documents()
+        self.assertEqual(len(top), 1)
+        self.assertEqual(top[0]["title"], "سند پرکاربرد")
+        self.assertEqual(top[0]["uses"], 1)
+
+    def test_analytics_page_renders_for_staff(self):
+        user = get_user_model().objects.create_user(
+            username="staff", password="pass", is_staff=True
+        )
+        self.client.force_login(user)
+        response = self.client.get("/admin/analytics/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "analytics-data")
+        self.assertContains(response, "chart-questions")
+
+    def test_analytics_page_requires_staff(self):
+        response = self.client.get("/admin/analytics/")
+        self.assertEqual(response.status_code, 302)

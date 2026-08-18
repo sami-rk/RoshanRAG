@@ -1471,3 +1471,27 @@ body.dashboard #content {
         animation-iteration-count: 1 !important;
     }
 }
+.analytics-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.analytics-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 160ms ease, border-color 160ms ease;
+}
+
+.analytics-link:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}

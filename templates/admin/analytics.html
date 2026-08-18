@@ -1,0 +1,123 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .analytics-grid-2 {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .analytics-card {
+    background: var(--card-bg, var(--card));
+    border: 1px solid var(--border-color, var(--border));
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .analytics-card h2 {
+    margin-top: 0;
+    font-size: 15px;
+  }
+  .analytics-chart-wrap {
+    position: relative;
+    height: 260px;
+  }
+  .analytics-top-docs {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .analytics-top-docs td {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color, var(--border));
+  }
+  .analytics-top-docs tr:last-child td {
+    border-bottom: 0;
+  }
+  .analytics-top-docs .uses {
+    text-align: left;
+    font-weight: 700;
+  }
+  .analytics-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .analytics-toolbar a {
+    font-weight: 700;
+  }
+  @media (max-width: 900px) {
+    .analytics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script defer src="{% static 'admin/js/chart.umd.min.js' %}"></script>
+<script defer src="{% static 'admin/js/analytics.js' %}"></script>
+{{ analytics|json_script:"analytics-data" }}
+{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="analytics-toolbar">
+    <h1>{{ title }}</h1>
+    <a href="{% url 'admin:index' %}">&larr; {% translate 'Back' %}</a>
+  </div>
+  <div class="analytics-grid">
+    <div class="analytics-card">
+      <h2>{% translate 'Questions per day (last 30 days)' %}</h2>
+      <div class="analytics-chart-wrap"><canvas id="chart-questions"></canvas></div>
+    </div>
+    <div class="analytics-card">
+      <h2>{% translate 'Documents by status' %}</h2>
+      <div class="analytics-chart-wrap"><canvas id="chart-documents"></canvas></div>
+      <p class="quiet">
+        {{ analytics.documents_ready }} {% translate 'ready' %} &middot;
+        {{ analytics.documents_pending }} {% translate 'pending' %} &middot;
+        {{ analytics.documents_failed }} {% translate 'failed' %}
+      </p>
+    </div>
+    <div class="analytics-card">
+      <h2>{% translate 'Answer feedback' %}</h2>
+      <div class="analytics-chart-wrap"><canvas id="chart-feedback"></canvas></div>
+      <p class="quiet">
+        {{ analytics.feedback_counts.up }} {% translate 'useful' %} &middot;
+        {{ analytics.feedback_counts.down }} {% translate 'not useful' %}
+      </p>
+    </div>
+    <div class="analytics-card">
+      <h2>{% translate 'Most used documents' %}</h2>
+      {% if analytics.top_documents %}
+      <table class="analytics-top-docs">
+        {% for doc in analytics.top_documents %}
+        <tr>
+          <td>{{ doc.title }}</td>
+          <td class="uses">{{ doc.uses }} &times;</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p class="quiet">{% translate 'No document has been referenced in an answer yet.' %}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
