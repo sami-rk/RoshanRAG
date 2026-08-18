@@ -1,9 +1,12 @@
 import csv
 import json
+import uuid
 
 from django.http import HttpResponse, JsonResponse
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from .models import Question
 from .serializers import QuestionSerializer
@@ -66,3 +69,28 @@ class QuestionViewSet(
                 row["sources"] = json.dumps(row["sources"], ensure_ascii=False)
             writer.writerow([row[column] for column in EXPORT_COLUMNS])
         return response
+
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def demo_ask(self, request):
+        question_text = (request.data.get("question") or "").strip()
+        if not question_text:
+            return Response(
+                {"detail": "متن پرسش الزامی است."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        question = Question.objects.create(
+            question=question_text, demo_token=uuid.uuid4()
+        )
+        schedule_answering(question.pk)
+        data = QuestionSerializer(question, context=self.get_serializer_context()).data
+        data["demo_token"] = str(question.demo_token)
+        return Response(data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["get"], permission_classes=[AllowAny], url_path="demo")
+    def demo_retrieve(self, request, pk=None):
+        question = self.get_object()
+        token = request.query_params.get("token")
+        if question.demo_token is None or token != str(question.demo_token):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            QuestionSerializer(question, context=self.get_serializer_context()).data
+        )

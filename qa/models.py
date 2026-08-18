@@ -23,6 +23,9 @@ class Question(models.Model):
     )
     sources = models.JSONField("منابع", default=list, blank=True)
     error_message = models.TextField("پیام خطا", blank=True, default="")
+    demo_token = models.UUIDField(
+        "شناسه دمو", null=True, blank=True, unique=True, editable=False
+    )
     created_at = models.DateTimeField("تاریخ ایجاد", auto_now_add=True)
     answered_at = models.DateTimeField("تاریخ پاسخ", null=True, blank=True)
 

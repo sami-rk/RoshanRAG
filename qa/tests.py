@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 from unittest.mock import patch
+from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -123,6 +124,49 @@ class QuestionAPITests(APITestCase):
         content = response.content.decode("utf-8")
         self.assertIn("در انتظار", content)
         self.assertNotIn("انجام شده", content)
+
+    def test_demo_ask_creates_question_without_login(self):
+        with patch("qa.views.schedule_answering") as schedule:
+            response = self.client.post(
+                "/api/questions/demo_ask/", {"question": "سوال دمو"}, format="json"
+            )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data["demo_token"])
+        question = Question.objects.get(pk=response.data["id"])
+        self.assertEqual(question.question, "سوال دمو")
+        self.assertIsNotNone(question.demo_token)
+        schedule.assert_called_once_with(question.pk)
+
+    def test_demo_ask_rejects_empty_question(self):
+        response = self.client.post(
+            "/api/questions/demo_ask/", {"question": "   "}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_demo_retrieve_requires_matching_token(self):
+        with patch("qa.views.schedule_answering"):
+            question = Question.objects.create(
+                question="پرسش", demo_token=uuid4()
+            )
+        response = self.client.get(f"/api/questions/{question.pk}/demo/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.get(
+            f"/api/questions/{question.pk}/demo/?token=wrong"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.get(
+            f"/api/questions/{question.pk}/demo/?token={question.demo_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["question"], "پرسش")
+
+    def test_demo_retrieve_hides_normal_questions(self):
+        with patch("qa.views.schedule_answering"):
+            question = Question.objects.create(question="عادی")
+        response = self.client.get(
+            f"/api/questions/{question.pk}/demo/?token=abc"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class FriendlyErrorTests(APITestCase):
