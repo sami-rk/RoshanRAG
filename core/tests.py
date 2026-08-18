@@ -408,9 +408,10 @@ class AnalyticsTests(TestCase):
     def test_top_documents_by_usage(self):
         from core.stats import get_top_documents
 
-        document = Document.objects.create(
-            title="سند پرکاربرد", file="documents/x.txt", status=Document.Status.READY
-        )
+        with patch("documents.signals.schedule_index"):
+            document = Document.objects.create(
+                title="سند پرکاربرد", file="documents/x.txt", status=Document.Status.READY
+            )
         Question.objects.create(
             question="پرسش",
             sources=[{"document_id": document.pk, "title": document.title}],
