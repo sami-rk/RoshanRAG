@@ -47,7 +47,8 @@
         var start = null;
         var digit = el.querySelector("em") || el;
         function setValue(value) {
-            digit.textContent = toPersianDigits(value);
+            var isEn = document.documentElement.lang === "en";
+            digit.textContent = isEn ? String(value) : toPersianDigits(value);
         }
         if (prefersReducedMotion()) {
             setValue(target);
