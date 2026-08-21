@@ -217,6 +217,15 @@
       var decoder = new TextDecoder();
       var buffer = "";
 
+      var tokenQueue = "";
+      var tokenRaf = null;
+      function flushTokens() {
+        tokenRaf = null;
+        if (tokenQueue && pending.isConnected) {
+          pending.textContent += tokenQueue;
+          tokenQueue = "";
+        }
+      }
       function handle(frame) {
         var line = frame.trim();
         if (line.indexOf("data:") !== 0) return;
@@ -227,7 +236,11 @@
           return;
         }
         if (data.type === "token") {
-          if (pending.isConnected) pending.textContent += data.text;
+          if (!pending.isConnected) return;
+          tokenQueue += data.text;
+          if (!tokenRaf) {
+            tokenRaf = window.requestAnimationFrame(flushTokens);
+          }
         } else if (data.type === "done") {
           setBusy(false);
           container.innerHTML = renderAnswerHtml(data.question);
@@ -324,7 +337,8 @@
         });
         if (!active) return;
         active.classList.add("chat-source-active");
-        active.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        active.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
         return;
       }
       var btn = event.target.closest("button[data-feedback]");
