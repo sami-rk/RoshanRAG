@@ -11,7 +11,19 @@
   var stream = document.getElementById("chat-stream");
   var threadsList = document.getElementById("chat-threads-list");
   var newThreadBtn = document.getElementById("chat-new-thread");
+  var bodyEl = document.querySelector(".chat-conversation-body");
+  var scrollRoot = bodyEl || stream;
   var currentThread = null;
+
+  function scrollToBottom() {
+    if (!scrollRoot) return;
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    try {
+      scrollRoot.scrollTo({ top: scrollRoot.scrollHeight, behavior: reduce ? "auto" : "smooth" });
+    } catch (e) {
+      scrollRoot.scrollTop = scrollRoot.scrollHeight;
+    }
+  }
 
   var T = {
     fa: {
@@ -69,6 +81,7 @@
     el.className = "chat-msg chat-msg-" + kind;
     el.innerHTML = html;
     stream.appendChild(el);
+    scrollToBottom();
   }
 
   function renderSources(sources) {
@@ -239,14 +252,19 @@
           if (!pending.isConnected) return;
           tokenQueue += data.text;
           if (!tokenRaf) {
-            tokenRaf = window.requestAnimationFrame(flushTokens);
+            tokenRaf = window.requestAnimationFrame(function () {
+              flushTokens();
+              scrollToBottom();
+            });
           }
         } else if (data.type === "done") {
           setBusy(false);
           container.innerHTML = renderAnswerHtml(data.question);
+          scrollToBottom();
         } else if (data.type === "error" || data.type === "timeout") {
           setBusy(false);
           container.innerHTML = "<p>" + T.noAnswer + "</p>";
+          scrollToBottom();
         }
       }
 
@@ -288,6 +306,7 @@
       var btn = threadsList.querySelector('[data-thread="' + thread.id + '"]');
       if (btn) btn.classList.add("active");
       input.focus();
+      scrollToBottom();
     }).catch(function () {
       addMessage("error", "<p>" + T.openFailed + "</p>");
     });
