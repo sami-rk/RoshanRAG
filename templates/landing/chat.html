@@ -16,7 +16,7 @@
     <div class="marquee-group">
       <span>BAAI/bge-m3</span><span>ChromaDB</span><span>OpenRouter</span><span>LangChain</span><span>Django</span><span>Persian NLP</span>
     </div>
-    <div class="marquee-group">
+    <div class="marquee-group" aria-hidden="true">
       <span>BAAI/bge-m3</span><span>ChromaDB</span><span>OpenRouter</span><span>LangChain</span><span>Django</span><span>Persian NLP</span>
     </div>
   </div>
@@ -35,15 +35,18 @@
       </div>
     {% else %}
       <div class="chat-layout reveal in-view" data-reveal>
-        <aside class="chat-threads">
+        <aside class="chat-threads" aria-label="{% trans 'گفتگوها' %}">
           <div class="chat-threads-head">
             <h3>{% trans "گفتگوها" %}</h3>
             <button type="button" id="chat-new-thread" class="chat-new-thread">{% trans "گفتگوی جدید" %}</button>
           </div>
-          <ul id="chat-threads-list"></ul>
+          <ul id="chat-threads-list" role="list"></ul>
         </aside>
-        <div class="chat-card">
-          <form id="ask-form" autocomplete="off">
+        <div class="chat-card chat-conversation" role="region" aria-label="chat">
+          <div class="chat-conversation-body">
+            <div id="chat-stream" class="chat-stream" aria-live="polite"></div>
+          </div>
+          <form id="ask-form" class="chat-composer" autocomplete="off">
             {% csrf_token %}
             <label for="ask-input" class="visually-hidden">{% trans "پرسش شما" %}</label>
             <textarea id="ask-input" name="question" rows="3" placeholder="{% trans 'پرسش خود را بنویسید؛ مثلاً «میزان فروش در سه ماهه اول چقدر بود؟»' %}" required></textarea>
@@ -52,7 +55,6 @@
               <span class="chat-hint">{% trans "پاسخ فقط بر اساس محتوای اسناد بارگذاری‌شده تولید می‌شود." %}</span>
             </div>
           </form>
-          <div id="chat-stream" class="chat-stream" aria-live="polite"></div>
         </div>
       </div>
     {% endif %}
