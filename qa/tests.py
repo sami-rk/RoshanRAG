@@ -1,3 +1,4 @@
+from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
@@ -1078,4 +1079,43 @@ class ScheduleAnsweringTests(TestCase):
             schedule_answering(question.pk)
         question.delete()
         run.call_args.kwargs["on_error"](RuntimeError("boom"))
+        self.assertFalse(Question.objects.filter(pk=question.pk).exists())
+
+
+class CleanupDemoQuestionsTests(TestCase):
+    def test_deletes_expired_demo_questions(self):
+        from django.core.management import call_command
+
+        old = timezone.now() - timedelta(days=8)
+        expired = Question.objects.create(question="دمو قدیمی", demo_token=uuid4())
+        Question.objects.filter(pk=expired.pk).update(created_at=old)
+        recent = Question.objects.create(question="دمو جدید", demo_token=uuid4())
+        normal = Question.objects.create(question="عادی", user=get_user_model().objects.create_user("u", password="p"))
+
+        call_command("cleanup_demo_questions", stdout=MagicMock())
+
+        self.assertFalse(Question.objects.filter(pk=expired.pk).exists())
+        self.assertTrue(Question.objects.filter(pk=recent.pk).exists())
+        self.assertTrue(Question.objects.filter(pk=normal.pk).exists())
+
+    def test_dry_run_does_not_delete(self):
+        from django.core.management import call_command
+
+        old = timezone.now() - timedelta(days=8)
+        expired = Question.objects.create(question="دمو", demo_token=uuid4())
+        Question.objects.filter(pk=expired.pk).update(created_at=old)
+
+        call_command("cleanup_demo_questions", "--dry-run", stdout=MagicMock())
+
+        self.assertTrue(Question.objects.filter(pk=expired.pk).exists())
+
+    def test_custom_days_threshold(self):
+        from django.core.management import call_command
+
+        old = timezone.now() - timedelta(days=2)
+        question = Question.objects.create(question="دمو", demo_token=uuid4())
+        Question.objects.filter(pk=question.pk).update(created_at=old)
+
+        call_command("cleanup_demo_questions", "--days", "1", stdout=MagicMock())
+
         self.assertFalse(Question.objects.filter(pk=question.pk).exists())
