@@ -592,12 +592,14 @@ class AnsweringServiceTests(APITestCase):
                     "title": "گزارش فروش",
                     "excerpt": "متن گزارش فروش کامل",
                     "citation": 1,
+                    "file_url": "/media/documents/ready.txt",
                 },
                 {
                     "document_id": 2,
                     "title": "گزارش دوم",
                     "excerpt": "متن گزارش دوم",
                     "citation": 2,
+                    "file_url": None,
                 },
             ],
         )

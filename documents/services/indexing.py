@@ -26,12 +26,19 @@ def index_document(document_id: int) -> None:
         if not chunks:
             raise ValueError("سند هیچ بخش قابل بازیابی تولید نکرد")
 
+        file_url = None
+        if document.file:
+            try:
+                file_url = document.file.url
+            except Exception:
+                file_url = None
         ids = [f"doc-{document.pk}-{index}" for index in range(len(chunks))]
         metadatas = [
             {
                 "document_id": document.pk,
                 "title": document.title,
                 "chunk_index": index,
+                "file_url": file_url,
             }
             for index in range(len(chunks))
         ]

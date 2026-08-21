@@ -119,14 +119,31 @@ def _stream_answer(llm, messages, question):
 
 
 def _build_sources(retrieved):
+    # Bulk-fetch file URLs so sources can deep-link to the protected media
+    # endpoint; existing vector chunks without file_url fall back to the DB.
+    doc_ids = [d.metadata.get("document_id") for d in retrieved]
+    db_docs = {
+        doc.pk: doc
+        for doc in Document.objects.filter(pk__in=[i for i in doc_ids if i is not None])
+    }
     sources = []
     for index, document in enumerate(retrieved, start=1):
+        doc_id = document.metadata.get("document_id")
+        file_url = document.metadata.get("file_url")
+        if not file_url and doc_id in db_docs:
+            db_doc = db_docs[doc_id]
+            if db_doc.file:
+                try:
+                    file_url = db_doc.file.url
+                except Exception:
+                    file_url = None
         sources.append(
             {
-                "document_id": document.metadata.get("document_id"),
+                "document_id": doc_id,
                 "title": document.metadata.get("title"),
                 "excerpt": document.page_content[:300],
                 "citation": index,
+                "file_url": file_url,
             }
         )
     return sources
