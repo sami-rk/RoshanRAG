@@ -195,17 +195,39 @@
 
     function setupMagnetic(el) {
         if (prefersReducedMotion() || !canHover()) return;
-        el.addEventListener("pointermove", function (e) {
-            var rect = el.getBoundingClientRect();
-            var x = e.clientX - rect.left - rect.width / 2;
-            var y = e.clientY - rect.top - rect.height / 2;
+        var ticking = false;
+        var latest = null;
+        var rect = null;
+        function update() {
+            ticking = false;
+            if (!latest || !rect) return;
+            var x = latest.clientX - rect.left - rect.width / 2;
+            var y = latest.clientY - rect.top - rect.height / 2;
             var dx = Math.max(-9, Math.min(9, x * 0.3));
             var dy = Math.max(-9, Math.min(9, y * 0.3));
             el.style.translate = dx.toFixed(1) + "px " + dy.toFixed(1) + "px";
+        }
+        el.addEventListener("pointerenter", function () {
+            rect = el.getBoundingClientRect();
+        });
+        el.addEventListener("pointermove", function (e) {
+            latest = e;
+            if (!ticking) {
+                ticking = true;
+                window.requestAnimationFrame(update);
+            }
         });
         el.addEventListener("pointerleave", function () {
+            latest = null;
+            ticking = false;
             el.style.translate = "0px 0px";
         });
+        if ("ResizeObserver" in window) {
+            var ro = new ResizeObserver(function () {
+                rect = el.getBoundingClientRect();
+            });
+            ro.observe(el);
+        }
     }
 
     function initMagnetic() {
