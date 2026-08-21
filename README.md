@@ -143,12 +143,20 @@ Full reference (auth, examples, status flows, rate limits): [docs/api.md](docs/a
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/api/documents/` | Upload a document (multipart: `file` required, `title` optional) |
+| `POST` | `/api/documents/batch/` | Upload several documents at once (multipart: repeat `files`) |
 | `GET` | `/api/documents/` | List documents (`?q=<text>` searches title + full text, `?status=pending|ready|failed` filters) |
 | `GET` / `PATCH` / `DELETE` | `/api/documents/{id}/` | Detail / edit / delete (removes vector chunks and the stored file) |
-| `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`) |
-| `GET` | `/api/questions/` | Q&A history (`?status=pending|generating|done|failed` filters) |
+| `POST` | `/api/questions/` | Ask a question (`{"question": "..."}`, optional `"thread": "<uuid>"`) |
+| `GET` | `/api/questions/` | Q&A history (`?status=...` filters, `?thread=<uuid>` scopes to a thread, paginated 20/page) |
 | `GET` | `/api/questions/{id}/` | Poll for status / answer / sources |
+| `GET` | `/api/questions/{id}/stream/` | Server-Sent Events live streaming (token + done frames) |
+| `PATCH` | `/api/questions/{id}/` | Record feedback (`{"feedback": "up"|"down"|"none"}`) |
 | `DELETE` | `/api/questions/{id}/` | Delete a question from the history |
+| `GET` | `/api/questions/export/` | Export Q&A history (`?format=csv` default, `?format=json`) |
+| `POST` | `/api/questions/demo_ask/` | Anonymous demo question (no token) — returns `demo_token` |
+| `GET` | `/api/questions/{id}/demo/?token=...` | Poll a demo question (token-gated) |
+| `GET` / `POST` | `/api/threads/` | List / create conversation threads |
+| `GET` | `/api/threads/{id}/` | Thread detail including its ordered questions |
 | `GET` | `/api/health/` | Health check (DB + Chroma), used by the container healthcheck |
 
 Document status: `pending → ready | failed`. Question status: `pending → generating → done | failed`. After creating a question, poll `GET /api/questions/{id}/` for the result.
@@ -203,7 +211,7 @@ documents/         Document model, services (extraction/chunking/indexing), sign
 qa/                Question model, RAG answering service, API
 templates/landing/ Public landing pages (home, about, pricing, contact, base)
 static/landing/    Landing CSS/JS (dark-light theme, mobile nav, count-up, scroll reveals, tilt, magnetic CTAs, marquee)
-sample_data/       Four Persian sample documents (3 DOCX + 1 TXT)
+sample_data/       Five Persian sample documents (3 DOCX + 1 PDF + 1 TXT)
 Dockerfile         python:3.12-slim; CPU torch by default, CUDA torch via GPU build arg
 compose.yaml       web + chroma services
 compose.gpu.yaml   GPU override (adds CUDA torch + nvidia device reservation)
