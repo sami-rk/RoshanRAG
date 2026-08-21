@@ -213,10 +213,96 @@
   }
 
   function openStream(questionId, container) {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var pending = document.createElement("p");
     pending.className = "chat-streaming";
     pending.textContent = T.streaming;
     container.appendChild(pending);
+
+    var typer = {
+      buffer: "",
+      raf: null,
+      started: false,
+      last: 0,
+      acc: 0,
+    };
+
+    function appendWord(chunk) {
+      var span = document.createElement("span");
+      span.className = "chat-word";
+      span.textContent = chunk;
+      pending.appendChild(span);
+    }
+
+    function popWord() {
+      var match = typer.buffer.match(/^\s*\S+/);
+      var chunk;
+      if (match) {
+        chunk = match[0];
+      } else {
+        chunk = typer.buffer;
+      }
+      typer.buffer = typer.buffer.slice(chunk.length);
+      return chunk;
+    }
+
+    function step(now) {
+      typer.raf = null;
+      if (!pending.isConnected || !typer.buffer.length) return;
+      if (!typer.started) {
+        typer.started = true;
+        pending.textContent = "";
+      }
+      var elapsed = Math.min(now - typer.last, 200);
+      typer.last = now;
+      typer.acc += elapsed;
+      var wordsLeft = Math.max(1, Math.ceil(typer.buffer.length / 6));
+      var perWord = Math.max(16, Math.min(70, 2600 / wordsLeft));
+      var revealed = false;
+      while (typer.buffer.length && typer.acc >= perWord) {
+        appendWord(popWord());
+        typer.acc -= perWord;
+        revealed = true;
+      }
+      if (revealed) scrollToBottom();
+      typer.raf = window.requestAnimationFrame(step);
+    }
+
+    function typerPush(text) {
+      if (!text) return;
+      if (reduce || !pending.isConnected) {
+        if (!pending.isConnected) return;
+        if (!typer.started) {
+          typer.started = true;
+          pending.textContent = "";
+        }
+        pending.appendChild(document.createTextNode(text));
+        scrollToBottom();
+        return;
+      }
+      typer.buffer += text;
+      if (!typer.raf) {
+        typer.last = performance.now();
+        typer.acc = 0;
+        typer.raf = window.requestAnimationFrame(step);
+      }
+    }
+
+    function typerFlush() {
+      if (typer.raf) {
+        window.cancelAnimationFrame(typer.raf);
+        typer.raf = null;
+      }
+      if (reduce || !pending.isConnected || !typer.buffer.length) return;
+      if (!typer.started) {
+        typer.started = true;
+        pending.textContent = "";
+      }
+      while (typer.buffer.length) {
+        appendWord(popWord());
+      }
+      scrollToBottom();
+    }
 
     fetch("/api/questions/" + questionId + "/stream/", {
       headers: { "X-CSRFToken": csrf },
@@ -230,15 +316,6 @@
       var decoder = new TextDecoder();
       var buffer = "";
 
-      var tokenQueue = "";
-      var tokenRaf = null;
-      function flushTokens() {
-        tokenRaf = null;
-        if (tokenQueue && pending.isConnected) {
-          pending.textContent += tokenQueue;
-          tokenQueue = "";
-        }
-      }
       function handle(frame) {
         var line = frame.trim();
         if (line.indexOf("data:") !== 0) return;
@@ -250,19 +327,18 @@
         }
         if (data.type === "token") {
           if (!pending.isConnected) return;
-          tokenQueue += data.text;
-          if (!tokenRaf) {
-            tokenRaf = window.requestAnimationFrame(function () {
-              flushTokens();
-              scrollToBottom();
-            });
-          }
+          typerPush(data.text == null ? "" : String(data.text));
         } else if (data.type === "done") {
           setBusy(false);
+          typerFlush();
           container.innerHTML = renderAnswerHtml(data.question);
           scrollToBottom();
         } else if (data.type === "error" || data.type === "timeout") {
           setBusy(false);
+          if (typer.raf) {
+            window.cancelAnimationFrame(typer.raf);
+            typer.raf = null;
+          }
           container.innerHTML = "<p>" + T.noAnswer + "</p>";
           scrollToBottom();
         }
@@ -272,6 +348,10 @@
         return reader.read().then(function (result) {
           if (result.done) {
             setBusy(false);
+            if (typer.raf) {
+              window.cancelAnimationFrame(typer.raf);
+              typer.raf = null;
+            }
             return;
           }
           buffer += decoder.decode(result.value, { stream: true });
@@ -285,6 +365,10 @@
       return pump();
     }).catch(function () {
       setBusy(false);
+      if (typer.raf) {
+        window.cancelAnimationFrame(typer.raf);
+        typer.raf = null;
+      }
       if (pending.isConnected) {
         container.innerHTML = "<p>" + T.fetchFailed + "</p>";
       }
