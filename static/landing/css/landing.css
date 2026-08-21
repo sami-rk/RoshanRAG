@@ -936,6 +936,10 @@ html[data-theme="dark"] .hero::after,
     line-height: 1;
 }
 
+html[lang="en"] .step::before {
+    content: counter(step);
+}
+
 .step .icon {
     display: inline-flex;
     align-items: center;
