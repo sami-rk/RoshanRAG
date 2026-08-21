@@ -10,7 +10,7 @@ SUPPORTED_EXTENSIONS = {"docx", "pdf", "txt"}
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=False)
+    title = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Document
@@ -41,6 +41,8 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         title = validated_data.pop("title", None)
+        if isinstance(title, str):
+            title = title.strip()
         if not title:
             title = Path(validated_data["file"].name).stem
         return Document.objects.create(title=title, **validated_data)
