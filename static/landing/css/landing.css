@@ -181,6 +181,8 @@ summary:focus-visible,
     -webkit-backdrop-filter: blur(12px);
     background: color-mix(in srgb, var(--bg) 78%, transparent);
     border-bottom: 1px solid var(--border);
+    will-change: backdrop-filter;
+    contain: paint;
 }
 
 .site-nav .container {
@@ -309,11 +311,13 @@ summary:focus-visible,
 }
 
 .btn.magnetic {
+    will-change: translate;
     transition:
         background 160ms ease,
         border-color 160ms ease,
         color 160ms ease,
-        box-shadow 160ms ease;
+        box-shadow 160ms ease,
+        translate 120ms linear;
 }
 
 .btn-lg {
@@ -440,7 +444,8 @@ html[data-theme="dark"] .elegant-dark-bg {
     background: linear-gradient(rgb(0, 207, 255) 0%, rgba(0, 207, 255, 0) 100%);
     -webkit-mask: var(--mask);
     mask: var(--mask);
-    transform: skewX(45deg);
+    transform: skewX(45deg) translateZ(0);
+    will-change: transform;
     animation: edbDrift 28s ease-in-out infinite;
 }
 
@@ -721,6 +726,8 @@ html[data-theme="dark"] .hero::after,
     display: flex;
     width: max-content;
     animation: marqueeScroll 32s linear infinite;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .marquee-group {
@@ -1087,9 +1094,10 @@ html[data-theme="dark"] .hero::after,
 }
 
 .faq .faq-a {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    max-height: 0;
+    overflow: hidden;
+    will-change: max-height;
+    transition: max-height 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .faq .faq-a p {
@@ -1102,7 +1110,7 @@ html[data-theme="dark"] .hero::after,
 }
 
 .faq details[open] .faq-a {
-    grid-template-rows: 1fr;
+    max-height: 400px;
 }
 
 /* ---- CTA ---- */
@@ -1422,6 +1430,7 @@ html[data-theme="dark"] .hero::after,
 /* ---- Motion: entrance + scroll reveal ---- */
 
 html.js-anim [data-hero] {
+    will-change: transform, opacity;
     animation: heroEnter 640ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
     animation-delay: calc(var(--i, 0) * 90ms);
 }
