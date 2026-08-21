@@ -1776,6 +1776,13 @@ html.js-anim [data-reveal].in-view {
     gap: 0;
     padding: 28px;
     min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#ask-form {
+    width: 100%;
+    min-width: 0;
 }
 
 .chat-card textarea {
@@ -1829,10 +1836,12 @@ html.js-anim [data-reveal].in-view {
     padding: 14px 18px;
     line-height: 1.9;
     max-width: 88%;
-    width: fit-content;
-    white-space: pre-line;
-    overflow-wrap: break-word;
+    width: auto;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     word-break: break-word;
+    min-width: 0;
 }
 
 .chat-msg-question {
