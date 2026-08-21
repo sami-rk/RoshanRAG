@@ -1641,10 +1641,10 @@ html.js-anim [data-reveal].in-view {
 
 /* ── Chat (ask-your-documents) — REBUILT, aligned single box ── */
 .chat-wrap{max-width:1120px;width:100%;margin-inline:auto;padding-top:24px;box-sizing:border-box}
-.chat-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start;width:100%;max-width:100%;box-sizing:border-box}
+.chat-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:stretch;width:100%;max-width:100%;box-sizing:border-box}
 .chat-layout > *{min-width:0}
 
-.chat-threads{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);padding:20px;position:sticky;top:24px;box-sizing:border-box;max-width:100%}
+.chat-threads{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);padding:20px;position:sticky;top:24px;box-sizing:border-box;max-width:100%;height:clamp(520px,68vh,760px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;scrollbar-width:thin}
 .chat-threads-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .chat-threads-head h3{font-size:15px;color:var(--muted);margin:0}
 .chat-new-thread{font:inherit;font-size:13px;cursor:pointer;padding:6px 12px;border:1px solid var(--border-strong);border-radius:999px;background:var(--bg);color:var(--accent);transition:border-color 160ms,color 160ms}
@@ -1703,6 +1703,8 @@ html.js-anim [data-reveal].in-view {
 
     .chat-threads {
         position: static;
+        height: auto;
+        overflow: visible;
     }
 }
 
