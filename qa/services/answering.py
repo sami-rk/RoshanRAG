@@ -1,5 +1,6 @@
 import json
 import logging
+from functools import lru_cache
 
 from django.conf import settings
 from django.utils import timezone
@@ -79,6 +80,38 @@ def _dedupe_by_document(documents, max_docs):
         if len(result) >= max_docs:
             break
     return result
+
+
+@lru_cache(maxsize=1)
+def _get_reranker():
+    model_name = getattr(settings, "RERANKER_MODEL", "")
+    if not model_name:
+        return None
+    try:
+        import torch
+
+        from sentence_transformers import CrossEncoder
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        return CrossEncoder(model_name, device=device, trust_remote_code=True)
+    except Exception as exc:  # pragma: no cover - depends on optional model download
+        logger.warning("Failed to load reranker %s: %s", model_name, exc)
+        return None
+
+
+def _rerank(query: str, documents):
+    reranker = _get_reranker()
+    if reranker is None or not documents:
+        return documents
+    try:
+        pairs = [(query, doc.page_content) for doc in documents]
+        scores = reranker.predict(pairs)
+        # CrossEncoder returns numpy array or list; sort descending
+        ranked = sorted(zip(scores, documents), key=lambda x: x[0], reverse=True)
+        return [doc for _, doc in ranked]
+    except Exception as exc:  # pragma: no cover - graceful fallback
+        logger.warning("Reranking failed, using vector order: %s", exc)
+        return documents
 
 
 def _build_retrieval_query(question) -> str:
@@ -219,6 +252,10 @@ def answer_question(question_id: int) -> None:
                 k=settings.RETRIEVAL_TOP_K,
                 fetch_k=settings.RETRIEVAL_FETCH_K,
             )
+            # Optional cross-encoder reranking sharpens MMR results when a
+            # reranker model is configured; falls back to vector order on error
+            # or when disabled.
+            retrieved = _rerank(retrieval_query, retrieved)
             retrieved = _dedupe_by_document(retrieved, settings.RETRIEVAL_MAX_DOCS)
 
             if not retrieved:

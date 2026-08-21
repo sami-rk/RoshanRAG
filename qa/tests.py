@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from django.contrib import messages
@@ -637,6 +637,61 @@ class AnsweringServiceTests(APITestCase):
 
         self.assertIn("میزان فروش سال گذشته", vectorstore.last_query)
         self.assertIn("امسال چطور؟", vectorstore.last_query)
+
+    def test_reranking_is_skipped_when_disabled(self):
+        from qa.services.answering import _get_reranker, _rerank
+
+        _get_reranker.cache_clear()
+        self.addCleanup(_get_reranker.cache_clear)
+        docs = [
+            self._fake_doc(1, "سند الف", "متن اول"),
+            self._fake_doc(2, "سند ب", "متن دوم"),
+        ]
+        # Default settings have no RERANKER_MODEL
+        self.assertEqual(_rerank("پرسش", docs), docs)
+
+    def test_reranking_reorders_results_when_enabled(self):
+        from qa.services.answering import _get_reranker, _rerank
+
+        _get_reranker.cache_clear()
+        self.addCleanup(_get_reranker.cache_clear)
+        docs = [
+            self._fake_doc(1, "سند الف", "متن اول"),
+            self._fake_doc(2, "سند ب", "متن دوم"),
+            self._fake_doc(3, "سند ج", "متن سوم"),
+        ]
+        mock_reranker = MagicMock()
+        mock_reranker.predict.return_value = [0.1, 0.9, 0.5]
+        with patch("qa.services.answering._get_reranker", return_value=mock_reranker):
+            ranked = _rerank("پرسش", docs)
+        # Highest score (0.9) corresponds to doc 2
+        self.assertEqual([d.metadata["document_id"] for d in ranked], [2, 3, 1])
+        mock_reranker.predict.assert_called_once()
+
+    def test_answer_uses_reranking_before_dedupe(self):
+        question = Question.objects.create(question="سوال")
+        retrieved = [
+            self._fake_doc(1, "سند الف", "چانک اول - کم‌ارتباط"),
+            self._fake_doc(2, "سند ب", "چانک دوم - بسیار مرتبط"),
+        ]
+        vectorstore = self.FakeVectorStore(retrieved)
+        llm = self.FakeLLM()
+
+        # Mock reranker to reverse the order
+        mock_reranker = MagicMock()
+        mock_reranker.predict.return_value = [0.1, 0.9]
+
+        with (
+            patch("qa.services.answering.get_chroma_vectorstore", return_value=vectorstore),
+            patch("qa.services.answering.get_llm", return_value=llm),
+            patch("qa.services.answering._get_reranker", return_value=mock_reranker),
+        ):
+            answer_question(question.pk)
+
+        question.refresh_from_db()
+        # After reranking, doc 2 should be citation 1
+        self.assertEqual(question.sources[0]["document_id"], 2)
+        self.assertEqual(question.sources[0]["citation"], 1)
 
     def test_answer_dedupes_chunks_from_same_document(self):
         question = Question.objects.create(question="سوال")
