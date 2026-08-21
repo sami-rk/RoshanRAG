@@ -1642,13 +1642,17 @@ html.js-anim [data-reveal].in-view {
 /* ── Chat (ask-your-documents) ─────────────────────────────────── */
 .chat-wrap {
     max-width: 1180px;
+    width: 100%;
+    margin-inline: auto;
+    padding-top: 24px;
 }
 
 .chat-layout {
     display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 22px;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 24px;
     align-items: start;
+    width: 100%;
 }
 
 .chat-threads {
@@ -1767,11 +1771,16 @@ html.js-anim [data-reveal].in-view {
 }
 
 .chat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     padding: 28px;
+    min-width: 0;
 }
 
 .chat-card textarea {
     width: 100%;
+    min-width: 0;
     box-sizing: border-box;
     resize: vertical;
     border: 1px solid var(--border-strong);
@@ -1781,6 +1790,7 @@ html.js-anim [data-reveal].in-view {
     font: inherit;
     padding: 14px 16px;
     line-height: 1.8;
+    display: block;
 }
 
 .chat-card textarea:focus {
@@ -1792,9 +1802,11 @@ html.js-anim [data-reveal].in-view {
 .chat-actions {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 16px;
     margin-top: 14px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .chat-hint {
@@ -1807,15 +1819,20 @@ html.js-anim [data-reveal].in-view {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    width: 100%;
+    min-width: 0;
+    align-items: stretch;
 }
 
 .chat-msg {
     border-radius: 16px;
     padding: 14px 18px;
     line-height: 1.9;
-    max-width: 92%;
+    max-width: 88%;
+    width: fit-content;
     white-space: pre-line;
     overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .chat-msg-question {
@@ -1827,7 +1844,7 @@ html.js-anim [data-reveal].in-view {
 }
 
 .chat-msg-answer {
-    align-self: stretch;
+    align-self: flex-start;
     background: var(--bg);
     border: 1px solid var(--border);
     border-start-end-radius: 6px;
