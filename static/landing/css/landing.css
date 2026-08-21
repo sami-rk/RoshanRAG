@@ -1778,6 +1778,8 @@ html.js-anim [data-reveal].in-view {
     min-width: 0;
     overflow: hidden;
     box-sizing: border-box;
+    height: clamp(520px, 68vh, 760px);
+    min-height: 0;
 }
 
 #ask-form {
