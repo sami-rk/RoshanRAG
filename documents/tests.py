@@ -429,6 +429,7 @@ class LoadSampleDataCommandTests(TestCase):
         "سوالات-متداول",
         "سیاست-حریم-خصوصی",
         "گزارش-فروش-سه-ماهه-اول-1403",
+        "راهنمای-سامانه-روشن",
     }
 
     def test_loads_all_sample_documents(self):
@@ -437,15 +438,15 @@ class LoadSampleDataCommandTests(TestCase):
                 call_command("load_sample_data")
             titles = set(Document.objects.values_list("title", flat=True))
             self.assertEqual(titles, self.SAMPLE_TITLES)
-            self.assertEqual(index.call_count, 4)
+            self.assertEqual(index.call_count, 5)
 
     def test_second_run_skips_existing(self):
         with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
             with patch("documents.management.commands.load_sample_data.index_document") as index:
                 call_command("load_sample_data")
                 call_command("load_sample_data")
-            self.assertEqual(Document.objects.count(), 4)
-            self.assertEqual(index.call_count, 4)
+            self.assertEqual(Document.objects.count(), 5)
+            self.assertEqual(index.call_count, 5)
 
     def test_post_save_signal_is_reconnected(self):
         with override_settings(MEDIA_ROOT=tempfile.mkdtemp()):
