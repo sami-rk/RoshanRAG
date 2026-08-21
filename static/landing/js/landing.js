@@ -139,22 +139,6 @@
         for (var m = 0; m < els.length; m++) {
             io.observe(els[m]);
         }
-        var timer = null;
-        window.addEventListener("scroll", function () {
-            if (timer) return;
-            timer = setTimeout(function () {
-                timer = null;
-                var vh = window.innerHeight;
-                for (var n = 0; n < els.length; n++) {
-                    var el = els[n];
-                    if (el.classList.contains("in-view")) continue;
-                    if (el.getBoundingClientRect().top <= vh + 80) {
-                        show(el);
-                        io.unobserve(el);
-                    }
-                }
-            }, 90);
-        }, { passive: true });
     }
 
     function canHover() {
