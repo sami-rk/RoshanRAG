@@ -1986,6 +1986,7 @@ html.js-anim [data-reveal].in-view {
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
