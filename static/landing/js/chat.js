@@ -191,6 +191,40 @@
     );
   }
 
+  function revealAnswer(container, streamingEl, question) {
+    if (!container.isConnected) return;
+    if (question.status === "failed") {
+      container.innerHTML = renderAnswerHtml(question);
+      return;
+    }
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    streamingEl.className = "";
+    streamingEl.innerHTML = withCitations(esc(question.answer), question.sources);
+    var sequence = [];
+    if (question.sources && question.sources.length) {
+      var holder = document.createElement("div");
+      holder.innerHTML = renderSources(question.sources);
+      container.appendChild(holder);
+      sequence.push(holder.querySelector(".chat-sources-title"));
+      sequence.push.apply(
+        sequence,
+        Array.prototype.slice.call(holder.querySelectorAll(".chat-source"))
+      );
+    }
+    var feedback = document.createElement("div");
+    feedback.innerHTML = renderFeedback(question);
+    container.appendChild(feedback);
+    sequence.push(feedback.firstElementChild);
+    if (reduce) return;
+    sequence.forEach(function (el, index) {
+      if (!el) return;
+      el.classList.add("chat-enter");
+      window.setTimeout(function () {
+        if (el.isConnected) el.classList.add("chat-enter-in");
+      }, 140 + index * 200);
+    });
+  }
+
   function setBusy(busy) {
     input.disabled = busy;
     submit.disabled = busy;
@@ -331,7 +365,7 @@
         } else if (data.type === "done") {
           setBusy(false);
           typerFlush();
-          container.innerHTML = renderAnswerHtml(data.question);
+          revealAnswer(container, pending, data.question);
           scrollToBottom();
         } else if (data.type === "error" || data.type === "timeout") {
           setBusy(false);

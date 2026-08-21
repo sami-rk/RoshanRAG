@@ -1710,6 +1710,23 @@ html.js-anim [data-reveal].in-view {
 .chat-streaming::after{content:"▍";margin-inline-start:2px;color:var(--accent);animation:chat-blink 1s step-end infinite}
 @keyframes chat-blink{50%{opacity:0}}
 .chat-empty{color:var(--quiet)}
+.chat-word{animation:chat-word-in 160ms ease-out backwards}
+@keyframes chat-word-in{from{opacity:0}to{opacity:1}}
+.chat-enter{opacity:0;translate:0 12px;transition:opacity 360ms cubic-bezier(0.22,1,0.36,1),translate 360ms cubic-bezier(0.22,1,0.36,1)}
+.chat-enter.chat-enter-in{opacity:1;translate:0 0}
+
+@media (prefers-reduced-motion: reduce) {
+    .chat-word {
+        animation: none;
+    }
+
+    .chat-enter,
+    .chat-enter.chat-enter-in {
+        opacity: 1;
+        translate: none;
+        transition: none;
+    }
+}
 
 @media (max-width: 860px) {
     .chat-layout {
