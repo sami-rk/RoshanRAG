@@ -79,9 +79,12 @@
         var citation = source.citation != null ? source.citation : "";
         var title = esc(source.title || T.unnamedDoc);
         var excerpt = esc((source.excerpt || "").slice(0, 220));
-        var link = id
-          ? '<a href="/admin/documents/document/' + id + '/change/">' + title + "</a>"
-          : title;
+        var fileUrl = source.file_url ? esc(source.file_url) : "";
+        var link = fileUrl
+          ? '<a href="' + fileUrl + '" target="_blank" rel="noopener">' + title + "</a>"
+          : id
+            ? '<a href="/admin/documents/document/' + id + '/change/">' + title + "</a>"
+            : title;
         var badge = citation
           ? '<span class="chat-citation-badge">[' + citation + "]</span>"
           : "";
