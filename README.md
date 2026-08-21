@@ -106,6 +106,11 @@ docker compose exec web python manage.py shell -c \
 
 # Open a shell inside the container:
 docker compose exec web python manage.py shell
+
+# Clean up expired demo questions (older than 7 days by default):
+docker compose exec web python manage.py cleanup_demo_questions
+docker compose exec web python manage.py cleanup_demo_questions --dry-run
+docker compose exec web python manage.py cleanup_demo_questions --days 3
 ```
 
 ### Languages
