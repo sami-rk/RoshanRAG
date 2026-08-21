@@ -1644,17 +1644,18 @@ html.js-anim [data-reveal].in-view {
 .chat-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:stretch;width:100%;max-width:100%;box-sizing:border-box}
 .chat-layout > *{min-width:0}
 
-.chat-threads{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);padding:20px;padding-inline:20px;position:sticky;top:88px;box-sizing:border-box;max-width:100%;height:clamp(520px,68vh,760px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;scrollbar-width:thin}
+.chat-threads{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);padding:20px;padding-inline:20px;position:sticky;top:88px;box-sizing:border-box;max-width:100%;height:clamp(520px,68vh,760px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
 .chat-threads-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .chat-threads-head h3{font-size:15px;color:var(--muted);margin:0}
 .chat-new-thread{font:inherit;font-size:13px;cursor:pointer;padding:6px 12px;border:1px solid var(--border-strong);border-radius:999px;background:var(--bg);color:var(--accent);transition:border-color 160ms,color 160ms}
 .chat-new-thread:hover{border-color:var(--accent)}
 .chat-threads ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.chat-threads ul>li{min-width:0;max-width:100%}
 .chat-thread{display:flex;flex-direction:column;gap:2px;width:100%;max-width:100%;text-align:start;font:inherit;padding:10px 14px;padding-inline:14px;padding-block:10px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--fg);cursor:pointer;transition:border-color 160ms,background 160ms;box-sizing:border-box;min-width:0}
 .chat-thread:hover{border-color:var(--border-strong)}
 .chat-thread.active{border-color:var(--accent);background:var(--accent-soft)}
-.chat-thread-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chat-thread-meta{font-size:12px;color:var(--quiet)}
+.chat-thread-title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-thread-meta{display:block;min-width:0;font-size:12px;color:var(--quiet)}
 
 .chat-auth,.chat-card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);box-sizing:border-box;max-width:100%}
 .chat-auth{padding:48px 40px;text-align:center}
