@@ -14,7 +14,8 @@
   Chart.defaults.color = text;
   Chart.defaults.borderColor = grid;
 
-  var dateFormatter = new Intl.DateTimeFormat("fa-IR", {
+  var isEn = document.documentElement.lang === "en";
+  var dateFormatter = new Intl.DateTimeFormat(isEn ? "en-US" : "fa-IR", {
     month: "short",
     day: "numeric",
   });
@@ -23,12 +24,13 @@
     return dateFormatter.format(new Date(iso + "T00:00:00"));
   }
 
+  var qLabel = isEn ? "Questions" : "پرسش";
   var questionsChart = new Chart(document.getElementById("chart-questions"), {
     type: "line",
     data: {
       labels: data.questions_per_day.map(function (d) { return persianDate(d.date); }),
       datasets: [{
-        label: "پرسش",
+        label: qLabel,
         data: data.questions_per_day.map(function (d) { return d.count; }),
         borderColor: accent,
         backgroundColor: accent + "33",
@@ -47,10 +49,11 @@
     },
   });
 
+  var docLabels = isEn ? ["Ready", "Pending", "Failed"] : ["آماده", "در انتظار", "ناموفق"];
   new Chart(document.getElementById("chart-documents"), {
     type: "doughnut",
     data: {
-      labels: ["آماده", "در انتظار", "ناموفق"],
+      labels: docLabels,
       datasets: [{
         data: [
           data.documents_ready,
@@ -69,10 +72,11 @@
     },
   });
 
+  var fbLabels = isEn ? ["Helpful", "Not helpful"] : ["مفید", "نامفید"];
   new Chart(document.getElementById("chart-feedback"), {
     type: "bar",
     data: {
-      labels: ["مفید", "نامفید"],
+      labels: fbLabels,
       datasets: [{
         data: [data.feedback_counts.up, data.feedback_counts.down],
         backgroundColor: ["#22c55e", "#ef4444"],
