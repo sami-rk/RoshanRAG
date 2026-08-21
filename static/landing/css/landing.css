@@ -811,7 +811,8 @@ html[data-theme="dark"] .hero::after,
     border: 1px solid var(--border);
     background: var(--card-glass);
     box-shadow: var(--shadow-sm);
-    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
+    will-change: transform;
     transition:
         translate 240ms cubic-bezier(0.22, 1, 0.36, 1),
         box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),

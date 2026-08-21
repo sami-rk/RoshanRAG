@@ -147,23 +147,43 @@
 
     function setupTilt(el) {
         if (prefersReducedMotion() || !canHover()) return;
-        el.addEventListener("pointerenter", function () {
-            el.classList.add("is-tilting");
-        });
-        el.addEventListener("pointermove", function (e) {
-            var rect = el.getBoundingClientRect();
-            var x = (e.clientX - rect.left) / rect.width - 0.5;
-            var y = (e.clientY - rect.top) / rect.height - 0.5;
+        var ticking = false;
+        var latest = null;
+        var rect = null;
+        function update() {
+            ticking = false;
+            if (!latest || !rect) return;
+            var x = (latest.clientX - rect.left) / rect.width - 0.5;
+            var y = (latest.clientY - rect.top) / rect.height - 0.5;
             el.style.setProperty("--rx", (-y * 7).toFixed(2) + "deg");
             el.style.setProperty("--ry", (x * 7).toFixed(2) + "deg");
-            el.style.setProperty("--mx", (((e.clientX - rect.left) / rect.width) * 100).toFixed(2) + "%");
-            el.style.setProperty("--my", (((e.clientY - rect.top) / rect.height) * 100).toFixed(2) + "%");
+            el.style.setProperty("--mx", (((latest.clientX - rect.left) / rect.width) * 100).toFixed(2) + "%");
+            el.style.setProperty("--my", (((latest.clientY - rect.top) / rect.height) * 100).toFixed(2) + "%");
+        }
+        el.addEventListener("pointerenter", function () {
+            el.classList.add("is-tilting");
+            rect = el.getBoundingClientRect();
+        });
+        el.addEventListener("pointermove", function (e) {
+            latest = e;
+            if (!ticking) {
+                ticking = true;
+                window.requestAnimationFrame(update);
+            }
         });
         el.addEventListener("pointerleave", function () {
+            latest = null;
+            ticking = false;
             el.classList.remove("is-tilting");
             el.style.setProperty("--rx", "0deg");
             el.style.setProperty("--ry", "0deg");
         });
+        if ("ResizeObserver" in window) {
+            var ro = new ResizeObserver(function () {
+                rect = el.getBoundingClientRect();
+            });
+            ro.observe(el);
+        }
     }
 
     function initTilt() {
