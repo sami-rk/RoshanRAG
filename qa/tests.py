@@ -614,6 +614,30 @@ class AnsweringServiceTests(APITestCase):
         self.assertIn("اسناد", llm.messages[-1].content)
         self.assertIn("متن گزارش فروش کامل", llm.messages[-1].content)
 
+    def test_retrieval_query_includes_thread_history(self):
+        thread = Thread.objects.create(title="گفتگو", user=None)
+        Question.objects.create(
+            question="میزان فروش سال گذشته چقدر بود؟",
+            answer="فروش سال گذشته ۱۰ میلیارد بود.",
+            thread=thread,
+            status=Question.Status.DONE,
+        )
+        question = Question.objects.create(
+            question="امسال چطور؟", thread=thread
+        )
+        retrieved = [self._fake_doc(1, "سند", "متن")]
+        vectorstore = self.FakeVectorStore(retrieved)
+        llm = self.FakeLLM()
+
+        with (
+            patch("qa.services.answering.get_chroma_vectorstore", return_value=vectorstore),
+            patch("qa.services.answering.get_llm", return_value=llm),
+        ):
+            answer_question(question.pk)
+
+        self.assertIn("میزان فروش سال گذشته", vectorstore.last_query)
+        self.assertIn("امسال چطور؟", vectorstore.last_query)
+
     def test_answer_dedupes_chunks_from_same_document(self):
         question = Question.objects.create(question="سوال")
         retrieved = [

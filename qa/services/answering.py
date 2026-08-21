@@ -81,6 +81,41 @@ def _dedupe_by_document(documents, max_docs):
     return result
 
 
+def _build_retrieval_query(question) -> str:
+    """Build a retrieval query that includes recent thread history.
+
+    For follow-up questions the thread contains prior Q/A that disambiguates
+    pronouns and topic. The last two turns are prepended in chronological
+    order, keeping the current question verbatim at the end so the embedding
+    stays centered on the user intent.
+    """
+    base = question.question or ""
+    if not question.thread_id:
+        return base
+    # Last two completed turns in this thread, oldest first
+    try:
+        previous = list(
+            Question.objects.filter(thread_id=question.thread_id)
+            .exclude(pk=question.pk)
+            .order_by("-created_at")[:2]
+        )
+    except Exception:
+        return base
+    if not previous:
+        return base
+    previous.reverse()
+    parts = []
+    for prev in previous:
+        if prev.question:
+            parts.append(f"پرسش قبلی: {prev.question}")
+        if prev.answer:
+            # Keep answer short to avoid drowning the embedding
+            parts.append(f"پاسخ قبلی: {prev.answer[:400]}")
+    if not parts:
+        return base
+    return "\n".join(parts) + f"\nپرسش فعلی: {base}"
+
+
 def _coerce_answer_content(content) -> str:
     if isinstance(content, str):
         return content
@@ -173,11 +208,14 @@ def answer_question(question_id: int) -> None:
             question.error_message = ""
         else:
             vectorstore = get_chroma_vectorstore()
+            # For thread-aware retrieval the query is expanded with the last two
+            # turns so follow-up pronouns ("آن"، "this") resolve correctly.
+            retrieval_query = _build_retrieval_query(question)
             # MMR (maximal marginal relevance) balances relevance with diversity so
             # the retrieved chunks cover different parts of the documents instead of
             # near-duplicate passages.
             retrieved = vectorstore.max_marginal_relevance_search(
-                question.question,
+                retrieval_query,
                 k=settings.RETRIEVAL_TOP_K,
                 fetch_k=settings.RETRIEVAL_FETCH_K,
             )
