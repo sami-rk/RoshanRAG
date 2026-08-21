@@ -9,7 +9,7 @@ from documents.models import Document
 from documents.services.indexing import index_document
 
 SAMPLE_DIR = Path(__file__).resolve().parent.parent.parent.parent / "sample_data"
-SUPPORTED = {".docx", ".txt"}
+SUPPORTED = {".docx", ".pdf", ".txt"}
 
 
 class Command(BaseCommand):
