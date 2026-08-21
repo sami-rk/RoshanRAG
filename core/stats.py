@@ -10,21 +10,42 @@ from qa.models import Question
 
 
 def get_dashboard_stats():
-    documents = Document.objects.all()
-    questions = Question.objects.all()
-    return {
-        "documents": documents.count(),
-        "documents_ready": documents.filter(status=Document.Status.READY).count(),
-        "documents_pending": documents.filter(status=Document.Status.PENDING).count(),
-        "documents_failed": documents.filter(status=Document.Status.FAILED).count(),
-        "questions": questions.count(),
-        "questions_done": questions.filter(status=Question.Status.DONE).count(),
-        "questions_generating": questions.filter(
-            status=Question.Status.GENERATING
-        ).count(),
-        "questions_pending": questions.filter(status=Question.Status.PENDING).count(),
-        "questions_failed": questions.filter(status=Question.Status.FAILED).count(),
+    from django.core.cache import cache
+
+    cache_key = "dashboard_stats"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    # Collapse 9 COUNT queries into 2 aggregated queries using conditional Count
+    from django.db.models import Q
+
+    doc_stats = Document.objects.aggregate(
+        total=Count("id"),
+        ready=Count("id", filter=Q(status=Document.Status.READY)),
+        pending=Count("id", filter=Q(status=Document.Status.PENDING)),
+        failed=Count("id", filter=Q(status=Document.Status.FAILED)),
+    )
+    q_stats = Question.objects.aggregate(
+        total=Count("id"),
+        done=Count("id", filter=Q(status=Question.Status.DONE)),
+        generating=Count("id", filter=Q(status=Question.Status.GENERATING)),
+        pending=Count("id", filter=Q(status=Question.Status.PENDING)),
+        failed=Count("id", filter=Q(status=Question.Status.FAILED)),
+    )
+    result = {
+        "documents": doc_stats["total"],
+        "documents_ready": doc_stats["ready"],
+        "documents_pending": doc_stats["pending"],
+        "documents_failed": doc_stats["failed"],
+        "questions": q_stats["total"],
+        "questions_done": q_stats["done"],
+        "questions_generating": q_stats["generating"],
+        "questions_pending": q_stats["pending"],
+        "questions_failed": q_stats["failed"],
     }
+    cache.set(cache_key, result, 60)
+    return result
 
 
 def get_questions_per_day(days=30):
