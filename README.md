@@ -226,7 +226,9 @@ entrypoint.sh      Migrate, recover stuck tasks, create superuser, run gunicorn
 - **Background work via Python threads + status fields** (`pending/ready/failed`), per the project's simplicity-first requirement — no Celery/Redis. Stuck tasks are recovered automatically on container start (`recover_stuck_tasks`).
 - **Free OpenRouter models with `with_fallbacks`.** Free models get rate-limited, so on error LangChain tries the next model in the chain. Stored errors are unwrapped to the provider's actual message.
 - **MMR retrieval.** Retrieval uses maximal marginal relevance (`fetch_k=20`, `k=4`) to balance relevance with diversity, then dedupes to at most 3 documents.
-- **Answers are cited.** Every answer returns the source documents used, keeping RAG transparent; answers follow the language of the question.
+- **Thread-aware retrieval.** When a question belongs to a thread, the last two turns are prepended to the retrieval query so follow-ups like «آن را توضیح بده» resolve correctly.
+- **Optional cross-encoder reranking.** If `RERANKER_MODEL` is set (e.g. `cross-encoder/ms-marco-MiniLM-L-6-v2`), the top MMR hits are rescored with a cross-encoder before deduplication; failures fall back to vector order.
+- **Answers are cited.** Every answer returns the source documents used (including a protected `file_url`), keeping RAG transparent; answers follow the language of the question.
 - **Empty-corpus guard.** Asking a question before any document is indexed skips the LLM call entirely and answers with a deterministic "no documents yet" message, then the admin retry action can re-ask it later.
 - **Uploaded media is protected.** `/media/` files require an authenticated session or an `Authorization: Token` header, so uploaded documents are not downloadable by URL guessing; the API still exposes working file links for token clients.
 - **Fail-fast secret key.** With `DEBUG=false`, the app refuses to start unless `SECRET_KEY` is a strong random value, instead of silently running on a placeholder key.
