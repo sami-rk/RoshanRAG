@@ -1641,7 +1641,7 @@ html.js-anim [data-reveal].in-view {
 
 /* ── Chat (ask-your-documents) ─────────────────────────────────── */
 .chat-wrap {
-    max-width: 1180px;
+    max-width: 1120px;
     width: 100%;
     margin-inline: auto;
     padding-top: 24px;
@@ -1856,11 +1856,11 @@ html.js-anim [data-reveal].in-view {
 }
 
 .chat-msg-question {
-    align-self: flex-start;
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
-    border-start-start-radius: 6px;
-    color: var(--fg);
+    align-self: flex-end;
+    background: var(--accent);
+    color: #fff;
+    border: 1px solid var(--accent);
+    border-end-end-radius: 6px;
 }
 
 .chat-msg-answer {
